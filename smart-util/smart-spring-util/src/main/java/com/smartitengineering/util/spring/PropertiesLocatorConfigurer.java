@@ -62,6 +62,10 @@ public class PropertiesLocatorConfigurer
         new DefaultPropertiesPersister();
     private boolean ignoreResourceNotFound = false;
     private String fileEncoding = null;
+    private boolean defaultSearchEnabled = true;
+    private boolean classpathSearchEnabled = true;
+    private boolean currentDirSearchEnabled = true;
+    private boolean userHomeSearchEnabled = true;
     private String fileContext;
 
     protected void loadProperties(Properties props)
@@ -81,29 +85,40 @@ public class PropertiesLocatorConfigurer
                     continue;
                 }
                 try {
-                    boolean resourceFound;
-                    String resourceName = new StringBuilder(fileName).append(
-                        getDefaultResourceSuffix()).toString();
-                    Resource resource =
-                        new ClassPathResource(resourceName);
-                    is = attemptToLoadResource(props, resource);
-                    resourceFound = closeInputStream(is);
-                    resource =
-                        new ClassPathResource(fileName);
-                    is = attemptToLoadResource(props, resource);
-                    resourceFound = closeInputStream(is) || resourceFound;
-                    File resourceFile = new File(System.getProperty("user.dir"),
-                        fileName);
-                    resource =
-                        new FileSystemResource(resourceFile);
-                    is = attemptToLoadResource(props, resource);
-                    resourceFound = closeInputStream(is) || resourceFound;
-                    resourceFile = new File(System.getProperty("user.home"),
-                        fileName);
-                    resource =
-                        new FileSystemResource(resourceFile);
-                    is = attemptToLoadResource(props, resource);
-                    resourceFound = closeInputStream(is) || resourceFound;
+                    boolean resourceFound = false;
+                    Resource resource;
+                    if (isDefaultSearchEnabled()) {
+                        String resourceName = new StringBuilder(fileName).append(
+                            getDefaultResourceSuffix()).toString();
+                        resource =
+                            new ClassPathResource(resourceName);
+                        is = attemptToLoadResource(props, resource);
+                        resourceFound = closeInputStream(is);
+                    }
+                    if (isClasspathSearchEnabled()) {
+                        resource =
+                            new ClassPathResource(fileName);
+                        is = attemptToLoadResource(props, resource);
+                        resourceFound = closeInputStream(is) || resourceFound;
+                    }
+                    if (isCurrentDirSearchEnabled()) {
+                        File resourceFile = new File(System.getProperty(
+                            "user.dir"),
+                            fileName);
+                        resource =
+                            new FileSystemResource(resourceFile);
+                        is = attemptToLoadResource(props, resource);
+                        resourceFound = closeInputStream(is) || resourceFound;
+                    }
+                    if (isUserHomeSearchEnabled()) {
+                        File resourceFile = new File(System.getProperty(
+                            "user.home"),
+                            fileName);
+                        resource =
+                            new FileSystemResource(resourceFile);
+                        is = attemptToLoadResource(props, resource);
+                        resourceFound = closeInputStream(is) || resourceFound;
+                    }
                     if (!resourceFound) {
                         throw new RuntimeException(fileName + " not found!");
                     }
@@ -197,5 +212,37 @@ public class PropertiesLocatorConfigurer
             resources[i] = new ClassPathResource(smartLocations[i]);
         }
         super.setLocations(resources);
+    }
+
+    public boolean isClasspathSearchEnabled() {
+        return classpathSearchEnabled;
+    }
+
+    public void setClasspathSearchEnabled(boolean classpathSearchEnabled) {
+        this.classpathSearchEnabled = classpathSearchEnabled;
+    }
+
+    public boolean isCurrentDirSearchEnabled() {
+        return currentDirSearchEnabled;
+    }
+
+    public void setCurrentDirSearchEnabled(boolean currentDirSearchEnabled) {
+        this.currentDirSearchEnabled = currentDirSearchEnabled;
+    }
+
+    public boolean isDefaultSearchEnabled() {
+        return defaultSearchEnabled;
+    }
+
+    public void setDefaultSearchEnabled(boolean defaultSearchEnabled) {
+        this.defaultSearchEnabled = defaultSearchEnabled;
+    }
+
+    public boolean isUserHomeSearchEnabled() {
+        return userHomeSearchEnabled;
+    }
+
+    public void setUserHomeSearchEnabled(boolean userHomeSearchEnabled) {
+        this.userHomeSearchEnabled = userHomeSearchEnabled;
     }
 }
