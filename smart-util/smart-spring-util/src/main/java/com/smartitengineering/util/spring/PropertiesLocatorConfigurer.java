@@ -89,7 +89,6 @@ public class PropertiesLocatorConfigurer
                 String fileName =
                     new StringBuilder(getResourceContext()).append(location).
                     toString();
-                System.out.println(fileName);
                 if (fileName == null) {
                     continue;
                 }
@@ -124,9 +123,9 @@ public class PropertiesLocatorConfigurer
                         for (String searchLocation : searchLocations) {
                             if (StringUtils.isNotEmpty(StringUtils.trim(
                                 searchLocation))) {
-                                attempToReadRsrcFromFile(searchLocation,
-                                    fileName,
-                                    resourceFound, props);
+                                resourceFound = attempToReadRsrcFromFile(
+                                    searchLocation, fileName, resourceFound,
+                                    props);
                             }
                         }
                     }
@@ -326,7 +325,7 @@ public class PropertiesLocatorConfigurer
 
     /**
      * Sets whether search in classpath is enabled or not
-     * @param currentDirSearchEnabled True if search is enabled for classpath
+     * @param classpathSearchEnabled True if search is enabled for classpath
      */
     public void setClasspathSearchEnabled(boolean classpathSearchEnabled) {
         this.classpathSearchEnabled = classpathSearchEnabled;
@@ -358,7 +357,7 @@ public class PropertiesLocatorConfigurer
 
     /**
      * Sets whether search in default classpath is enabled or not
-     * @param currentDirSearchEnabled True if search is enabled for default cp
+     * @param defaultSearchEnabled True if search is enabled for default cp
      */
     public void setDefaultSearchEnabled(boolean defaultSearchEnabled) {
         this.defaultSearchEnabled = defaultSearchEnabled;
@@ -374,7 +373,7 @@ public class PropertiesLocatorConfigurer
 
     /**
      * Sets whether search in user home directory is enabled or not
-     * @param currentDirSearchEnabled True if search is enabled for user home dir
+     * @param userHomeSearchEnabled True if search is enabled for user home dir
      */
     public void setUserHomeSearchEnabled(boolean userHomeSearchEnabled) {
         this.userHomeSearchEnabled = userHomeSearchEnabled;

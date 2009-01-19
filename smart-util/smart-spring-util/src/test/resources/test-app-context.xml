@@ -28,6 +28,10 @@
                 <value>test-config.properties</value>
             </list>
         </property>
+        <property name="defaultSearchEnabled"><value>true</value></property>
+        <property name="classpathSearchEnabled"><value>true</value></property>
+        <property name="currentDirSearchEnabled"><value>true</value></property>
+        <property name="userHomeSearchEnabled"><value>true</value></property>
     </bean>
     <bean id="testBean" class="com.smartitengineering.util.spring.TestBean">
         <property name="propertyDefault">
@@ -41,6 +45,38 @@
         </property>
         <property name="propertyUserHome">
             <value>${testbean.user_home}</value>
+        </property>
+    </bean>
+    <bean id="propertyConfigurer2" class="com.smartitengineering.util.spring.PropertiesLocatorConfigurer">
+        <property name="smartLocations">
+            <list>
+                <value>test-config.properties</value>
+            </list>
+        </property>
+        <property name="placeholderPrefix">
+            <value>#[</value>
+        </property>
+        <property name="placeholderSuffix">
+            <value>]</value>
+        </property>
+        <property name="defaultSearchEnabled"><value>true</value></property>
+        <property name="classpathSearchEnabled"><value>false</value></property>
+        <property name="currentDirSearchEnabled"><value>false</value></property>
+        <property name="userHomeSearchEnabled"><value>false</value></property>
+        <property name="searchLocationsAsCsv"><value>${search_locations}</value></property>
+    </bean>
+    <bean id="testBean2" class="com.smartitengineering.util.spring.TestBean">
+        <property name="propertyDefault">
+            <value>#[testbean.default]</value>
+        </property>
+        <property name="propertyClassPath">
+            <value>#[testbean.cp]</value>
+        </property>
+        <property name="propertyCurrentDir">
+            <value>#[testbean.current_dir]</value>
+        </property>
+        <property name="propertyUserHome">
+            <value>#[testbean.user_home]</value>
         </property>
     </bean>
 </beans>

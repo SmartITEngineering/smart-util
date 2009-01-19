@@ -136,9 +136,10 @@ public class PropertiesLocatorConfigurerTest
         fileCurrentDir.delete();
         fileUserHome.delete();
     }
-
+    
     private void getBean()
         throws BeansException {
+        System.setProperty("search_locations", "./target");
         applicationContext =
             new ClassPathXmlApplicationContext("test-app-context.xml");
         bean =
