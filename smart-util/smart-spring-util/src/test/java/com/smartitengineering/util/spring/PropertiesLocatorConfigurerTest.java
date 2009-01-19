@@ -137,12 +137,104 @@ public class PropertiesLocatorConfigurerTest
         fileUserHome.delete();
     }
     
+    public void testBean2() {
+        getBean2();
+        assertTrue(bean.getPropertyDefault().endsWith("2"));
+        assertTrue(bean.getPropertyClassPath().endsWith("2"));
+        assertTrue(bean.getPropertyCurrentDir().endsWith("2"));
+        assertTrue(bean.getPropertyUserHome().endsWith("2"));
+    }
+    
     private void getBean()
         throws BeansException {
-        System.setProperty("search_locations", "./target");
         applicationContext =
             new ClassPathXmlApplicationContext("test-app-context.xml");
         bean =
             (TestBean) applicationContext.getBean("testBean");
+    }
+
+    private void getBean2()
+        throws BeansException {
+        StringBuilder paths = new StringBuilder();
+        initPaths(paths);
+        applicationContext =
+            new ClassPathXmlApplicationContext("test-app-context.xml");
+        bean =
+            (TestBean) applicationContext.getBean("testBean2");
+    }
+
+    private void initPaths(StringBuilder paths) {
+        String path = "./target/a/";
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        Properties properties = new Properties();
+        properties.setProperty("testbean.default", "default 2");
+        File fileCurrentDir = new File(dir, "test-config-custom.properties");
+        try {
+            FileOutputStream fos = new FileOutputStream(fileCurrentDir);
+            properties.store(fos, "");
+            fos.close();
+        }
+        catch (IOException ex) {
+            fail(ex.getMessage());
+        }
+        paths.append(path);
+        path = "./target/b/";
+        dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        properties = new Properties();
+        properties.setProperty("testbean.cp", "cp 2");
+        fileCurrentDir = new File(dir, "test-config-custom.properties");
+        try {
+            FileOutputStream fos = new FileOutputStream(fileCurrentDir);
+            properties.store(fos, "");
+            fos.close();
+        }
+        catch (IOException ex) {
+            fail(ex.getMessage());
+        }
+        paths.append(',');
+        paths.append(path);
+        path = "./target/c/";
+        dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        properties = new Properties();
+        properties.setProperty("testbean.current_dir", "current dir");
+        fileCurrentDir = new File(dir, "test-config-custom.properties");
+        try {
+            FileOutputStream fos = new FileOutputStream(fileCurrentDir);
+            properties.store(fos, "");
+            fos.close();
+        }
+        catch (IOException ex) {
+            fail(ex.getMessage());
+        }
+        paths.append(',');
+        paths.append(path);
+        path = "./target/d/";
+        dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        properties = new Properties();
+        properties.setProperty("testbean.current_dir", "current dir 2");
+        properties.setProperty("testbean.user_home", "user home dir 2");
+        fileCurrentDir = new File(dir, "test-config-custom.properties");
+        try {
+            FileOutputStream fos = new FileOutputStream(fileCurrentDir);
+            properties.store(fos, "");
+            fos.close();
+        }
+        catch (IOException ex) {
+            fail(ex.getMessage());
+        }
+        paths.append(',');
+        paths.append(path);
     }
 }
