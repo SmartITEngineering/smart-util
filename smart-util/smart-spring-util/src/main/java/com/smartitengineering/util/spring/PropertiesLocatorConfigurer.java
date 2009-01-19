@@ -404,6 +404,7 @@ public class PropertiesLocatorConfigurer
      * @param searchLocationAsCsv The search locations as CSV
      */
     public void setSearchLocationsAsCsv(String searchLocationAsCsv) {
+
         if (StringUtils.isNotEmpty(searchLocationAsCsv)) {
             setSearchLocations(searchLocationAsCsv.split(","));
         }
@@ -416,5 +417,15 @@ public class PropertiesLocatorConfigurer
      */
     public void setSearchLocations(String[] searchLocations) {
         this.searchLocations = searchLocations;
+    }
+
+    /**
+     * Set whether to ignore if resource is not found
+     * @param ignoreResourceNotFound Flag to note whether to ignore missing rsrc
+     */
+    @Override
+    public void setIgnoreResourceNotFound(boolean ignoreResourceNotFound) {
+        this.ignoreResourceNotFound = ignoreResourceNotFound;
+        super.setIgnoreResourceNotFound(ignoreResourceNotFound);
     }
 }
