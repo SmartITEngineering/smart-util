@@ -57,7 +57,7 @@ public class PropertiesLocatorConfigurer
     public static final String DEFAULT_RESOURCE_SUFFIX = ".template";
     private String defaultResourceSuffix =
         PropertiesLocatorConfigurer.DEFAULT_RESOURCE_SUFFIX;
-    private Resource[] locations;
+    private String[] smartLocations;
     private PropertiesPersister myPropertiesPersister =
         new DefaultPropertiesPersister();
     private boolean ignoreResourceNotFound = false;
@@ -66,16 +66,16 @@ public class PropertiesLocatorConfigurer
 
     protected void loadProperties(Properties props)
         throws IOException {
-        if (this.locations != null) {
-            for (int i = 0; i < this.locations.length; i++) {
-                Resource location = this.locations[i];
+        if (this.smartLocations != null) {
+            for (int i = 0; i < this.smartLocations.length; i++) {
+                String location = this.smartLocations[i];
                 if (logger.isInfoEnabled()) {
                     logger.info("Loading properties file from " + location);
                 }
                 InputStream is = null;
                 String fileName =
-                    new StringBuilder(getFileContext()).append(location.
-                    getFilename()).toString();
+                    new StringBuilder(getFileContext()).append(location).
+                    toString();
                 System.out.println(fileName);
                 if (fileName == null) {
                     continue;
@@ -178,12 +178,24 @@ public class PropertiesLocatorConfigurer
     }
 
     public void setLocation(Resource location) {
-        this.locations = new Resource[]{location};
-        super.setLocation(location);
+        throw new UnsupportedOperationException();
     }
 
     public void setLocations(Resource[] locations) {
-        this.locations = locations;
-        super.setLocations(locations);
+        throw new UnsupportedOperationException();
+    }
+
+    public void setSmartLocation(String smartLocation) {
+        this.smartLocations = new String[]{smartLocation};
+        super.setLocation(new ClassPathResource(smartLocation));
+    }
+
+    public void setSmartLocations(String[] smartLocations) {
+        this.smartLocations = smartLocations;
+        Resource[] resources = new Resource[smartLocations.length];
+        for (int i = 0; i < smartLocations.length; ++i) {
+            resources[i] = new ClassPathResource(smartLocations[i]);
+        }
+        super.setLocations(resources);
     }
 }
