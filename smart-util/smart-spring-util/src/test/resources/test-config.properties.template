@@ -1,0 +1,4 @@
+testbean.default=default
+testbean.cp=classpath...sample
+testbean.current_dir=current dir...sample
+testbean.user_home=user home dir...sample
