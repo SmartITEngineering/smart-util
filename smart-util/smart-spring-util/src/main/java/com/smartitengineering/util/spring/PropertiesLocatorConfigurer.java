@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -67,7 +68,9 @@ public class PropertiesLocatorConfigurer
     private boolean currentDirSearchEnabled = true;
     private boolean userHomeSearchEnabled = true;
     private String fileContext;
+    private String[] searchLocations;
 
+    @Override
     protected void loadProperties(Properties props)
         throws IOException {
         if (this.smartLocations != null) {
@@ -102,22 +105,24 @@ public class PropertiesLocatorConfigurer
                         resourceFound = closeInputStream(is) || resourceFound;
                     }
                     if (isCurrentDirSearchEnabled()) {
-                        File resourceFile = new File(System.getProperty(
-                            "user.dir"),
-                            fileName);
-                        resource =
-                            new FileSystemResource(resourceFile);
-                        is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is) || resourceFound;
+                        String parent = System.getProperty("user.dir");
+                        resourceFound = attempToReadRsrcFromFile(parent,
+                            fileName, resourceFound, props);
                     }
                     if (isUserHomeSearchEnabled()) {
-                        File resourceFile = new File(System.getProperty(
-                            "user.home"),
-                            fileName);
-                        resource =
-                            new FileSystemResource(resourceFile);
-                        is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is) || resourceFound;
+                        String parent = System.getProperty("user.home");
+                        resourceFound = attempToReadRsrcFromFile(parent,
+                            fileName, resourceFound, props);
+                    }
+                    if (searchLocations != null) {
+                        for (String searchLocation : searchLocations) {
+                            if (StringUtils.isNotEmpty(StringUtils.trim(
+                                searchLocation))) {
+                                attempToReadRsrcFromFile(searchLocation,
+                                    fileName,
+                                    resourceFound, props);
+                            }
+                        }
                     }
                     if (!resourceFound) {
                         throw new RuntimeException(fileName + " not found!");
@@ -139,6 +144,18 @@ public class PropertiesLocatorConfigurer
                 }
             }
         }
+    }
+
+    protected boolean attempToReadRsrcFromFile(String parent,
+                                               String fileName,
+                                               boolean resourceFound,
+                                               Properties props)
+        throws IOException {
+        File resourceFile = new File(parent, fileName);
+        Resource resource =
+            new FileSystemResource(resourceFile);
+        InputStream is = attemptToLoadResource(props, resource);
+        return closeInputStream(is) || resourceFound;
     }
 
     public String getDefaultResourceSuffix() {
@@ -192,10 +209,12 @@ public class PropertiesLocatorConfigurer
         return false;
     }
 
+    @Override
     public void setLocation(Resource location) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setLocations(Resource[] locations) {
         throw new UnsupportedOperationException();
     }
@@ -205,11 +224,18 @@ public class PropertiesLocatorConfigurer
         super.setLocation(new ClassPathResource(smartLocation));
     }
 
+    public void setSmartLocationsAsCsv(String smartLocationsAsCsv) {
+        setSearchLocations(smartLocationsAsCsv.split(","));
+    }
+
     public void setSmartLocations(String[] smartLocations) {
         this.smartLocations = smartLocations;
         Resource[] resources = new Resource[smartLocations.length];
         for (int i = 0; i < smartLocations.length; ++i) {
-            resources[i] = new ClassPathResource(smartLocations[i]);
+            String smartLocation = StringUtils.trim(smartLocations[i]);
+            if (StringUtils.isNotEmpty(smartLocation)) {
+                resources[i] = new ClassPathResource(smartLocation);
+            }
         }
         super.setLocations(resources);
     }
@@ -244,5 +270,17 @@ public class PropertiesLocatorConfigurer
 
     public void setUserHomeSearchEnabled(boolean userHomeSearchEnabled) {
         this.userHomeSearchEnabled = userHomeSearchEnabled;
+    }
+
+    public String[] getSearchLocations() {
+        return searchLocations;
+    }
+
+    public void setSearchLocation(String searchLocation) {
+        setSearchLocations(new String[]{searchLocation});
+    }
+
+    public void setSearchLocations(String[] searchLocations) {
+        this.searchLocations = searchLocations;
     }
 }
