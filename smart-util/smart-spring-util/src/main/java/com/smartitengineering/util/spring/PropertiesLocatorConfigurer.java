@@ -67,9 +67,15 @@ public class PropertiesLocatorConfigurer
     private boolean classpathSearchEnabled = true;
     private boolean currentDirSearchEnabled = true;
     private boolean userHomeSearchEnabled = true;
-    private String fileContext;
+    private String resourceContext;
     private String[] searchLocations;
 
+    /**
+     * Loads properties file from locations as it is supposed.
+     * @param props The properties object that is filled.
+     * @throws java.io.IOException If failed to load the properties or error
+     *                              reading a resoure
+     */
     @Override
     protected void loadProperties(Properties props)
         throws IOException {
@@ -81,7 +87,7 @@ public class PropertiesLocatorConfigurer
                 }
                 InputStream is = null;
                 String fileName =
-                    new StringBuilder(getFileContext()).append(location).
+                    new StringBuilder(getResourceContext()).append(location).
                     toString();
                 System.out.println(fileName);
                 if (fileName == null) {
@@ -146,6 +152,16 @@ public class PropertiesLocatorConfigurer
         }
     }
 
+    /**
+     * 
+     * @param parent The parent folder of the fileName
+     * @param fileName The file to read
+     * @param resourceFound True if resource was earlier found
+     * @param props The properties object to fill the properties with
+     * @return True if either resourceFound is true or resource was read from
+     *         fileName
+     * @throws java.io.IOException If error in reading the file
+     */
     protected boolean attempToReadRsrcFromFile(String parent,
                                                String fileName,
                                                boolean resourceFound,
@@ -158,27 +174,52 @@ public class PropertiesLocatorConfigurer
         return closeInputStream(is) || resourceFound;
     }
 
-    public String getDefaultResourceSuffix() {
+    /**
+     * Return suffix for default resource file.
+     * @return Suffix for the classpath default resource
+     */
+    protected String getDefaultResourceSuffix() {
         return defaultResourceSuffix;
     }
 
+    /**
+     * Set the suffix for the default resource file
+     * @param defaultResourceSuffix The suffix of he default resource
+     */
     public void setDefaultResourceSuffix(String defaultResourceSuffix) {
         this.defaultResourceSuffix = defaultResourceSuffix;
     }
 
-    public String getFileContext() {
-        if (fileContext == null) {
+    /**
+     * Retrieves the context of the search. The context will be added before the
+     * for every resource search. It is primarily useful if you multiple config
+     * group for single application.
+     * @return The context for current configurer
+     */
+    protected String getResourceContext() {
+        if (resourceContext == null) {
             return "";
         }
-        return fileContext;
+        return resourceContext;
     }
 
-    public void setFileContext(String fileContext) {
-        this.fileContext = fileContext;
+    /**
+     * Sets the context for the resource context for this config group lookup.
+     * @param resourceContext The context to search the current configs.
+     */
+    public void setResourceContext(String resourceContext) {
+        this.resourceContext = resourceContext;
     }
 
-    private InputStream attemptToLoadResource(Properties props,
-                                              Resource resource) {
+    /**
+     * Load the current resource into the provided properties file. It respects
+     * type of properties and encoding if set.
+     * @param props Properties file to fill
+     * @param resource Resource to load if present
+     * @return The input stream of the resource.
+     */
+    protected InputStream attemptToLoadResource(Properties props,
+                                                Resource resource) {
         InputStream is = null;
         try {
             is = resource.getInputStream();
@@ -209,25 +250,60 @@ public class PropertiesLocatorConfigurer
         return false;
     }
 
+    /**
+     * This operation is restricted from this configurer.
+     * @param location
+     */
     @Override
     public void setLocation(Resource location) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * This operation is restricted from this configurer.
+     * @param locations
+     */
     @Override
     public void setLocations(Resource[] locations) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Set the encoding of the resource file to read in. It basically delegates
+     * through to parents method, but also sets the value in current method to
+     * used for reading the input stream.
+     * @param encoding Encoding of the resource
+     */
+    @Override
+    public void setFileEncoding(String encoding) {
+        this.fileEncoding = encoding;
+        super.setFileEncoding(encoding);
+    }
+
+    /**
+     * Set the single custom resource to search at.
+     * @param smartLocation The custom resource
+     */
     public void setSmartLocation(String smartLocation) {
         this.smartLocations = new String[]{smartLocation};
         super.setLocation(new ClassPathResource(smartLocation));
     }
 
+    /**
+     * The custom resources as CSV. Its main intended use would be to supply
+     * custom resources through another properties file to keep the resources
+     * dynamic.
+     * @param smartLocationsAsCsv The resources as comma separated values (csv)
+     */
     public void setSmartLocationsAsCsv(String smartLocationsAsCsv) {
         setSearchLocations(smartLocationsAsCsv.split(","));
     }
 
+    /**
+     * The custom resources as array, its main intended use case would be from
+     * an application context XML file.
+     * @param smartLocations The resources as an array
+     */
     public void setSmartLocations(String[] smartLocations) {
         this.smartLocations = smartLocations;
         Resource[] resources = new Resource[smartLocations.length];
@@ -240,46 +316,105 @@ public class PropertiesLocatorConfigurer
         super.setLocations(resources);
     }
 
-    public boolean isClasspathSearchEnabled() {
+    /**
+     * Retrieves whether search in classpath is enabled or not.
+     * @return True if search is enabled in classpath
+     */
+    protected boolean isClasspathSearchEnabled() {
         return classpathSearchEnabled;
     }
 
+    /**
+     * Sets whether search in classpath is enabled or not
+     * @param currentDirSearchEnabled True if search is enabled for classpath
+     */
     public void setClasspathSearchEnabled(boolean classpathSearchEnabled) {
         this.classpathSearchEnabled = classpathSearchEnabled;
     }
 
-    public boolean isCurrentDirSearchEnabled() {
+    /**
+     * Retrieves whether search in current directory is enabled or not.
+     * @return True if search is enabled in current directory
+     */
+    protected boolean isCurrentDirSearchEnabled() {
         return currentDirSearchEnabled;
     }
 
+    /**
+     * Sets whether search in current directory is enabled or not
+     * @param currentDirSearchEnabled True if search is enabled for current dir
+     */
     public void setCurrentDirSearchEnabled(boolean currentDirSearchEnabled) {
         this.currentDirSearchEnabled = currentDirSearchEnabled;
     }
 
-    public boolean isDefaultSearchEnabled() {
+    /**
+     * Retrieves whether search in classpath for default is enabled or not.
+     * @return True if search is enabled for enabled
+     */
+    protected boolean isDefaultSearchEnabled() {
         return defaultSearchEnabled;
     }
 
+    /**
+     * Sets whether search in default classpath is enabled or not
+     * @param currentDirSearchEnabled True if search is enabled for default cp
+     */
     public void setDefaultSearchEnabled(boolean defaultSearchEnabled) {
         this.defaultSearchEnabled = defaultSearchEnabled;
     }
 
-    public boolean isUserHomeSearchEnabled() {
+    /**
+     * Retrieves whether search in user home directory is enabled or not.
+     * @return True if search is enabled in user home directory
+     */
+    protected boolean isUserHomeSearchEnabled() {
         return userHomeSearchEnabled;
     }
 
+    /**
+     * Sets whether search in user home directory is enabled or not
+     * @param currentDirSearchEnabled True if search is enabled for user home dir
+     */
     public void setUserHomeSearchEnabled(boolean userHomeSearchEnabled) {
         this.userHomeSearchEnabled = userHomeSearchEnabled;
     }
 
-    public String[] getSearchLocations() {
+    /**
+     * Get configured custom search locations
+     * @return Custom search locations
+     */
+    protected String[] getSearchLocations() {
         return searchLocations;
     }
 
+    /**
+     * The custom search location for the current configurer.
+     * @param searchLocation The custom search location
+     */
     public void setSearchLocation(String searchLocation) {
-        setSearchLocations(new String[]{searchLocation});
+        if (StringUtils.isNotEmpty(searchLocation)) {
+            setSearchLocations(new String[]{searchLocation});
+        }
     }
 
+    /**
+     * The custom search locations as comma separated values (csv). It will
+     * primarily split the search locations by ',' and its intended use case is
+     * to inject the search locations via another properties configurer.
+     * @param searchLocationAsCsv The search locations as CSV
+     */
+    public void setSearchLocationsAsCsv(String searchLocationAsCsv) {
+        if (StringUtils.isNotEmpty(searchLocationAsCsv)) {
+            setSearchLocations(searchLocationAsCsv.split(","));
+        }
+    }
+
+    /**
+     * The custom search locations intended to be mainly used via application
+     * context XML.
+     * @param searchLocations The search locations
+     */
     public void setSearchLocations(String[] searchLocations) {
         this.searchLocations = searchLocations;
     }
