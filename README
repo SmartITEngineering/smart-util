@@ -1,0 +1,3 @@
+This project will mainly contain utility stuff for diverse purpose. Initially it will primarily comprise of Spring Utilities which will perform the following purposes:
+1. Load a single resource properties file from pre-configured locations with priority based override.
+2. Application context registrar to make the context available to other interested components.
