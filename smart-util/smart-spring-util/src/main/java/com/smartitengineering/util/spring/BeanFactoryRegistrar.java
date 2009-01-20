@@ -17,6 +17,9 @@
  */
 package com.smartitengineering.util.spring;
 
+import com.smartitengineering.util.spring.annotations.Aggregator;
+import com.smartitengineering.util.spring.annotations.InjectableField;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.apache.commons.lang.StringUtils;
@@ -59,5 +62,45 @@ public class BeanFactoryRegistrar
     public static BeanFactory getBeanFactorForContext(
         final String beanFactoryContextName) {
         return beanFactories.get(beanFactoryContextName);
+    }
+
+    public static void aggregate(Object aggregator) {
+        if (aggregator == null) {
+            return;
+        }
+        Class<? extends Object> aggregatorClass = aggregator.getClass();
+        Class<? extends Object> superClass = aggregatorClass.getSuperclass();
+        if (superClass != null) {
+            aggregate(superClass);
+        }
+        Aggregator aggregatorAnnotation = aggregatorClass.getAnnotation(
+            Aggregator.class);
+        if (aggregatorAnnotation == null || StringUtils.isEmpty(
+            aggregatorAnnotation.contextName())) {
+            return;
+        }
+        BeanFactory beanFactory = beanFactories.get(aggregatorAnnotation.
+            contextName());
+        Field[] declaredFields = aggregatorClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            InjectableField injectableField = declaredField.getAnnotation(
+                InjectableField.class);
+            if (injectableField == null) {
+                continue;
+            }
+            String beanName = StringUtils.isEmpty(injectableField.beanName()) ? declaredField.getName()
+                : injectableField.beanName();
+            if (StringUtils.isNotEmpty(beanName)) {
+                try {
+                    declaredField.set(aggregator, beanFactory.getBean(beanName));
+                }
+                catch (IllegalArgumentException ex) {
+                    ex.printStackTrace();
+                }
+                catch (IllegalAccessException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 }
