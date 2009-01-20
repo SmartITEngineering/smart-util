@@ -28,10 +28,6 @@
                 <value>test-config.properties</value>
             </list>
         </property>
-        <property name="defaultSearchEnabled"><value>true</value></property>
-        <property name="classpathSearchEnabled"><value>true</value></property>
-        <property name="currentDirSearchEnabled"><value>true</value></property>
-        <property name="userHomeSearchEnabled"><value>true</value></property>
     </bean>
     <bean id="testBean" class="com.smartitengineering.util.spring.TestBean">
         <property name="propertyDefault">
