@@ -86,10 +86,17 @@ public class PropertiesLocatorConfigurer
                     logger.info("Loading properties file from " + location);
                 }
                 InputStream is = null;
+                String context = getResourceContext();
+                if (StringUtils.isNotEmpty(context)) {
+                    if (!context.endsWith("/")) {
+                        context = new StringBuilder(context).append('/').
+                            toString();
+                    }
+                }
                 String fileName =
-                    new StringBuilder(getResourceContext()).append(location).
+                    new StringBuilder(context).append(location).
                     toString();
-                if (fileName == null) {
+                if (StringUtils.isEmpty(fileName)) {
                     continue;
                 }
                 try {
