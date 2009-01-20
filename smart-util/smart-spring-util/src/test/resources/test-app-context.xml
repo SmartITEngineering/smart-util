@@ -113,4 +113,7 @@
             <value>#[testbean.user_home]</value>
         </property>
     </bean>
+    <bean id="beanRegistrar" class="com.smartitengineering.util.spring.BeanFactoryRegistrar">
+        <property name="beanFactoryContextName"><value>testContext</value></property>
+    </bean>
 </beans>

@@ -160,6 +160,16 @@ public class PropertiesLocatorConfigurerTest
         assertEquals("current dir 3", bean.getPropertyCurrentDir());
         assertEquals("user home dir 3", bean.getPropertyUserHome());
     }
+    
+    public void testAggregator() {
+        TestBeanDummyAggregatorLevel1 aggregator = new TestBeanDummyAggregatorLevel1();
+        getBean3();
+        BeanFactoryRegistrar.aggregate(aggregator);
+        assertNull(aggregator.getTestBeanN());
+        assertEquals(applicationContext.getBean("testBean"), aggregator.getTestBean1());
+        assertEquals(applicationContext.getBean("testBean2"), aggregator.getTestBean2());
+        assertEquals(applicationContext.getBean("testBean3"), aggregator.getTestBean3());
+    }
 
     private void getBean()
         throws BeansException {
