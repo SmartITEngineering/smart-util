@@ -81,4 +81,40 @@
             <value>$[testbean.user_home]</value>
         </property>
     </bean>
+    <bean id="propertyConfigurer3" class="com.smartitengineering.util.spring.PropertiesLocatorConfigurer">
+        <property name="smartLocations">
+            <list>
+                <value>custom-path/test-config.properties</value>
+            </list>
+        </property>
+        <property name="placeholderPrefix">
+            <value>#[</value>
+        </property>
+        <property name="placeholderSuffix">
+            <value>]</value>
+        </property>
+        <property name="defaultSearchEnabled"><value>true</value></property>
+        <property name="classpathSearchEnabled"><value>true</value></property>
+        <property name="currentDirSearchEnabled"><value>false</value></property>
+        <property name="userHomeSearchEnabled"><value>false</value></property>
+        <property name="ignoreResourceNotFound"><value>true</value></property>
+        <property name="ignoreUnresolvablePlaceholders"><value>true</value></property>
+        <property name="searchLocationsAsCsv"><value>./target/a/,./target/b/,./target/c/,./target/d/</value></property>
+        <property name="resourceContext"><value>custom-context</value></property>
+        <property name="defaultResourceSuffix"><value>.default</value></property>
+    </bean>
+    <bean id="testBean3" class="com.smartitengineering.util.spring.TestBean">
+        <property name="propertyDefault">
+            <value>#[testbean.default]</value>
+        </property>
+        <property name="propertyClassPath">
+            <value>#[testbean.cp]</value>
+        </property>
+        <property name="propertyCurrentDir">
+            <value>#[testbean.current_dir]</value>
+        </property>
+        <property name="propertyUserHome">
+            <value>#[testbean.user_home]</value>
+        </property>
+    </bean>
 </beans>

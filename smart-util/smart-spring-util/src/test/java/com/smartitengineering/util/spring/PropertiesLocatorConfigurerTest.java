@@ -101,7 +101,7 @@ public class PropertiesLocatorConfigurerTest
         assertEquals("current dir...sample", bean.getPropertyCurrentDir());
         assertEquals("user home dir", bean.getPropertyUserHome());
     }
-    
+
     public void testAll() {
         Properties properties = new Properties();
         properties.setProperty("testbean.current_dir", "current dir");
@@ -136,7 +136,7 @@ public class PropertiesLocatorConfigurerTest
         fileCurrentDir.delete();
         fileUserHome.delete();
     }
-    
+
     public void testBean2() {
         getBean2();
         assertTrue(bean.getPropertyDefault().endsWith("2"));
@@ -144,7 +144,23 @@ public class PropertiesLocatorConfigurerTest
         assertTrue(bean.getPropertyCurrentDir().endsWith("2"));
         assertTrue(bean.getPropertyUserHome().endsWith("2"));
     }
-    
+
+    public void testDefaultResourceSuffix() {
+        getBean3();
+        assertEquals("default", bean.getPropertyDefault());
+        assertEquals("classpath", bean.getPropertyClassPath());
+        assertEquals("current dir...sample", bean.getPropertyCurrentDir());
+        assertEquals("user home dir...sample", bean.getPropertyUserHome());
+    }
+
+    public void testContextAndPath() {
+        getBean3(true);
+        assertEquals("default", bean.getPropertyDefault());
+        assertEquals("classpath", bean.getPropertyClassPath());
+        assertEquals("current dir 3", bean.getPropertyCurrentDir());
+        assertEquals("user home dir 3", bean.getPropertyUserHome());
+    }
+
     private void getBean()
         throws BeansException {
         applicationContext =
@@ -163,7 +179,26 @@ public class PropertiesLocatorConfigurerTest
             (TestBean) applicationContext.getBean("testBean2");
     }
 
+    private void getBean3()
+        throws BeansException {
+        getBean3(false);
+    }
+
+    private void getBean3(boolean createBean3Rsrc) {
+        StringBuilder paths = new StringBuilder();
+        initPaths(paths, createBean3Rsrc);
+        applicationContext =
+            new ClassPathXmlApplicationContext("test-app-context.xml");
+        bean =
+            (TestBean) applicationContext.getBean("testBean3");
+    }
+
     private void initPaths(StringBuilder paths) {
+        initPaths(paths, false);
+    }
+
+    private void initPaths(StringBuilder paths,
+                           boolean createBean3Rsrc) {
         String path = "./target/a/";
         File dir = new File(path);
         if (!dir.exists()) {
@@ -233,6 +268,22 @@ public class PropertiesLocatorConfigurerTest
         }
         catch (IOException ex) {
             fail(ex.getMessage());
+        }
+        if (createBean3Rsrc) {
+            properties = new Properties();
+            properties.setProperty("testbean.current_dir", "current dir 3");
+            properties.setProperty("testbean.user_home", "user home dir 3");
+            dir = new File(dir, "custom-context/custom-path/");
+            dir.mkdirs();
+            fileCurrentDir = new File(dir, "test-config.properties");
+            try {
+                FileOutputStream fos = new FileOutputStream(fileCurrentDir);
+                properties.store(fos, "");
+                fos.close();
+            }
+            catch (IOException ex) {
+                fail(ex.getMessage());
+            }
         }
         paths.append(',');
         paths.append(path);
