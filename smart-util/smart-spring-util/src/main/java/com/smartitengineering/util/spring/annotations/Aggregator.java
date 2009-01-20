@@ -17,11 +17,15 @@
  */
 package com.smartitengineering.util.spring.annotations;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This annotation signifies that this object is an aggregator to be processed
  * by a bean factory registrar; if absent the bean registrar will ignore it.
  * @author imyousuf
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Aggregator {
     String contextName();
 }

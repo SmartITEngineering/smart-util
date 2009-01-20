@@ -17,6 +17,9 @@
  */
 package com.smartitengineering.util.spring.annotations;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This annotation is to be used in order to set which fields are to be injected
  * from Spring's bean factory. If bean name is not specified then it will try to
@@ -24,6 +27,7 @@ package com.smartitengineering.util.spring.annotations;
  * used on.
  * @author imyousuf
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface InjectableField {
     String beanName() default "";
 }

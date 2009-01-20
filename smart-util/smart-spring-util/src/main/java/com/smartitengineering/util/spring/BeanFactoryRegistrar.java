@@ -65,33 +65,47 @@ public class BeanFactoryRegistrar
     }
 
     public static void aggregate(Object aggregator) {
-        if (aggregator == null) {
+        if (aggregator == null || aggregator.getClass().equals(Object.class)) {
             return;
         }
         Class<? extends Object> aggregatorClass = aggregator.getClass();
-        Class<? extends Object> superClass = aggregatorClass.getSuperclass();
-        if (superClass != null) {
-            aggregate(superClass);
-        }
-        Aggregator aggregatorAnnotation = aggregatorClass.getAnnotation(
-            Aggregator.class);
-        if (aggregatorAnnotation == null || StringUtils.isEmpty(
-            aggregatorAnnotation.contextName())) {
+        if (aggregate(aggregatorClass, aggregator)) {
             return;
         }
-        BeanFactory beanFactory = beanFactories.get(aggregatorAnnotation.
-            contextName());
+    }
+
+    private static boolean aggregate(Class<? extends Object> aggregatorClass,
+                                     Object aggregator)
+        throws BeansException,
+               SecurityException {
+        if(aggregatorClass.equals(Object.class)) {
+            return true;
+        }
+        Class<? extends Object> superClass = aggregatorClass.getSuperclass();
+        if (superClass != null) {
+            aggregate(superClass, aggregator);
+        }
+        Aggregator aggregatorAnnotation =
+            aggregatorClass.getAnnotation(Aggregator.class);
+        if (aggregatorAnnotation == null ||
+            StringUtils.isEmpty(aggregatorAnnotation.contextName())) {
+            return true;
+        }
+        BeanFactory beanFactory =
+            beanFactories.get(aggregatorAnnotation.contextName());
         Field[] declaredFields = aggregatorClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            InjectableField injectableField = declaredField.getAnnotation(
-                InjectableField.class);
+            InjectableField injectableField =
+                declaredField.getAnnotation(InjectableField.class);
             if (injectableField == null) {
                 continue;
             }
-            String beanName = StringUtils.isEmpty(injectableField.beanName()) ? declaredField.getName()
-                : injectableField.beanName();
+            String beanName =
+                StringUtils.isEmpty(injectableField.beanName())
+                ? declaredField.getName() : injectableField.beanName();
             if (StringUtils.isNotEmpty(beanName)) {
                 try {
+                    declaredField.setAccessible(true);
                     declaredField.set(aggregator, beanFactory.getBean(beanName));
                 }
                 catch (IllegalArgumentException ex) {
@@ -102,5 +116,6 @@ public class BeanFactoryRegistrar
                 }
             }
         }
+        return false;
     }
 }
