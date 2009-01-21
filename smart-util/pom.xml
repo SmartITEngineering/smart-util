@@ -71,7 +71,6 @@
     </developers>
     <scm>
         <connection>scm:git:git://github.com/imyousuf/smart-util.git</connection>
-        <developerConnection>scm:git:git@github.com:imyousuf/smart-util.git</developerConnection>
     </scm>
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
