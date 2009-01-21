@@ -41,6 +41,13 @@
         <system>Google Code Issue Tracker</system>
         <url>http://code.google.com/p/smart-util/issues/</url>
     </issueManagement>
+    <mailingLists>
+        <mailingList>
+            <name>Mailing List</name>
+            <archive>http://groups.google.com/group/smart-util</archive>
+            <post>smart-util@googlegroups.com</post>
+        </mailingList>
+    </mailingLists>
     <licenses>
         <license>
             <name>LGPL v3</name>
@@ -63,8 +70,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git://repo.or.cz/smart-util.git</connection>
-        <developerConnection>scm:git:ssh://imyousuf@repo.or.cz/srv/git/smart-util.git</developerConnection>
+        <connection>scm:git:git://github.com/imyousuf/smart-util.git</connection>
+        <developerConnection>scm:git:git@github.com:imyousuf/smart-util.git</developerConnection>
     </scm>
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
