@@ -92,7 +92,10 @@ public class BeanFactoryRegistrar
             return true;
         }
         BeanFactory beanFactory =
-            beanFactories.get(aggregatorAnnotation.contextName());
+            getBeanFactorForContext(aggregatorAnnotation.contextName());
+        if(beanFactory == null) {
+            return true;
+        }
         Field[] declaredFields = aggregatorClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
             InjectableField injectableField =
