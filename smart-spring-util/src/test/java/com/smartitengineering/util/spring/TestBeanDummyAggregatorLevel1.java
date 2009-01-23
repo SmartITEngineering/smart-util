@@ -17,13 +17,19 @@
  */
 package com.smartitengineering.util.spring;
 
+import com.smartitengineering.util.spring.annotations.Aggregator;
+import com.smartitengineering.util.spring.annotations.InjectableField;
 import java.io.Serializable;
 
 /**
  *
  * @author imyousuf
  */
+@Aggregator(contextName="imaginary")
 public class TestBeanDummyAggregatorLevel1
     extends TestBeanDummyAggregatorLevel2
     implements Serializable {
+    
+    @InjectableField
+    private String test;
 }
