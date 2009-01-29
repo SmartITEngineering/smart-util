@@ -166,6 +166,7 @@ public class PropertiesLocatorConfigurerTest
         getBean3();
         BeanFactoryRegistrar.aggregate(aggregator);
         assertNull(aggregator.getTestBeanN());
+        assertNull(aggregator.getTestBeanNull());
         assertEquals(applicationContext.getBean("testBean"), aggregator.getTestBean1());
         assertEquals(applicationContext.getBean("testBean2"), aggregator.getTestBean2());
         assertEquals(applicationContext.getBean("testBean3"), aggregator.getTestBean3());

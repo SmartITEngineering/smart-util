@@ -30,6 +30,8 @@ public class TestBeanDummyAggregatorLevel2 extends TestBeanDummyAggregatorLevel3
     private TestBean testBean2;
     @InjectableField(beanName="testBean")
     private TestBean testBean1;
+    @InjectableField
+    private TestBean testBeanNull;
 
     public TestBean getTestBean2() {
         return testBean2;
@@ -37,6 +39,10 @@ public class TestBeanDummyAggregatorLevel2 extends TestBeanDummyAggregatorLevel3
 
     public TestBean getTestBean1() {
         return testBean1;
+    }
+
+    public TestBean getTestBeanNull() {
+        return testBeanNull;
     }
     
 }
