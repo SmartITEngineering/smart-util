@@ -78,7 +78,7 @@ public class BeanFactoryRegistrar
                                      Object aggregator)
         throws BeansException,
                SecurityException {
-        if(aggregatorClass.equals(Object.class)) {
+        if (aggregatorClass.equals(Object.class)) {
             return true;
         }
         Class<? extends Object> superClass = aggregatorClass.getSuperclass();
@@ -93,7 +93,7 @@ public class BeanFactoryRegistrar
         }
         BeanFactory beanFactory =
             getBeanFactorForContext(aggregatorAnnotation.contextName());
-        if(beanFactory == null) {
+        if (beanFactory == null) {
             return true;
         }
         Field[] declaredFields = aggregatorClass.getDeclaredFields();
@@ -109,7 +109,10 @@ public class BeanFactoryRegistrar
             if (StringUtils.isNotEmpty(beanName)) {
                 try {
                     declaredField.setAccessible(true);
-                    declaredField.set(aggregator, beanFactory.getBean(beanName));
+                    if (beanFactory.containsBean(beanName)) {
+                        declaredField.set(aggregator, beanFactory.getBean(
+                            beanName));
+                    }
                 }
                 catch (IllegalArgumentException ex) {
                     ex.printStackTrace();
