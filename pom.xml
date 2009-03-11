@@ -88,7 +88,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -97,28 +97,45 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.0-beta-8</version>
+                <version>${release.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <version>1.1</version>
+                <version>${scm.version}</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
             </plugin>
         </plugins>
         <extensions>
             <extension>
                 <groupId>org.jvnet.wagon-svn</groupId>
                 <artifactId>wagon-svn</artifactId>
-                <version>1.8</version>
+                <version>${wagon.svn.version}</version>
             </extension>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ftp</artifactId>
-                <version>1.0-alpha-6</version>
+                <version>${wagon.ftp.version}</version>
             </extension>
         </extensions>
     </build>
-  <modules>
-    <module>smart-spring-util</module>
-  </modules>
+    <modules>
+        <module>smart-spring-util</module>
+        <module>simple-util</module>
+    </modules>
+    <properties>
+        <wagon.ftp.version>1.0-alpha-6</wagon.ftp.version>
+        <wagon.svn.version>1.8</wagon.svn.version>
+        <scm.version>1.1</scm.version>
+        <release.version>2.0-beta-8</release.version>
+        <junit.version>3.8.1</junit.version>
+        <source.version>2.0.4</source.version>
+        <javadoc.version>2.3</javadoc.version>
+        <compiler.version>2.0.2</compiler.version>
+        <lang.version>2.3</lang.version>
+        <surefire.version>2.4.3</surefire.version>
+    </properties>
 </project>
