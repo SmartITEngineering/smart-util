@@ -15,22 +15,29 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.simple;
+package com.smartitengineering.util.simple.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 
-public class StringInputStream extends InputStream
-{
+/**
+ * Input stream for reading from a String. It utilizes java.io.StreamReader to
+ * serve from a String.
+ * @author imyousuf
+ * @since 0.1.1
+ * @see java.io.InputStream
+ */
+public class StringInputStream
+    extends InputStream {
 
     private StringReader stringReader;
     private String string;
     private int readCount;
     private int lastMarked;
-    
+
     public StringInputStream(final String string) {
-        if(string == null) {
+        if (string == null) {
             throw new IllegalArgumentException();
         }
         stringReader = new StringReader(string);
@@ -38,7 +45,7 @@ public class StringInputStream extends InputStream
         readCount = 0;
         lastMarked = 0;
     }
-    
+
     @Override
     public int read()
         throws IOException {
@@ -101,5 +108,4 @@ public class StringInputStream extends InputStream
         throws IOException {
         return stringReader.skip(n);
     }
-    
 }

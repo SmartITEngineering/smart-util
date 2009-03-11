@@ -1,5 +1,6 @@
 package com.smartitengineering.util.simple;
 
+import com.smartitengineering.util.simple.io.StringInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import junit.framework.Test;
