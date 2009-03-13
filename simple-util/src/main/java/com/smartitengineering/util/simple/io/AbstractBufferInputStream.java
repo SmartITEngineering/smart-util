@@ -28,11 +28,11 @@ import java.io.Writer;
  * @author imyousuf
  * @since 0.1.1
  */
-public abstract class AbstractBufferInputStream
+public abstract class AbstractBufferInputStream <W extends Writer>
     extends FilterInputStream
-    implements ContentBuffer {
+    implements ContentBuffer<W> {
 
-    private Writer buffer;
+    private W buffer;
     private boolean init = false;
 
     protected AbstractBufferInputStream(final InputStream bufferedStream)
@@ -43,7 +43,7 @@ public abstract class AbstractBufferInputStream
         }
     }
 
-    protected void setBuffer(Writer buffer) {
+    protected void setBuffer(W buffer) {
         this.buffer = buffer;
         init = true;
     }
@@ -54,7 +54,7 @@ public abstract class AbstractBufferInputStream
         }
     }
 
-    public Writer getBuffer() {
+    public W getBuffer() {
         return buffer;
     }
 

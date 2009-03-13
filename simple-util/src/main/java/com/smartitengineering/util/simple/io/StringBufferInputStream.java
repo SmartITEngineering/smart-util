@@ -26,8 +26,8 @@ import java.io.StringWriter;
  * @since 0.1.1
  */
 public class StringBufferInputStream
-    extends AbstractBufferInputStream
-    implements ContentBuffer {
+    extends AbstractBufferInputStream<StringWriter>
+    implements ContentBuffer<StringWriter> {
 
     private StringWriter buffer;
     

@@ -25,7 +25,7 @@ import java.io.Writer;
  * @author imyousuf
  * @since 0.1.1
  */
-public interface ContentBuffer {
+public interface ContentBuffer <W extends Writer> {
 
     /**
      * Get the String representing the buffer.
@@ -37,5 +37,5 @@ public interface ContentBuffer {
      * Writer to which the the buffer is written to
      * @return Writer written to
      */
-    public Writer getBuffer();
+    public W getBuffer();
 }
