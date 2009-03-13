@@ -43,7 +43,7 @@ public class StringInputStreamTest
             fail(exception.getMessage());
         }
         String string = "test";
-        InputStream stream = new StringInputStream(string);
+        InputStream stream = IOFactory.getStringInputStream(string);
         for(int i = 0; i < string.length(); ++i) {
             try {
                 assertEquals(string.charAt(i), (char) stream.read());
@@ -56,7 +56,7 @@ public class StringInputStreamTest
     
     public void testAvailable() {
         String string = "test";
-        InputStream stream = new StringInputStream(string);
+        InputStream stream = IOFactory.getStringInputStream(string);
         try {
             assertEquals(string.length(), stream.available());
             stream.read();
