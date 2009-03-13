@@ -38,7 +38,7 @@ public abstract class AbstractBufferInputStream <W extends Writer>
     protected AbstractBufferInputStream(final InputStream bufferedStream)
         throws IllegalArgumentException {
         super(bufferedStream);
-        if (bufferedStream == null || buffer == null) {
+        if (bufferedStream == null) {
             throw new IllegalArgumentException("Args can't be null!");
         }
     }
