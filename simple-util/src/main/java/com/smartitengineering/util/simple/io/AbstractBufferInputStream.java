@@ -28,41 +28,42 @@ import java.io.Writer;
  * @author imyousuf
  * @since 0.1.1
  */
-public class AbstractBufferInputStream
-    extends FilterInputStream {
+public abstract class AbstractBufferInputStream <W extends Writer>
+    extends FilterInputStream
+    implements ContentBuffer<W> {
 
-    private Writer buffer;
+    private W buffer;
     private boolean init = false;
 
     protected AbstractBufferInputStream(final InputStream bufferedStream)
         throws IllegalArgumentException {
         super(bufferedStream);
-        if (bufferedStream == null || buffer == null) {
+        if (bufferedStream == null) {
             throw new IllegalArgumentException("Args can't be null!");
         }
     }
 
-    protected void setBuffer(Writer buffer) {
+    protected void setBuffer(W buffer) {
         this.buffer = buffer;
         init = true;
     }
-    
+
     protected void checkInit() {
-        if(!init) {
+        if (!init) {
             throw new IllegalStateException("Set buffer has to be called first!");
         }
     }
 
-    public Writer getBuffer() {
+    public W getBuffer() {
         return buffer;
     }
-    
+
     @Override
     public int read()
         throws IOException {
         checkInit();
         int read = super.read();
-        if(read > 0) {
+        if (read > 0) {
             buffer.write(read);
         }
         return read;
@@ -79,7 +80,7 @@ public class AbstractBufferInputStream
     @Override
     public int read(byte[] b)
         throws IOException {
-        if(b == null || b.length < 1) {
+        if (b == null || b.length < 1) {
             throw new IllegalArgumentException();
         }
         return read(b, 0, b.length);
@@ -92,9 +93,9 @@ public class AbstractBufferInputStream
         throws IOException {
         checkInit();
         int read = super.read(b, off, len);
-        if(read > 0) {
+        if (read > 0) {
             int count = Math.min(off + read, off + len);
-            for(int i = off; i < count; ++i) {
+            for (int i = off; i < count; ++i) {
                 buffer.write(b[i]);
             }
         }
@@ -106,7 +107,7 @@ public class AbstractBufferInputStream
         throws IOException {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public synchronized void mark(int readlimit) {
         throw new UnsupportedOperationException();
@@ -116,6 +117,5 @@ public class AbstractBufferInputStream
     public boolean markSupported() {
         return false;
     }
-
 }
  

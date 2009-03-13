@@ -15,33 +15,33 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.simple.io;
+package com.smartitengineering.util.simple;
 
+import com.smartitengineering.util.simple.io.ContentBuffer;
+import com.smartitengineering.util.simple.io.StringBufferInputStream;
+import com.smartitengineering.util.simple.io.StringInputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 
 /**
- * Buffers info read from an input stream into a string writer.
+ *
  * @author imyousuf
  * @since 0.1.1
  */
-public class StringBufferInputStream
-    extends AbstractBufferInputStream<StringWriter>
-    implements ContentBuffer<StringWriter> {
+public final class IOFactory {
 
-    private StringWriter buffer;
-    
-
-    {
-        buffer = new StringWriter();
+    private IOFactory() {
+        throw new AssertionError();
     }
 
-    public StringBufferInputStream(InputStream bufferedStream) {
-        super(bufferedStream);
-        setBuffer(buffer);
+    public static InputStream getStringInputStream(final String string) {
+        if (string == null) {
+            throw new IllegalArgumentException();
+        }
+        return new StringInputStream(string);
     }
 
-    public String getBufferAsString() {
-        return getBuffer().toString();
+    public static <T extends InputStream & ContentBuffer> T getStringBufferingIOStream(
+        final InputStream bufferedStream) {
+        return (T) new StringBufferInputStream(bufferedStream);
     }
 }

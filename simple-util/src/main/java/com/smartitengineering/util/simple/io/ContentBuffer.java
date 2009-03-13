@@ -17,31 +17,25 @@
  */
 package com.smartitengineering.util.simple.io;
 
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.Writer;
 
 /**
- * Buffers info read from an input stream into a string writer.
+ * Contents that will be buffered should implement this so that this can be used
+ * to retrieve the writer and String representing the buffer.
  * @author imyousuf
  * @since 0.1.1
  */
-public class StringBufferInputStream
-    extends AbstractBufferInputStream<StringWriter>
-    implements ContentBuffer<StringWriter> {
+public interface ContentBuffer <W extends Writer> {
 
-    private StringWriter buffer;
-    
+    /**
+     * Get the String representing the buffer.
+     * @return String rep of the buffer
+     */
+    public String getBufferAsString();
 
-    {
-        buffer = new StringWriter();
-    }
-
-    public StringBufferInputStream(InputStream bufferedStream) {
-        super(bufferedStream);
-        setBuffer(buffer);
-    }
-
-    public String getBufferAsString() {
-        return getBuffer().toString();
-    }
+    /**
+     * Writer to which the the buffer is written to
+     * @return Writer written to
+     */
+    public W getBuffer();
 }
