@@ -15,19 +15,21 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.spring.annotations;
+package com.smartitengineering.util.bean;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.smartitengineering.util.bean.annotations.Aggregator;
+import com.smartitengineering.util.bean.annotations.InjectableField;
 
 /**
- * This annotation is to be used in order to set which fields are to be injected
- * from Spring's bean factory. If bean name is not specified then it will try to
- * resolve a bean name similar to that of the member field the annotation is
- * used on.
+ *
  * @author imyousuf
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface InjectableField {
-    String beanName() default "";
+@Aggregator(contextName="testContext")
+public class TestBeanDummyAggregatorLevel4 {
+    @InjectableField
+    private TestBean testBean3;
+
+    public TestBean getTestBean3() {
+        return testBean3;
+    }
 }

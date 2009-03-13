@@ -123,7 +123,7 @@
         </extensions>
     </build>
     <modules>
-        <module>smart-spring-util</module>
+        <module>smart-bean-util</module>
         <module>simple-util</module>
     </modules>
     <properties>
