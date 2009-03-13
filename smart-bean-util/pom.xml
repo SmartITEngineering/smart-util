@@ -27,8 +27,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.smartitengineering.smart-util</groupId>
-    <artifactId>smart-spring-util</artifactId>
-    <name>smart-spring-util</name>
+    <artifactId>smart-bean-util</artifactId>
+    <name>smart-bean-util</name>
     <version>0.1.1-SNAPSHOT</version>
     <dependencies>
         <dependency>

@@ -15,34 +15,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.spring;
+package com.smartitengineering.util.bean.annotations;
 
-import com.smartitengineering.util.spring.annotations.Aggregator;
-import com.smartitengineering.util.spring.annotations.InjectableField;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- *
+ * This annotation signifies that this object is an aggregator to be processed
+ * by a bean factory registrar; if absent the bean registrar will ignore it.
  * @author imyousuf
  */
-@Aggregator(contextName="testContext")
-public class TestBeanDummyAggregatorLevel2 extends TestBeanDummyAggregatorLevel3 {
-    @InjectableField
-    private TestBean testBean2;
-    @InjectableField(beanName="testBean")
-    private TestBean testBean1;
-    @InjectableField
-    private TestBean testBeanNull;
-
-    public TestBean getTestBean2() {
-        return testBean2;
-    }
-
-    public TestBean getTestBean1() {
-        return testBean1;
-    }
-
-    public TestBean getTestBeanNull() {
-        return testBeanNull;
-    }
-    
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Aggregator {
+    String contextName();
 }

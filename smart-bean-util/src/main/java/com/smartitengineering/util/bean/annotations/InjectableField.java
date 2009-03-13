@@ -15,17 +15,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.spring.annotations;
+package com.smartitengineering.util.bean.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * This annotation signifies that this object is an aggregator to be processed
- * by a bean factory registrar; if absent the bean registrar will ignore it.
+ * This annotation is to be used in order to set which fields are to be injected
+ * from Spring's bean factory. If bean name is not specified then it will try to
+ * resolve a bean name similar to that of the member field the annotation is
+ * used on.
  * @author imyousuf
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Aggregator {
-    String contextName();
+public @interface InjectableField {
+    String beanName() default "";
 }

@@ -22,14 +22,14 @@
 -->
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "spring-beans.dtd"  >
 <beans>
-    <bean id="propertyConfigurer" class="com.smartitengineering.util.spring.PropertiesLocatorConfigurer">
+    <bean id="propertyConfigurer" class="com.smartitengineering.util.bean.PropertiesLocatorConfigurer">
         <property name="smartLocations">
             <list>
                 <value>test-config.properties</value>
             </list>
         </property>
     </bean>
-    <bean id="testBean" class="com.smartitengineering.util.spring.TestBean">
+    <bean id="testBean" class="com.smartitengineering.util.bean.TestBean">
         <property name="propertyDefault">
             <value>${testbean.default}</value>
         </property>
@@ -43,7 +43,7 @@
             <value>${testbean.user_home}</value>
         </property>
     </bean>
-    <bean id="propertyConfigurer2" class="com.smartitengineering.util.spring.PropertiesLocatorConfigurer">
+    <bean id="propertyConfigurer2" class="com.smartitengineering.util.bean.PropertiesLocatorConfigurer">
         <property name="smartLocations">
             <list>
                 <value>test-config-custom.properties</value>
@@ -63,7 +63,7 @@
         <property name="ignoreUnresolvablePlaceholders"><value>true</value></property>
         <property name="searchLocationsAsCsv"><value>./target/a/,./target/b/,./target/c/,./target/d/</value></property>
     </bean>
-    <bean id="testBean2" class="com.smartitengineering.util.spring.TestBean">
+    <bean id="testBean2" class="com.smartitengineering.util.bean.TestBean">
         <property name="propertyDefault">
             <value>$[testbean.default]</value>
         </property>
@@ -77,7 +77,7 @@
             <value>$[testbean.user_home]</value>
         </property>
     </bean>
-    <bean id="propertyConfigurer3" class="com.smartitengineering.util.spring.PropertiesLocatorConfigurer">
+    <bean id="propertyConfigurer3" class="com.smartitengineering.util.bean.PropertiesLocatorConfigurer">
         <property name="smartLocations">
             <list>
                 <value>custom-path/test-config.properties</value>
@@ -99,7 +99,7 @@
         <property name="resourceContext"><value>custom-context</value></property>
         <property name="defaultResourceSuffix"><value>.default</value></property>
     </bean>
-    <bean id="testBean3" class="com.smartitengineering.util.spring.TestBean">
+    <bean id="testBean3" class="com.smartitengineering.util.bean.TestBean">
         <property name="propertyDefault">
             <value>#[testbean.default]</value>
         </property>
@@ -113,7 +113,7 @@
             <value>#[testbean.user_home]</value>
         </property>
     </bean>
-    <bean id="beanRegistrar" class="com.smartitengineering.util.spring.BeanFactoryRegistrar">
+    <bean id="beanRegistrar" class="com.smartitengineering.util.bean.BeanFactoryRegistrar">
         <property name="beanFactoryContextName"><value>testContext</value></property>
     </bean>
 </beans>
