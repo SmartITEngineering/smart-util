@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
@@ -49,9 +48,27 @@ public class BeanFactoryRegistrar
                 "Bean factory context name is not specified!");
         }
         if (beanFactory != null) {
-            synchronized (beanFactories) {
-                beanFactories.put(beanFactoryContextName, beanFactory);
-            }
+            registerBeanFactory(beanFactoryContextName,
+                new SpringBeanFactory(beanFactory));
+        }
+    }
+
+    public static void registerBeanFactory(final String beanFactoryContextName,
+                                           final BeanFactory beanFactory) {
+        if (beanFactory == null || StringUtils.isBlank(beanFactoryContextName)) {
+            throw new IllegalArgumentException();
+        }
+        synchronized (beanFactories) {
+            beanFactories.put(beanFactoryContextName, beanFactory);
+        }
+    }
+
+    public static void deregisterBeanFactory(final String beanFactoryContextName) {
+        if (StringUtils.isBlank(beanFactoryContextName)) {
+            throw new IllegalArgumentException();
+        }
+        synchronized (beanFactories) {
+            beanFactories.remove(beanFactoryContextName);
         }
     }
 
