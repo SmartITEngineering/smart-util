@@ -17,25 +17,24 @@
  */
 package com.smartitengineering.util.bean;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.util.DefaultPropertiesPersister;
-import org.springframework.util.PropertiesPersister;
 
 /**
  *
  * @author imyousuf
+ * @since 0.2
  */
 public class PropertiesLocator {
 
     public static final String DEFAULT_RESOURCE_SUFFIX = ".template";
+    public static final String CLASSPATH_RESOURCE_PREFIX = "classpath:";
     private String defaultResourceSuffix =
         PropertiesLocator.DEFAULT_RESOURCE_SUFFIX;
     private String[] smartLocations;
@@ -45,8 +44,6 @@ public class PropertiesLocator {
     private boolean userHomeSearchEnabled = true;
     private String resourceContext;
     private String[] searchLocations;
-    private PropertiesPersister myPropertiesPersister =
-        new DefaultPropertiesPersister();
     private String fileEncoding = null;
 
     public boolean isClasspathSearchEnabled() {
@@ -124,10 +121,6 @@ public class PropertiesLocator {
         this.fileEncoding = fileEncoding;
     }
 
-    public PropertiesPersister getMyPropertiesPersister() {
-        return myPropertiesPersister;
-    }
-
     public boolean loadProperties(Properties props)
         throws IOException {
         boolean resourceFound = true;
@@ -155,14 +148,20 @@ public class PropertiesLocator {
                             new StringBuilder(fileName).append(
                             getDefaultResourceSuffix()).
                             toString();
+                        String resourcePath = new StringBuilder(
+                            CLASSPATH_RESOURCE_PREFIX).append(resourceName).
+                            toString();
                         resource =
-                            new ClassPathResource(resourceName);
+                            ResourceFactory.getResource(resourcePath);
                         is = attemptToLoadResource(props, resource);
                         resourceFound = closeInputStream(is) && resourceFound;
                     }
                     if (isClasspathSearchEnabled()) {
+                        String resourcePath = new StringBuilder(
+                            CLASSPATH_RESOURCE_PREFIX).append(fileName).
+                            toString();
                         resource =
-                            new ClassPathResource(fileName);
+                            ResourceFactory.getResource(resourcePath);
                         is = attemptToLoadResource(props, resource);
                         resourceFound = closeInputStream(is) && resourceFound;
                     }
@@ -220,7 +219,7 @@ public class PropertiesLocator {
         throws IOException {
         File resourceFile = new File(parent, fileName);
         Resource resource =
-            new FileSystemResource(resourceFile);
+            ResourceFactory.getResource(resourceFile.getAbsolutePath());
         InputStream is = attemptToLoadResource(props, resource);
         return closeInputStream(is) || resourceFound;
     }
@@ -235,19 +234,19 @@ public class PropertiesLocator {
         try {
             is = resource.getInputStream();
             if (resource.getFilename().endsWith(".xml")) {
-                this.myPropertiesPersister.loadFromXml(props, is);
+                props.loadFromXML(is);
             }
             else {
                 if (this.fileEncoding != null) {
-                    this.myPropertiesPersister.load(props,
-                        new InputStreamReader(is, this.fileEncoding));
+                    loadFromReader(props, new InputStreamReader(is,
+                        this.fileEncoding));
                 }
                 else {
-                    this.myPropertiesPersister.load(props, is);
+                    props.load(is);
                 }
             }
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
         }
         return is;
     }
@@ -259,5 +258,59 @@ public class PropertiesLocator {
             return true;
         }
         return false;
+    }
+
+    protected void loadFromReader(Properties props,
+                                  Reader reader)
+        throws IOException {
+        BufferedReader in = new BufferedReader(reader);
+        while (true) {
+            String line = in.readLine();
+            if (line == null) {
+                return;
+            }
+            line = StringUtils.stripStart(line, null);
+            if (line.length() > 0) {
+                char firstChar = line.charAt(0);
+                if (firstChar != '#' && firstChar != '!') {
+                    while (endsWithContinuationMarker(line)) {
+                        String nextLine = in.readLine();
+                        line = line.substring(0, line.length() - 1);
+                        if (nextLine != null) {
+                            line += StringUtils.stripStart(nextLine, null);
+                        }
+                    }
+                    int separatorIndex = line.indexOf("=");
+                    if (separatorIndex == -1) {
+                        separatorIndex = line.indexOf(":");
+                    }
+                    String key = (separatorIndex != -1 ? line.substring(0,
+                        separatorIndex) : line);
+                    String value = (separatorIndex != -1) ? line.substring(
+                        separatorIndex + 1) : "";
+                    key = StringUtils.stripEnd(key, null);
+                    value = StringUtils.stripStart(value, null);
+                    props.put(unescape(key), unescape(value));
+                }
+            }
+        }
+    }
+
+    protected boolean endsWithContinuationMarker(String line) {
+        boolean evenSlashCount = true;
+        int index = line.length() - 1;
+        while (index >= 0 && line.charAt(index) == '\\') {
+            evenSlashCount = !evenSlashCount;
+            index--;
+        }
+        return !evenSlashCount;
+    }
+
+    protected String unescape(String str) {
+        String result = StringUtils.replace(str, "\\t", "\t", -1);
+        result = StringUtils.replace(result, "\\r", "\r", -1);
+        result = StringUtils.replace(result, "\\n", "\n", -1);
+        result = StringUtils.replace(result, "\\f", "\f", -1);
+        return result;
     }
 }

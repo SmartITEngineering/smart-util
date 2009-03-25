@@ -53,7 +53,6 @@ public class PropertiesLocatorConfigurer
     private final PropertiesLocator locator = new PropertiesLocator();
 
     public PropertiesLocatorConfigurer() {
-        setPropertiesPersister(locator.getMyPropertiesPersister());
     }
 
     /**
