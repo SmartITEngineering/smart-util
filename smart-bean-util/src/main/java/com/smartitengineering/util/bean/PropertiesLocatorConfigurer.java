@@ -17,10 +17,7 @@
  */
 package com.smartitengineering.util.bean;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -29,10 +26,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.DefaultPropertiesPersister;
-import org.springframework.util.PropertiesPersister;
 
 /**
  * This class will mainly search for a designated properties file at locations
@@ -55,20 +49,11 @@ public class PropertiesLocatorConfigurer
                BeanNameAware,
                BeanFactoryAware {
 
-    public static final String DEFAULT_RESOURCE_SUFFIX = ".template";
-    private String defaultResourceSuffix =
-        PropertiesLocatorConfigurer.DEFAULT_RESOURCE_SUFFIX;
-    private String[] smartLocations;
-    private PropertiesPersister myPropertiesPersister =
-        new DefaultPropertiesPersister();
     private boolean ignoreResourceNotFound = false;
-    private String fileEncoding = null;
-    private boolean defaultSearchEnabled = true;
-    private boolean classpathSearchEnabled = true;
-    private boolean currentDirSearchEnabled = true;
-    private boolean userHomeSearchEnabled = true;
-    private String resourceContext;
-    private String[] searchLocations;
+    private final PropertiesLocator locator = new PropertiesLocator();
+
+    public PropertiesLocatorConfigurer() {
+    }
 
     /**
      * Loads properties file from locations as it is supposed.
@@ -79,113 +64,19 @@ public class PropertiesLocatorConfigurer
     @Override
     protected void loadProperties(Properties props)
         throws IOException {
-        if (this.smartLocations != null) {
-            for (int i = 0; i < this.smartLocations.length; i++) {
-                String location = this.smartLocations[i];
-                if (logger.isInfoEnabled()) {
-                    logger.info("Loading properties file from " + location);
-                }
-                InputStream is = null;
-                String context = getResourceContext();
-                if (StringUtils.isNotEmpty(context)) {
-                    if (!context.endsWith("/")) {
-                        context = new StringBuilder(context).append('/').
-                            toString();
-                    }
-                }
-                String fileName =
-                    new StringBuilder(context).append(location).
-                    toString();
-                if (StringUtils.isEmpty(fileName)) {
-                    continue;
-                }
-                try {
-                    boolean resourceFound = false;
-                    Resource resource;
-                    if (isDefaultSearchEnabled()) {
-                        String resourceName = new StringBuilder(fileName).append(
-                            getDefaultResourceSuffix()).toString();
-                        resource =
-                            new ClassPathResource(resourceName);
-                        is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is);
-                    }
-                    if (isClasspathSearchEnabled()) {
-                        resource =
-                            new ClassPathResource(fileName);
-                        is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is) || resourceFound;
-                    }
-                    if (isCurrentDirSearchEnabled()) {
-                        String parent = System.getProperty("user.dir");
-                        resourceFound = attempToReadRsrcFromFile(parent,
-                            fileName, resourceFound, props);
-                    }
-                    if (isUserHomeSearchEnabled()) {
-                        String parent = System.getProperty("user.home");
-                        resourceFound = attempToReadRsrcFromFile(parent,
-                            fileName, resourceFound, props);
-                    }
-                    if (searchLocations != null) {
-                        for (String searchLocation : searchLocations) {
-                            if (StringUtils.isNotEmpty(StringUtils.trim(
-                                searchLocation))) {
-                                resourceFound = attempToReadRsrcFromFile(
-                                    searchLocation, fileName, resourceFound,
-                                    props);
-                            }
-                        }
-                    }
-                    if (!resourceFound) {
-                        throw new RuntimeException(fileName + " not found!");
-                    }
-                }
-                catch (Exception ex) {
-                    if (this.ignoreResourceNotFound) {
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("Could not load properties from " +
-                                location + ": " + ex.getMessage());
-                        }
-                    }
-                    else {
-                        throw new IOException(ex);
-                    }
-                }
-                finally {
-                    closeInputStream(is);
-                }
-            }
+        boolean resourceFound;
+        resourceFound = locator.loadProperties(props);
+        if (!resourceFound && !this.ignoreResourceNotFound) {
+            throw new IOException();
         }
     }
 
     /**
-     * 
-     * @param parent The parent folder of the fileName
-     * @param fileName The file to read
-     * @param resourceFound True if resource was earlier found
-     * @param props The properties object to fill the properties with
-     * @return True if either resourceFound is true or resource was read from
-     *         fileName
-     * @throws java.io.IOException If error in reading the file
-     */
-    protected boolean attempToReadRsrcFromFile(String parent,
-                                               String fileName,
-                                               boolean resourceFound,
-                                               Properties props)
-        throws IOException {
-        File resourceFile = new File(parent, fileName);
-        Resource resource =
-            new FileSystemResource(resourceFile);
-        InputStream is = attemptToLoadResource(props, resource);
-        return closeInputStream(is) || resourceFound;
-    }
-
-    /**
-     * Return suffix for default resource file.
-     * @return Suffix for the classpath default resource
+     * This operation is restricted from this configurer.
+     * @param location
      */
     protected String getDefaultResourceSuffix() {
-        return defaultResourceSuffix;
+        return locator.getDefaultResourceSuffix();
     }
 
     /**
@@ -193,7 +84,7 @@ public class PropertiesLocatorConfigurer
      * @param defaultResourceSuffix The suffix of he default resource
      */
     public void setDefaultResourceSuffix(String defaultResourceSuffix) {
-        this.defaultResourceSuffix = defaultResourceSuffix;
+        locator.setDefaultResourceSuffix(defaultResourceSuffix);
     }
 
     /**
@@ -203,10 +94,10 @@ public class PropertiesLocatorConfigurer
      * @return The context for current configurer
      */
     protected String getResourceContext() {
-        if (resourceContext == null) {
+        if (locator.getResourceContext() == null) {
             return "";
         }
-        return resourceContext;
+        return locator.getResourceContext();
     }
 
     /**
@@ -214,7 +105,7 @@ public class PropertiesLocatorConfigurer
      * @param resourceContext The context to search the current configs.
      */
     public void setResourceContext(String resourceContext) {
-        this.resourceContext = resourceContext;
+        locator.setResourceContext(resourceContext);
     }
 
     /**
@@ -223,42 +114,6 @@ public class PropertiesLocatorConfigurer
      * @param props Properties file to fill
      * @param resource Resource to load if present
      * @return The input stream of the resource.
-     */
-    protected InputStream attemptToLoadResource(Properties props,
-                                                Resource resource) {
-        InputStream is = null;
-        try {
-            is = resource.getInputStream();
-            if (resource.getFilename().endsWith(XML_FILE_EXTENSION)) {
-                this.myPropertiesPersister.loadFromXml(props, is);
-            }
-            else {
-                if (this.fileEncoding != null) {
-                    this.myPropertiesPersister.load(props,
-                        new InputStreamReader(is, this.fileEncoding));
-                }
-                else {
-                    this.myPropertiesPersister.load(props, is);
-                }
-            }
-        }
-        catch (IOException ex) {
-        }
-        return is;
-    }
-
-    private boolean closeInputStream(InputStream is)
-        throws IOException {
-        if (is != null) {
-            is.close();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * This operation is restricted from this configurer.
-     * @param location
      */
     @Override
     public void setLocation(Resource location) {
@@ -282,7 +137,7 @@ public class PropertiesLocatorConfigurer
      */
     @Override
     public void setFileEncoding(String encoding) {
-        this.fileEncoding = encoding;
+        locator.setFileEncoding(encoding);
         super.setFileEncoding(encoding);
     }
 
@@ -291,7 +146,7 @@ public class PropertiesLocatorConfigurer
      * @param smartLocation The custom resource
      */
     public void setSmartLocation(String smartLocation) {
-        this.smartLocations = new String[]{smartLocation};
+        locator.setSmartLocations(new String[]{smartLocation});
         super.setLocation(new ClassPathResource(smartLocation));
     }
 
@@ -302,7 +157,7 @@ public class PropertiesLocatorConfigurer
      * @param smartLocationsAsCsv The resources as comma separated values (csv)
      */
     public void setSmartLocationsAsCsv(String smartLocationsAsCsv) {
-        setSearchLocations(smartLocationsAsCsv.split(","));
+        setSmartLocations(smartLocationsAsCsv.split(","));
     }
 
     /**
@@ -311,7 +166,7 @@ public class PropertiesLocatorConfigurer
      * @param smartLocations The resources as an array
      */
     public void setSmartLocations(String[] smartLocations) {
-        this.smartLocations = smartLocations;
+        locator.setSmartLocations(smartLocations);
         Resource[] resources = new Resource[smartLocations.length];
         for (int i = 0; i < smartLocations.length; ++i) {
             String smartLocation = StringUtils.trim(smartLocations[i]);
@@ -327,7 +182,7 @@ public class PropertiesLocatorConfigurer
      * @return True if search is enabled in classpath
      */
     protected boolean isClasspathSearchEnabled() {
-        return classpathSearchEnabled;
+        return locator.isClasspathSearchEnabled();
     }
 
     /**
@@ -335,7 +190,7 @@ public class PropertiesLocatorConfigurer
      * @param classpathSearchEnabled True if search is enabled for classpath
      */
     public void setClasspathSearchEnabled(boolean classpathSearchEnabled) {
-        this.classpathSearchEnabled = classpathSearchEnabled;
+        locator.setClasspathSearchEnabled(classpathSearchEnabled);
     }
 
     /**
@@ -343,7 +198,7 @@ public class PropertiesLocatorConfigurer
      * @return True if search is enabled in current directory
      */
     protected boolean isCurrentDirSearchEnabled() {
-        return currentDirSearchEnabled;
+        return locator.isCurrentDirSearchEnabled();
     }
 
     /**
@@ -351,7 +206,7 @@ public class PropertiesLocatorConfigurer
      * @param currentDirSearchEnabled True if search is enabled for current dir
      */
     public void setCurrentDirSearchEnabled(boolean currentDirSearchEnabled) {
-        this.currentDirSearchEnabled = currentDirSearchEnabled;
+        locator.setCurrentDirSearchEnabled(currentDirSearchEnabled);
     }
 
     /**
@@ -359,7 +214,7 @@ public class PropertiesLocatorConfigurer
      * @return True if search is enabled for enabled
      */
     protected boolean isDefaultSearchEnabled() {
-        return defaultSearchEnabled;
+        return locator.isDefaultSearchEnabled();
     }
 
     /**
@@ -367,7 +222,7 @@ public class PropertiesLocatorConfigurer
      * @param defaultSearchEnabled True if search is enabled for default cp
      */
     public void setDefaultSearchEnabled(boolean defaultSearchEnabled) {
-        this.defaultSearchEnabled = defaultSearchEnabled;
+        locator.setDefaultSearchEnabled(defaultSearchEnabled);
     }
 
     /**
@@ -375,7 +230,7 @@ public class PropertiesLocatorConfigurer
      * @return True if search is enabled in user home directory
      */
     protected boolean isUserHomeSearchEnabled() {
-        return userHomeSearchEnabled;
+        return locator.isUserHomeSearchEnabled();
     }
 
     /**
@@ -383,7 +238,7 @@ public class PropertiesLocatorConfigurer
      * @param userHomeSearchEnabled True if search is enabled for user home dir
      */
     public void setUserHomeSearchEnabled(boolean userHomeSearchEnabled) {
-        this.userHomeSearchEnabled = userHomeSearchEnabled;
+        locator.setUserHomeSearchEnabled(userHomeSearchEnabled);
     }
 
     /**
@@ -391,7 +246,7 @@ public class PropertiesLocatorConfigurer
      * @return Custom search locations
      */
     protected String[] getSearchLocations() {
-        return searchLocations;
+        return locator.getSmartLocations();
     }
 
     /**
@@ -411,7 +266,6 @@ public class PropertiesLocatorConfigurer
      * @param searchLocationAsCsv The search locations as CSV
      */
     public void setSearchLocationsAsCsv(String searchLocationAsCsv) {
-
         if (StringUtils.isNotEmpty(searchLocationAsCsv)) {
             setSearchLocations(searchLocationAsCsv.split(","));
         }
@@ -423,7 +277,7 @@ public class PropertiesLocatorConfigurer
      * @param searchLocations The search locations
      */
     public void setSearchLocations(String[] searchLocations) {
-        this.searchLocations = searchLocations;
+        locator.setSearchLocations(searchLocations);
     }
 
     /**
@@ -435,4 +289,5 @@ public class PropertiesLocatorConfigurer
         this.ignoreResourceNotFound = ignoreResourceNotFound;
         super.setIgnoreResourceNotFound(ignoreResourceNotFound);
     }
+
 }
