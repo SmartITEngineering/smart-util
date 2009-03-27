@@ -137,5 +137,6 @@
         <compiler.version>2.0.2</compiler.version>
         <lang.version>2.3</lang.version>
         <surefire.version>2.4.3</surefire.version>
+        <asm.version>3.1</asm.version>
     </properties>
 </project>
