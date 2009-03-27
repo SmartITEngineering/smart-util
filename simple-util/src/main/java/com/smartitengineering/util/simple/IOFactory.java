@@ -20,6 +20,8 @@ package com.smartitengineering.util.simple;
 import com.smartitengineering.util.simple.io.ContentBuffer;
 import com.smartitengineering.util.simple.io.StringBufferInputStream;
 import com.smartitengineering.util.simple.io.StringInputStream;
+import com.smartitengineering.util.simple.reflection.ClassScanner;
+import com.smartitengineering.util.simple.reflection.DefaultClassScannerImpl;
 import java.io.InputStream;
 
 /**
@@ -43,5 +45,9 @@ public final class IOFactory {
     public static <T extends InputStream & ContentBuffer> T getStringBufferingIOStream(
         final InputStream bufferedStream) {
         return (T) new StringBufferInputStream(bufferedStream);
+    }
+    
+    public static ClassScanner getDefaultClassScanner() {
+        return new DefaultClassScannerImpl();
     }
 }
