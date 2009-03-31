@@ -123,7 +123,7 @@ public class PropertiesLocator {
 
     public boolean loadProperties(Properties props)
         throws IOException {
-        boolean resourceFound = true;
+        boolean resourceFound = false;
         if (getSmartLocations() != null) {
             for (int i = 0; i < getSmartLocations().length;
                 i++) {
@@ -154,7 +154,7 @@ public class PropertiesLocator {
                         resource =
                             ResourceFactory.getResource(resourcePath);
                         is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is) && resourceFound;
+                        resourceFound = closeInputStream(is) || resourceFound;
                     }
                     if (isClasspathSearchEnabled()) {
                         String resourcePath = new StringBuilder(
@@ -163,19 +163,19 @@ public class PropertiesLocator {
                         resource =
                             ResourceFactory.getResource(resourcePath);
                         is = attemptToLoadResource(props, resource);
-                        resourceFound = closeInputStream(is) && resourceFound;
+                        resourceFound = closeInputStream(is) || resourceFound;
                     }
                     if (isCurrentDirSearchEnabled()) {
                         String parent = System.getProperty("user.dir");
                         resourceFound =
                             attempToReadRsrcFromFile(parent, fileName,
-                            resourceFound, props) && resourceFound;
+                            resourceFound, props) || resourceFound;
                     }
                     if (isUserHomeSearchEnabled()) {
                         String parent = System.getProperty("user.home");
                         resourceFound =
                             attempToReadRsrcFromFile(parent, fileName,
-                            resourceFound, props) && resourceFound;
+                            resourceFound, props) || resourceFound;
                     }
                     if (getSearchLocations() != null) {
                         for (String searchLocation : getSearchLocations()) {
@@ -183,7 +183,7 @@ public class PropertiesLocator {
                                 searchLocation))) {
                                 resourceFound =
                                     attempToReadRsrcFromFile(searchLocation,
-                                    fileName, resourceFound, props) &&
+                                    fileName, resourceFound, props) ||
                                     resourceFound;
                             }
                         }
