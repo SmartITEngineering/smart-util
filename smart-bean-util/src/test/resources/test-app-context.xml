@@ -59,7 +59,7 @@
         <property name="classpathSearchEnabled"><value>false</value></property>
         <property name="currentDirSearchEnabled"><value>false</value></property>
         <property name="userHomeSearchEnabled"><value>false</value></property>
-        <property name="ignoreResourceNotFound"><value>true</value></property>
+        <property name="ignoreResourceNotFound"><value>false</value></property>
         <property name="ignoreUnresolvablePlaceholders"><value>true</value></property>
         <property name="searchLocationsAsCsv"><value>./target/a/,./target/b/,./target/c/,./target/d/</value></property>
     </bean>

@@ -174,6 +174,7 @@ public class PropertiesLocatorConfigurerTest
 
     private void getBean()
         throws BeansException {
+        initPaths(new StringBuilder());
         applicationContext =
             new ClassPathXmlApplicationContext("test-app-context.xml");
         bean =
