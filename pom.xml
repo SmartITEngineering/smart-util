@@ -138,5 +138,6 @@
         <lang.version>2.3</lang.version>
         <surefire.version>2.4.3</surefire.version>
         <asm.version>3.1</asm.version>
+        <jmock.version>2.1.0</jmock.version>
     </properties>
 </project>

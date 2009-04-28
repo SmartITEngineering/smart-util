@@ -15,10 +15,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.simple.data;
+package com.smartitengineering.util.simple.reflection;
 
-@Deprecated
-@SuppressWarnings({""})
-public class TestClass {
-
+/**
+ *
+ * @author imyousuf
+ */
+public interface VisitCallback<T extends Config> {
+    void handle(T config);
 }
