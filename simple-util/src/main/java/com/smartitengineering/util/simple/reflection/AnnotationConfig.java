@@ -36,10 +36,8 @@ public class AnnotationConfig
 
     @Override
     public boolean equals(Object obj) {
-        System.out.println(obj.getClass());
         if (obj instanceof AnnotationConfig && super.equals(obj)) {
             AnnotationConfig other = (AnnotationConfig) obj;
-            System.out.println(other.getAnnotationName());
             if (this.annotationName == other.annotationName ||
                 (this.annotationName != null && this.className.equals(
                 other.className))) {

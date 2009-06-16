@@ -17,8 +17,10 @@
  */
 package com.smartitengineering.util.simple.data;
 
+import javax.annotation.Resource;
+
 @Deprecated
 @SuppressWarnings({""})
+@Resource
 public class TestClass {
-
 }

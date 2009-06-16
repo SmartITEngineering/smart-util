@@ -23,6 +23,7 @@ import com.smartitengineering.util.simple.io.StringInputStream;
 import com.smartitengineering.util.simple.reflection.ClassScanner;
 import com.smartitengineering.util.simple.reflection.DefaultClassScannerImpl;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 
 /**
  *
@@ -46,8 +47,46 @@ public final class IOFactory {
         final InputStream bufferedStream) {
         return (T) new StringBufferInputStream(bufferedStream);
     }
-    
+
     public static ClassScanner getDefaultClassScanner() {
         return new DefaultClassScannerImpl();
+    }
+
+    public static String getAnnotationNameForVisitor(
+        Class<? extends Annotation> annotationClass) {
+        if (annotationClass == null) {
+            throw new IllegalArgumentException();
+        }
+        return "L".concat(annotationClass.getName().replaceAll("\\.", "/")).
+            concat(";");
+    }
+
+    public static Class getAnnotationClassFromVisitorName(
+        String name)
+        throws ClassNotFoundException,
+               IndexOutOfBoundsException {
+        if (name == null) {
+            throw new IllegalArgumentException();
+        }
+        return Class.forName(name.substring(1, name.length() - 1).replaceAll(
+            "/", "."));
+    }
+
+    public static Class getClassFromVisitorName(String name)
+        throws ClassNotFoundException,
+               IndexOutOfBoundsException {
+        if (name == null) {
+            throw new IllegalArgumentException();
+        }
+        return Class.forName(name.replaceAll(
+            "/", "."));
+    }
+
+    public static String getClassNameForVisitor(
+        Class clazz) {
+        if (clazz == null) {
+            throw new IllegalArgumentException();
+        }
+        return clazz.getName().replaceAll("\\.", "/");
     }
 }

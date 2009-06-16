@@ -22,6 +22,7 @@ import com.smartitengineering.util.simple.reflection.AnnotationConfig;
 import com.smartitengineering.util.simple.reflection.ClassAnnotationVisitorImpl;
 import com.smartitengineering.util.simple.reflection.ClassScanner;
 import com.smartitengineering.util.simple.reflection.VisitCallback;
+import javax.annotation.Resource;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -70,14 +71,18 @@ public class ClassAnnotationVisitorImplTest
             {
                 AnnotationConfig config;
                 config = new AnnotationConfig();
-                String className = TestClass.class.getName().replaceAll("\\.",
-                    "/");
+                String className = IOFactory.getClassNameForVisitor(
+                    TestClass.class);
                 config.setClassName(className);
-                config.setAnnotationName("Deprecated");
+                config.setAnnotationName(IOFactory.getAnnotationNameForVisitor(
+                    Deprecated.class));
                 exactly(2).of(mockVisitCallback).handle(with(equal(config)));
                 config = new AnnotationConfig();
+                className = IOFactory.getClassNameForVisitor(
+                    TestClass.class);
                 config.setClassName(className);
-                config.setAnnotationName("SuppressWarnings");
+                config.setAnnotationName(IOFactory.getAnnotationNameForVisitor(
+                    Resource.class));
                 exactly(2).of(mockVisitCallback).handle(with(equal(config)));
             }
         });
@@ -89,6 +94,7 @@ public class ClassAnnotationVisitorImplTest
         classVisitor = new ClassAnnotationVisitorImpl(mockVisitCallback);
         scanner.scan(new String[]{"com.smartitengineering.util.simple.data"},
             classVisitor);
+        context.assertIsSatisfied();
     }
 
     public void testVisitorCreationWithAnnotationNamePattern() {
@@ -101,14 +107,35 @@ public class ClassAnnotationVisitorImplTest
                 String className = TestClass.class.getName().replaceAll("\\.",
                     "/");
                 config.setClassName(className);
-                config.setAnnotationName("Deprecated");
+                config.setAnnotationName(IOFactory.getAnnotationNameForVisitor(
+                    Deprecated.class));
                 exactly(1).of(mockVisitCallback).handle(with(equal(config)));
             }
         });
         ClassScanner scanner = IOFactory.getDefaultClassScanner();
         ClassVisitor classVisitor = new ClassAnnotationVisitorImpl(
-            mockVisitCallback, "Dep*");
+            mockVisitCallback, IOFactory.getAnnotationNameForVisitor(
+            Deprecated.class));
         scanner.scan(new String[]{"com.smartitengineering.util.simple.data"},
             classVisitor);
+        context.assertIsSatisfied();
+    }
+
+    public void testFactoryNameConvertions() {
+        try {
+            assertTrue(TestClass.class.equals(IOFactory.getClassFromVisitorName(IOFactory.
+                getClassNameForVisitor(TestClass.class))));
+        }
+        catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+        try {
+            assertTrue(Deprecated.class.equals(IOFactory.
+                getAnnotationClassFromVisitorName(IOFactory.
+                getAnnotationNameForVisitor(Deprecated.class))));
+        }
+        catch (Exception ex) {
+            fail(ex.getMessage());
+        }
     }
 }
