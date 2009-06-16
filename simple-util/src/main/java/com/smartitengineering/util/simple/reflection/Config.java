@@ -24,6 +24,8 @@ package com.smartitengineering.util.simple.reflection;
 public class Config {
 
     protected String className;
+    protected String superClassName;
+    protected String[] interfaces;
 
     public String getClassName() {
         return className;
@@ -31,6 +33,22 @@ public class Config {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String[] getInterfaces() {
+        return interfaces;
+    }
+
+    public void setInterfaces(String[] interfaces) {
+        this.interfaces = interfaces;
+    }
+
+    public String getSuperClassName() {
+        return superClassName;
+    }
+
+    public void setSuperClassName(String superClassName) {
+        this.superClassName = superClassName;
     }
 
     @Override

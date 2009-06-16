@@ -33,6 +33,8 @@ public class ClassAnnotationVisitorImpl
     implements ClassVisitor {
 
     private String className = null;
+    private String superClassName = null;
+    private String[] interfaces = null;
     private boolean publicModifier = false;
     private VisitCallback<AnnotationConfig> callback;
     private String annotationNamePattern;
@@ -80,6 +82,8 @@ public class ClassAnnotationVisitorImpl
                       String[] interfaces) {
         publicModifier = (Opcodes.ACC_PUBLIC & access) == 1;
         className = name;
+        superClassName = superName;
+        this.interfaces = interfaces;
     }
 
     public AnnotationVisitor visitAnnotation(String desc,
@@ -89,6 +93,8 @@ public class ClassAnnotationVisitorImpl
                 AnnotationConfig config = new AnnotationConfig();
                 config.setAnnotationName(desc);
                 config.setClassName(className);
+                config.setSuperClassName(superClassName);
+                config.setInterfaces(interfaces);
                 callback.handle(config);
             }
         }
