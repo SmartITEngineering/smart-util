@@ -17,20 +17,10 @@
  */
 package com.smartitengineering.util.simple.data;
 
-import java.io.Serializable;
-import java.util.Comparator;
-import javax.annotation.Resource;
 import javax.swing.JPanel;
 
-@Deprecated
-@SuppressWarnings({""})
-@Resource
-public class TestClass
-    extends JPanel
-    implements Serializable,
-               Comparable<String>,
-               Cloneable,
-               Comparator<String> {
+public class TestClass3
+    extends JPanel {
 
     public int compareTo(String o) {
         throw new UnsupportedOperationException("Not supported yet.");

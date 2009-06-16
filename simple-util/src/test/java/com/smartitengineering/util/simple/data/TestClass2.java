@@ -19,14 +19,8 @@ package com.smartitengineering.util.simple.data;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import javax.annotation.Resource;
-import javax.swing.JPanel;
 
-@Deprecated
-@SuppressWarnings({""})
-@Resource
-public class TestClass
-    extends JPanel
+public class TestClass2
     implements Serializable,
                Comparable<String>,
                Cloneable,
