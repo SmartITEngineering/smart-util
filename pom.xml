@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.smartitengineering</groupId>
     <artifactId>smart-util</artifactId>
@@ -125,7 +124,8 @@
     <modules>
         <module>smart-bean-util</module>
         <module>simple-util</module>
-    </modules>
+    <module>smart-bean-spring-util</module>
+  </modules>
     <properties>
         <wagon.ftp.version>1.0-alpha-6</wagon.ftp.version>
         <wagon.svn.version>1.8</wagon.svn.version>
@@ -139,5 +139,6 @@
         <surefire.version>2.4.3</surefire.version>
         <asm.version>3.1</asm.version>
         <jmock.version>2.1.0</jmock.version>
+				<spring.version>2.5.6</spring.version>
     </properties>
 </project>
