@@ -27,41 +27,42 @@ import org.apache.commons.lang.StringUtils;
  * @since 0.1.1
  */
 public class SimpleBeanFactory
-    implements BeanFactory {
+				implements BeanFactory {
 
-    private Map<String, Object> beanContainer;
+		private Map<String, Object> beanContainer;
 
-    public SimpleBeanFactory(Map<String, Object> beanContainer) {
-        if (beanContainer == null) {
-            throw new IllegalArgumentException("Bean container can't be nulL!");
-        }
-        this.beanContainer = beanContainer;
-    }
+		public SimpleBeanFactory(Map<String, Object> beanContainer) {
+				if (beanContainer == null) {
+						throw new IllegalArgumentException("Bean container can't be nulL!");
+				}
+				this.beanContainer = beanContainer;
+		}
 
-    public boolean containsBean(String beanName)
-        throws IllegalArgumentException {
-        if (StringUtils.isBlank(beanName)) {
-            throw new IllegalArgumentException("Bean Name can not be blank!");
-        }
-        return contains(beanName);
-    }
+		public boolean containsBean(String beanName)
+						throws IllegalArgumentException {
+				if (StringUtils.isBlank(beanName)) {
+						throw new IllegalArgumentException("Bean Name can not be blank!");
+				}
+				return contains(beanName);
+		}
 
-    public Object getBean(String beanName)
-        throws IllegalArgumentException {
-        if (StringUtils.isBlank(beanName)) {
-            throw new IllegalArgumentException("Bean Name can not be blank!");
-        }
-        if (!containsBean(beanName)) {
-            throw new IllegalArgumentException("No such bean in factory!");
-        }
-        return get(beanName);
-    }
+		public Object getBean(String beanName,
+													Class beanClass)
+						throws IllegalArgumentException {
+				if (StringUtils.isBlank(beanName)) {
+						throw new IllegalArgumentException("Bean Name can not be blank!");
+				}
+				if (!containsBean(beanName)) {
+						throw new IllegalArgumentException("No such bean in factory!");
+				}
+				return get(beanName);
+		}
 
-    protected boolean contains(String beanName) {
-        return beanContainer.containsKey(beanName);
-    }
+		protected boolean contains(String beanName) {
+				return beanContainer.containsKey(beanName);
+		}
 
-    protected Object get(String beanName) {
-        return beanContainer.get(beanName);
-    }
+		protected Object get(String beanName) {
+				return beanContainer.get(beanName);
+		}
 }

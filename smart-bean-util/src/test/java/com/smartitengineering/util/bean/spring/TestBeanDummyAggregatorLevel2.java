@@ -15,21 +15,34 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.bean;
+package com.smartitengineering.util.bean.spring;
 
+import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
 
 /**
  *
  * @author imyousuf
  */
-
-public class TestBeanDummyAggregatorLevel3 extends TestBeanDummyAggregatorLevel4 {
+@Aggregator(contextName="testContext")
+public class TestBeanDummyAggregatorLevel2 extends TestBeanDummyAggregatorLevel3 {
     @InjectableField
-    private TestBean testBeanN;
+    private TestBean testBean2;
+    @InjectableField(beanName="testBean")
+    private TestBean testBean1;
+    @InjectableField
+    private TestBean testBeanNull;
 
-    public TestBean getTestBeanN() {
-        return testBeanN;
+    public TestBean getTestBean2() {
+        return testBean2;
+    }
+
+    public TestBean getTestBean1() {
+        return testBean1;
+    }
+
+    public TestBean getTestBeanNull() {
+        return testBeanNull;
     }
     
 }

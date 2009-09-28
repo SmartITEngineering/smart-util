@@ -15,8 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.bean;
+package com.smartitengineering.util.bean.spring;
 
+import com.smartitengineering.util.bean.*;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -45,7 +46,7 @@ public class SpringBeanFactory
         return beanFactory.containsBean(beanName);
     }
 
-    public Object getBean(String beanName)
+    public Object getBean(String beanName, Class beanClass)
         throws IllegalArgumentException {
         if (StringUtils.isBlank(beanName)) {
             throw new IllegalArgumentException("Bean Name can not be blank!");
@@ -53,6 +54,11 @@ public class SpringBeanFactory
         if (!containsBean(beanName)) {
             throw new IllegalArgumentException("No such bean in factory!");
         }
-        return beanFactory.getBean(beanName);
+				if(beanClass == null) {
+						return beanFactory.getBean(beanName);
+				}
+				else {
+						return beanFactory.getBean(beanName, beanClass);
+				}
     }
 }

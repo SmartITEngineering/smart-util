@@ -24,23 +24,25 @@ package com.smartitengineering.util.bean;
  */
 public interface BeanFactory {
 
-    /**
-     * Checks whether the bean is available in the factory of not.
-     * @param beanName Name of the bean to search with
-     * @return True iff there is a bean in this name
-     * @throws java.lang.IllegalArgumentException If beanName is blank
-     */
-    public boolean containsBean(String beanName)
-        throws IllegalArgumentException;
+		/**
+		 * Checks whether the bean is available in the factory of not.
+		 * @param beanName Name of the bean to search with
+		 * @return True iff there is a bean in this name
+		 * @throws java.lang.IllegalArgumentException If beanName is blank
+		 */
+		public boolean containsBean(String beanName)
+						throws IllegalArgumentException;
 
-    /**
-     * Retrieves the bean iff it exists.
-     * @param beanName Name of the bean to retrieve
-     * @return The bean with the specified name
-     * @throws java.lang.IllegalArgumentException if beanName is blank or if
-     *                                            there exists no such bean, 
-     *                                            i.e., containsBean is false
-     */
-    public Object getBean(String beanName)
-        throws IllegalArgumentException;
+		/**
+		 * Retrieves the bean iff it exists.
+		 * @param beanName Name of the bean to retrieve
+		 * @param beanClass Class expected from the bean factory
+		 * @return The bean with the specified name
+		 * @throws java.lang.IllegalArgumentException if beanName is blank or if
+		 *                                            there exists no such bean,
+		 *                                            i.e., containsBean is false
+		 */
+		public Object getBean(String beanName,
+													Class beanClass)
+						throws IllegalArgumentException;
 }
