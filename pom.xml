@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- *   
+ *
  * This is a utility project for wide range of applications
- * 
+ *
  * Copyright (C) 2008  Imran M Yousuf (imyousuf@smartitengineering.com)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,127 +18,212 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.smartitengineering</groupId>
-    <artifactId>smart-util</artifactId>
-    <packaging>pom</packaging>
-    <version>0.2-SNAPSHOT</version>
-    <name>smart-util</name>
-    <inceptionYear>2009</inceptionYear>
-    <description>
-        This project basically aims to create Utility libraries for wide range
-        of use.
-    </description>
-    <url>http://code.google.com/p/smart-util/</url>
-    <organization>
-        <name>Smart IT Engineering</name>
-        <url>http://www.smartitengineering.com</url>
-    </organization>
-    <issueManagement>
-        <system>Google Code Issue Tracker</system>
-        <url>http://code.google.com/p/smart-util/issues/</url>
-    </issueManagement>
-    <mailingLists>
-        <mailingList>
-            <name>Mailing List</name>
-            <archive>http://groups.google.com/group/smart-util</archive>
-            <post>smart-util@googlegroups.com</post>
-        </mailingList>
-    </mailingLists>
-    <licenses>
-        <license>
-            <name>LGPL v3</name>
-            <distribution>repo and manual</distribution>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>imyousuf</id>
-            <name>Imran M Yousuf</name>
-            <email>imyousuf@smartitengineering.com</email>
-            <organization>Smart IT Engineering</organization>
-            <timezone>GMT +0600</timezone>
-            <roles>
-                <role>Project Owner</role>
-                <role>Developer</role>
-                <role>Maintainer</role>
-            </roles>
-        </developer>
-    </developers>
-    <scm>
-        <connection>scm:git:git://github.com/imyousuf/smart-util.git</connection>
-    </scm>
-    <distributionManagement>
-        <!-- use the following if you're not using a snapshot version. -->
-        <repository>
-            <id>java.net-m2-repository</id>
-            <url>java-net:/maven2-repository/trunk/repository/</url>
-        </repository>
-        <!-- use the following if you ARE using a snapshot version. -->
-        <snapshotRepository>
-            <id>free-ftp-snapshot-repo</id>
-            <name>My FTP snapshot</name>
-            <url>ftp://imyousuf.100webspace.net/imyousuf.100webspace.net/maven-repo/snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${release.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>${scm.version}</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
-            </plugin>
-        </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.jvnet.wagon-svn</groupId>
-                <artifactId>wagon-svn</artifactId>
-                <version>${wagon.svn.version}</version>
-            </extension>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>${wagon.ftp.version}</version>
-            </extension>
-        </extensions>
-    </build>
-    <modules>
-        <module>smart-bean-util</module>
-        <module>simple-util</module>
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.smartitengineering</groupId>
+  <artifactId>smart-util</artifactId>
+  <packaging>pom</packaging>
+  <version>0.2-SNAPSHOT</version>
+  <name>smart-util</name>
+  <inceptionYear>2009</inceptionYear>
+  <description>
+    This project basically aims to create Utility libraries for wide range
+    of use.
+  </description>
+  <url>http://code.google.com/p/smart-util/</url>
+  <organization>
+    <name>Smart IT Engineering</name>
+    <url>http://www.smartitengineering.com</url>
+  </organization>
+  <issueManagement>
+    <system>Google Code Issue Tracker</system>
+    <url>http://code.google.com/p/smart-util/issues/</url>
+  </issueManagement>
+  <mailingLists>
+    <mailingList>
+      <name>Mailing List</name>
+      <archive>http://groups.google.com/group/smart-util</archive>
+      <post>smart-util@googlegroups.com</post>
+    </mailingList>
+  </mailingLists>
+  <licenses>
+    <license>
+      <name>LGPL v3</name>
+      <distribution>repo and manual</distribution>
+      <url>http://www.gnu.org/licenses/lgpl.html</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>imyousuf</id>
+      <name>Imran M Yousuf</name>
+      <email>imyousuf@smartitengineering.com</email>
+      <organization>Smart IT Engineering</organization>
+      <timezone>GMT +0600</timezone>
+      <roles>
+        <role>Project Owner</role>
+        <role>Developer</role>
+        <role>Maintainer</role>
+      </roles>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/imyousuf/smart-util.git</connection>
+  </scm>
+  <distributionManagement>
+    <!-- use the following if you're not using a snapshot version. -->
+    <repository>
+      <id>smartit-googlecode</id>
+      <name>Smart IT Engineering GoogleCode repository</name>
+      <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/releases</url>
+    </repository>
+    <!-- use the following if you ARE using a snapshot version. -->
+    <snapshotRepository>
+      <id>smartit-googlecode</id>
+      <name>Smart IT Engineering GoogleCode repository</name>
+      <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/snapshots</url>
+    </snapshotRepository>
+    <!-- deploy site here -->
+    <site>
+      <id>smartit-googlecode</id>
+      <name>Smart IT Engineering GoogleCode repository</name>
+      <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/site/util</url>
+    </site>
+  </distributionManagement>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${release.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-scm-plugin</artifactId>
+          <version>${scm.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${compiler.version}</version>
+          <inherited>true</inherited>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${javadoc.version}</version>
+          <inherited>true</inherited>
+          <configuration>
+            <attach>true</attach>
+          </configuration>
+          <executions>
+            <execution>
+              <id>gen-javadoc</id>
+              <phase>install</phase>
+              <inherited>true</inherited>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${source.version}</version>
+          <inherited>true</inherited>
+          <configuration>
+            <attach>true</attach>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <phase>verify</phase>
+              <inherited>true</inherited>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-scm-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+    </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.jvnet.wagon-svn</groupId>
+        <artifactId>wagon-svn</artifactId>
+        <version>${wagon.svn.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>${wagon.ftp.version}</version>
+      </extension>
+    </extensions>
+  </build>
+  <modules>
+    <module>smart-bean-util</module>
+    <module>simple-util</module>
     <module>smart-bean-spring-util</module>
   </modules>
-    <properties>
-        <wagon.ftp.version>1.0-alpha-6</wagon.ftp.version>
-        <wagon.svn.version>1.8</wagon.svn.version>
-        <scm.version>1.1</scm.version>
-        <release.version>2.0-beta-8</release.version>
-        <junit.version>3.8.1</junit.version>
-        <source.version>2.0.4</source.version>
-        <javadoc.version>2.3</javadoc.version>
-        <compiler.version>2.0.2</compiler.version>
-        <lang.version>2.3</lang.version>
-        <surefire.version>2.4.3</surefire.version>
-        <asm.version>3.1</asm.version>
-        <jmock.version>2.1.0</jmock.version>
-				<spring.version>2.5.6</spring.version>
-    </properties>
+  <properties>
+    <wagon.ftp.version>1.0-alpha-6</wagon.ftp.version>
+    <wagon.svn.version>1.8</wagon.svn.version>
+    <scm.version>1.1</scm.version>
+    <release.version>2.0-beta-8</release.version>
+    <junit.version>3.8.1</junit.version>
+    <source.version>2.0.4</source.version>
+    <javadoc.version>2.3</javadoc.version>
+    <compiler.version>2.0.2</compiler.version>
+    <lang.version>2.3</lang.version>
+    <surefire.version>2.4.3</surefire.version>
+    <asm.version>3.1</asm.version>
+    <jmock.version>2.1.0</jmock.version>
+    <spring.version>2.5.6</spring.version>
+  </properties>
 </project>
