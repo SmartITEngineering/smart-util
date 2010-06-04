@@ -17,7 +17,7 @@
  */
 package com.smartitengineering.util.bean.spring;
 
-import com.smartitengineering.util.bean.*;
+import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

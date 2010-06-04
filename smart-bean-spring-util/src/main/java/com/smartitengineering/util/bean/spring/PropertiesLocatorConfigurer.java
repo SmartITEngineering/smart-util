@@ -17,7 +17,7 @@
  */
 package com.smartitengineering.util.bean.spring;
 
-import com.smartitengineering.util.bean.*;
+import com.smartitengineering.util.bean.PropertiesLocator;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
