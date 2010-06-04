@@ -28,11 +28,21 @@ import java.util.Map.Entry;
  *
  * @author imyousuf
  */
-public abstract class AbstractGenericAdapter<F, T>
+public class GenericAdapterImpl<F, T>
     implements GenericAdapter<F, T> {
 
+  private AbstractAdapterHelper<F, T> helper;
+
+  public AbstractAdapterHelper<F, T> getHelper() {
+    return helper;
+  }
+
+  public void setHelper(AbstractAdapterHelper<F, T> helper) {
+    this.helper = helper;
+  }
+
   public Collection<T> convert(F... fromBeans) {
-    if(fromBeans == null || fromBeans.length <= 0) {
+    if (fromBeans == null || fromBeans.length <= 0) {
       return Collections.emptyList();
     }
     List<T> result = new ArrayList<T>();
@@ -43,7 +53,7 @@ public abstract class AbstractGenericAdapter<F, T>
   }
 
   public Collection<F> convertInversely(T... toBeans) {
-    if(toBeans == null || toBeans.length <= 0) {
+    if (toBeans == null || toBeans.length <= 0) {
       return Collections.emptyList();
     }
     List<F> result = new ArrayList<F>();
@@ -57,8 +67,8 @@ public abstract class AbstractGenericAdapter<F, T>
     if (fromBean == null) {
       return null;
     }
-    final T newTInstance = newTInstance();
-    mergeFromF2T(fromBean, newTInstance);
+    final T newTInstance = getHelper().newTInstance();
+    getHelper().mergeFromF2T(fromBean, newTInstance);
     return newTInstance;
   }
 
@@ -66,7 +76,7 @@ public abstract class AbstractGenericAdapter<F, T>
     if (toBean == null) {
       return null;
     }
-    return convertFromT2F(toBean);
+    return getHelper().convertFromT2F(toBean);
   }
 
   public void merge(Entry<F, T> bean) {
@@ -74,9 +84,9 @@ public abstract class AbstractGenericAdapter<F, T>
       return;
     }
     if (bean.getValue() == null) {
-      bean.setValue(newTInstance());
+      bean.setValue(getHelper().newTInstance());
     }
-    mergeFromF2T(bean.getKey(), bean.getValue());
+    getHelper().mergeFromF2T(bean.getKey(), bean.getValue());
   }
 
   public void merge(Collection<Entry<F, T>> beans) {
@@ -87,11 +97,4 @@ public abstract class AbstractGenericAdapter<F, T>
       merge(bean);
     }
   }
-
-  protected abstract T newTInstance();
-
-  protected abstract void mergeFromF2T(F fromBean,
-                                       T toBean);
-
-  protected abstract F convertFromT2F(T toBean);
 }

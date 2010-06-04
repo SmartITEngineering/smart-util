@@ -17,113 +17,174 @@
  */
 package com.smartitengineering.util.bean.adapter;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 import junit.framework.TestCase;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 
 /**
  *
  * @author imyousuf
  */
 public class AbstractGenericAdapterTest extends TestCase {
-    
-    public AbstractGenericAdapterTest(String testName) {
-        super(testName);
-    }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+  private final Mockery mockery = new Mockery() {
+
+    {
+      setImposteriser(ClassImposteriser.INSTANCE);
     }
+  };
+  final From mockedFrom = mockery.mock(From.class);
+  final To mockedTo = mockery.mock(To.class);
+
+  public AbstractGenericAdapterTest(String testName) {
+    super(testName);
+  }
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+  }
 
   /**
-   * Test of convert method, of class AbstractGenericAdapter.
+   * Test of convert method, of class GenericAdapterImpl.
    */
   public void testConvert_1args_1() {
-    System.out.println("convert");
-    From[] fromBeans = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    Collection expResult = null;
-    Collection result = instance.convert(fromBeans);
+    final From[] fromBeans = new From[]{mockedFrom, mockedFrom, mockedFrom,};
+
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(fromBeans.length).of(instance).newTInstance();
+        will(returnValue(mockedTo));
+        exactly(fromBeans.length).of(instance).mergeFromF2T(mockedFrom, mockedTo);
+      }
+    });
+    Collection result = adapter.convert(fromBeans);
     assertNotNull(result);
+    assertTrue(result.size() == fromBeans.length);
+    for (Object object : result) {
+      assertSame(mockedTo, object);
+    }
+    assertTrue(adapter.convert((From[]) null).size() == 0);
+    assertTrue(adapter.convert(new From[]{}).size() == 0);
   }
 
   /**
-   * Test of convertInversely method, of class AbstractGenericAdapter.
+   * Test of convertInversely method, of class GenericAdapterImpl.
    */
   public void testConvertInversely_1args_1() {
-    System.out.println("convertInversely");
-    To[] toBeans = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    Collection expResult = null;
-    Collection result = instance.convertInversely(toBeans);
+    final To[] toBeans = new To[]{mockedTo, mockedTo};
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(toBeans.length).of(instance).convertFromT2F(mockedTo);
+        will(returnValue(mockedFrom));
+      }
+    });
+    Collection<From> result = adapter.convertInversely(toBeans);
     assertNotNull(result);
+    assertTrue(result.size() == toBeans.length);
+    for (Object object : result) {
+      assertSame(mockedFrom, object);
+    }
+    assertTrue(adapter.convertInversely((To[]) null).size() == 0);
+    assertTrue(adapter.convertInversely(new To[]{}).size() == 0);
   }
 
   /**
-   * Test of convert method, of class AbstractGenericAdapter.
+   * Test of convert method, of class GenericAdapterImpl.
    */
   public void testConvert_1args_2() {
-    System.out.println("convert");
-    Object fromBean = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    Object expResult = null;
-    Object result = instance.convert(fromBean);
-    assertEquals(expResult, result);
+    From fromBean = mockedFrom;
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(instance).newTInstance();
+        will(returnValue(mockedTo));
+        exactly(1).of(instance).mergeFromF2T(mockedFrom, mockedTo);
+      }
+    });
+    Object expResult = mockedTo;
+    Object result = adapter.convert(fromBean);
+    assertSame(expResult, result);
+    assertNull(adapter.convert((From) null));
   }
 
   /**
-   * Test of convertInversely method, of class AbstractGenericAdapter.
+   * Test of convertInversely method, of class GenericAdapterImpl.
    */
   public void testConvertInversely_1args_2() {
-    System.out.println("convertInversely");
-    Object toBean = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    Object expResult = null;
-    Object result = instance.convertInversely(toBean);
-    assertEquals(expResult, result);
+    To toBean = mockedTo;
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(instance).convertFromT2F(mockedTo);
+        will(returnValue(mockedFrom));
+      }
+    });
+    Object expResult = mockedFrom;
+    Object result = adapter.convertInversely(toBean);
+    assertSame(expResult, result);
+    assertNull(adapter.convertInversely((To) null));
   }
 
   /**
-   * Test of merge method, of class AbstractGenericAdapter.
+   * Test of merge method, of class GenericAdapterImpl.
    */
   public void testMerge_MapEntry() {
-    System.out.println("merge");
-    Entry<From, To> bean = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    instance.merge(bean);
+    Entry<From, To> bean = new SimpleEntry<From, To>(mockedFrom, mockedTo);
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(instance).mergeFromF2T(mockedFrom, mockedTo);
+      }
+    });
+    adapter.merge(bean);
   }
 
   /**
-   * Test of merge method, of class AbstractGenericAdapter.
+   * Test of merge method, of class GenericAdapterImpl.
    */
   public void testMerge_Collection() {
-    System.out.println("merge");
-    Collection<Entry<From, To>> beans = null;
-    AbstractGenericAdapter instance = new AbstractGenericAdapterImpl();
-    instance.merge(beans);
+    final Collection<Entry<From, To>> beans = new ArrayList<Entry<From, To>>();
+    beans.add(new SimpleEntry<From, To>(mockedFrom, mockedTo));
+    beans.add(new SimpleEntry<From, To>(mockedFrom, mockedTo));
+    beans.add(new SimpleEntry<From, To>(mockedFrom, mockedTo));
+    final AbstractAdapterHelper<From, To> instance = mockery.mock(AbstractAdapterHelper.class);
+    GenericAdapterImpl<From, To> adapter = new GenericAdapterImpl<From, To>();
+    adapter.setHelper(instance);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(beans.size()).of(instance).mergeFromF2T(mockedFrom, mockedTo);
+      }
+    });
+    adapter.merge(beans);
   }
 
-  private class From{}
-  private class To{}
-
-  private class AbstractGenericAdapterImpl extends AbstractGenericAdapter<From, To> {
-
-    @Override
-    protected To newTInstance() {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected void mergeFromF2T(From fromBean, To toBean) {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected From convertFromT2F(To toBean) {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+  private class From {
   }
 
+  private class To {
+  }
 }
