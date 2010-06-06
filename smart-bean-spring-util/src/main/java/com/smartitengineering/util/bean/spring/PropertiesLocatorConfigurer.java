@@ -19,6 +19,7 @@ package com.smartitengineering.util.bean.spring;
 
 import com.smartitengineering.util.bean.PropertiesLocator;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -68,7 +69,8 @@ public class PropertiesLocatorConfigurer
         boolean resourceFound;
         resourceFound = locator.loadProperties(props);
         if (!resourceFound && !this.ignoreResourceNotFound) {
-            throw new IOException();
+            throw new IOException("Could not load resource: " + Arrays.toString(
+                locator.getSmartLocations()));
         }
     }
 
