@@ -22,6 +22,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.smartitengineering</groupId>
+    <artifactId>smart-core</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
   <groupId>com.smartitengineering</groupId>
   <artifactId>smart-util</artifactId>
   <packaging>pom</packaging>
@@ -73,18 +78,6 @@
     <connection>scm:git:git://github.com/imyousuf/smart-util.git</connection>
   </scm>
   <distributionManagement>
-    <!-- use the following if you're not using a snapshot version. -->
-    <repository>
-      <id>smartit-googlecode</id>
-      <name>Smart IT Engineering GoogleCode repository</name>
-      <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/releases</url>
-    </repository>
-    <!-- use the following if you ARE using a snapshot version. -->
-    <snapshotRepository>
-      <id>smartit-googlecode</id>
-      <name>Smart IT Engineering GoogleCode repository</name>
-      <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/snapshots</url>
-    </snapshotRepository>
     <!-- deploy site here -->
     <site>
       <id>smartit-googlecode</id>
@@ -92,89 +85,12 @@
       <url>svn:https://imyousuf@smart-it.googlecode.com/svn/maven2/site/util</url>
     </site>
   </distributionManagement>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${lang.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>${asm.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-context</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <!-- Provided scope -->
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>${servlet.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>javax.servlet.jsp</groupId>
-        <artifactId>jsp-api</artifactId>
-        <version>${jsp.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jmock</groupId>
-        <artifactId>jmock-junit3</artifactId>
-        <version>${jmock.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jmock</groupId>
-        <artifactId>jmock-legacy</artifactId>
-        <version>${jmock.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jmock</groupId>
-        <artifactId>jmock</artifactId>
-        <version>${jmock.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>${release.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-scm-plugin</artifactId>
-          <version>${scm.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>${plugin.ant.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${surefire.version}</version>
           <inherited>true</inherited>
           <executions>
             <execution>
@@ -195,7 +111,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${compiler.version}</version>
           <inherited>true</inherited>
           <configuration>
             <source>1.5</source>
@@ -205,7 +120,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${javadoc.version}</version>
           <inherited>true</inherited>
           <configuration>
             <attach>true</attach>
@@ -224,7 +138,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>${source.version}</version>
           <inherited>true</inherited>
           <configuration>
             <attach>true</attach>
@@ -239,11 +152,6 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-maven-plugin</artifactId>
-          <version>${plugin.jetty.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -262,52 +170,13 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-scm-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.jvnet.wagon-svn</groupId>
-        <artifactId>wagon-svn</artifactId>
-        <version>${wagon.svn.version}</version>
-      </extension>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ftp</artifactId>
-        <version>${wagon.ftp.version}</version>
-      </extension>
-    </extensions>
   </build>
   <modules>
     <module>smart-bean-util</module>
     <module>simple-util</module>
     <module>smart-bean-spring-util</module>
   </modules>
-  <properties>
-    <wagon.ftp.version>1.0-alpha-6</wagon.ftp.version>
-    <wagon.svn.version>1.8</wagon.svn.version>
-    <scm.version>1.1</scm.version>
-    <release.version>2.0-beta-8</release.version>
-    <junit.version>3.8.1</junit.version>
-    <source.version>2.0.4</source.version>
-    <javadoc.version>2.3</javadoc.version>
-    <compiler.version>2.0.2</compiler.version>
-    <lang.version>2.3</lang.version>
-    <surefire.version>2.4.3</surefire.version>
-    <asm.version>3.1</asm.version>
-    <jmock.version>2.5.1</jmock.version>
-    <spring.version>2.5.6</spring.version>
-    <servlet.version>2.5</servlet.version>
-    <jsp.version>2.1</jsp.version>
-    <plugin.jetty.version>7.0.2.v20100331</plugin.jetty.version>
-    <plugin.ant.version>1.3</plugin.ant.version>
-  </properties>
 </project>
