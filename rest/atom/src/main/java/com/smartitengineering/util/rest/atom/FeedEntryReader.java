@@ -37,10 +37,11 @@ import org.apache.abdera.model.Link;
  */
 public class FeedEntryReader<T> {
 
-  private Client client;
-  private List<Map.Entry<String, String>> linkSpecs;
-  private Class<? extends T> clazz;
-  private boolean entryAsContent;
+  private final Client client;
+  private final List<Map.Entry<String, String>> linkSpecs;
+  private final Class<? extends T> clazz;
+  private final StreamBasedEntityDeserializer<T> deserializer;
+  private final boolean entryAsContent;
 
   /**
    * Construct a reader able to read from any feed upto depth 'n' as specified by linkSpecs.
@@ -61,7 +62,25 @@ public class FeedEntryReader<T> {
     this.client = client;
     this.linkSpecs = linkSpecs;
     this.clazz = clazz;
+    this.deserializer = null;
     this.entryAsContent = false;
+  }
+
+  /**
+   * Create entry reader to read feed entries and deserialize on the basis of the content data in the respective entry.
+   * @param deserializer The deserializer know-how-to
+   * @throws IllegalArgumentException If deserializer is null
+   */
+  public FeedEntryReader(StreamBasedEntityDeserializer<T> deserializer) throws IllegalArgumentException{
+    if(deserializer == null) {
+      throw new IllegalArgumentException("Deserializer can not be null!");
+    }
+    this.deserializer = deserializer;
+    this.client = null;
+    this.linkSpecs = null;
+    this.clazz = null;
+    this.entryAsContent = true;
+
   }
 
   /**
@@ -85,7 +104,15 @@ public class FeedEntryReader<T> {
   }
 
   protected void readEntriesFromTheirContent(List<org.apache.abdera.model.Entry> entries, List<T> entities) {
-    throw new UnsupportedOperationException("Not implemented yet!");
+    for (org.apache.abdera.model.Entry entry : entries) {
+      try {
+        entities.add(deserializer.deserialze(entry.getContentStream(),
+            entry.getContentSrc().toURI(), entry.getContentMimeType().toString()));
+      }
+      catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }
   }
 
   protected void readEntriesFromTheirLink(List<org.apache.abdera.model.Entry> entries, List<T> entities) {
