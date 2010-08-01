@@ -36,5 +36,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-atom-abdera</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+    </dependency>
   </dependencies>
 </project>
