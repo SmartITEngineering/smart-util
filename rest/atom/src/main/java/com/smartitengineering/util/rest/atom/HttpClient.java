@@ -61,6 +61,7 @@ public class HttpClient {
       UriBuilder builder = UriBuilder.fromUri(resourceUri);
       builder.host(host);
       builder.port(port);
+      builder.scheme("http");
       resource = client.resource(builder.build());
     }
     return resource;
