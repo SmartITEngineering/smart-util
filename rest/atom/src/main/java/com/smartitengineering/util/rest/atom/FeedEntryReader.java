@@ -17,7 +17,6 @@
  */
 package com.smartitengineering.util.rest.atom;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource.Builder;
 import java.net.URI;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import org.apache.abdera.model.Link;
  */
 public class FeedEntryReader<T> {
 
-  private final Client client;
+  private final HttpClient client;
   private final List<Map.Entry<String, String>> linkSpecs;
   private final Class<? extends T> clazz;
   private final StreamBasedEntityDeserializer<T> deserializer;
@@ -51,7 +50,7 @@ public class FeedEntryReader<T> {
    * @param clazz The {@link Class} to use to de-serialize the main entity. Can not be null
    * @throws IllegalArgumentException If any parameter is null or link spec is empty.
    */
-  public FeedEntryReader(Client client, List<Entry<String, String>> linkSpecs, Class<? extends T> clazz) throws
+  public FeedEntryReader(HttpClient client, List<Entry<String, String>> linkSpecs, Class<? extends T> clazz) throws
       IllegalArgumentException {
     if (client == null || linkSpecs == null || clazz == null) {
       throw new IllegalArgumentException("No argument in the constructor be null!");
@@ -132,7 +131,7 @@ public class FeedEntryReader<T> {
   protected T fetchObject(Link fetchLink, int depth) {
     try {
       URI rsrcUri = fetchLink.getHref().toURI();
-      Builder webRsrc = client.resource(rsrcUri).accept(fetchLink.getMimeType().toString());
+      Builder webRsrc = client.getWebResource(rsrcUri).accept(fetchLink.getMimeType().toString());
       if (fetchLink.getMimeType().match(MediaType.APPLICATION_ATOM_XML)) {
         Feed nestedFeed = webRsrc.get(Feed.class);
         Map.Entry<String, String> linkSpec = getLinkSpec(depth);
