@@ -54,7 +54,7 @@ public class HttpClient {
       return null;
     }
     final WebResource resource;
-    if (resourceUri.isAbsolute()) {
+    if (StringUtils.isNotBlank(resourceUri.getHost())) {
       resource = client.resource(resourceUri);
     }
     else {
