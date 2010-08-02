@@ -28,17 +28,17 @@
     <version>0.2-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.rest</groupId>
-  <artifactId>atom</artifactId>
+  <artifactId>atom-client</artifactId>
   <version>0.2-SNAPSHOT</version>
-  <name>Atom Util</name>
+  <name>Atom Client Util</name>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-atom-abdera</artifactId>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-core</artifactId>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
