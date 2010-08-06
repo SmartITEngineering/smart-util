@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -25,8 +26,16 @@ import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
-import junit.framework.TestCase;
+import java.net.URI;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map.Entry;
+import javax.ws.rs.core.MediaType;
+import junit.framework.Assert;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
@@ -41,6 +50,7 @@ public class AppTest {
 
   private static Server jettyServer;
   private Client client;
+  private HttpClient httpClient;
 
   /**
    * Create the test case
@@ -76,13 +86,14 @@ public class AppTest {
     config.getClasses().add(FeedProvider.class);
     config.getClasses().add(JSONRootElementProvider.App.class);
     client = ApacheHttpClient.create(config);
+    httpClient = new HttpClient(client, "localhost", 9090);
   }
 
   @Test
   public void testSimpleGet() {
     System.out.println("::: testSimpleGet :::");
     WebResource resource = client.resource("http://localhost:9090/");
-    TestCase.assertEquals(204, resource.head().getStatus());
+    Assert.assertEquals(204, resource.head().getStatus());
   }
 
   @Test
@@ -90,7 +101,7 @@ public class AppTest {
     System.out.println("::: testFeed :::");
     WebResource resource = client.resource("http://localhost:9090/feed");
     Feed feed = resource.get(Feed.class);
-    TestCase.assertNotNull(feed);
+    Assert.assertNotNull(feed);
   }
 
   @Test
@@ -98,16 +109,60 @@ public class AppTest {
     System.out.println("::: testJson :::");
     WebResource resource = client.resource("http://localhost:9090/domain/0");
     SomeDomain domain = resource.get(SomeDomain.class);
-    TestCase.assertNotNull(domain);
+    Assert.assertNotNull(domain);
   }
 
   @Test
   public void testFeedReader() {
     System.out.println("::: testFeedReader :::");
+    final String rootFeedUriStr = "http://localhost:9090/feed";
+    WebResource resource = client.resource(rootFeedUriStr);
+    Feed feed = resource.get(Feed.class);
+    FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
+        asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
+        SomeDomain.class);
+    Collection<SomeDomain> collection = reader.readEntriesFromRooFeed(feed);
+    Assert.assertNotNull(collection);
+    Assert.assertEquals(5, collection.size());
+    try {
+      int newCount = 20;
+      URI uri = new URI(rootFeedUriStr + "?count=" + newCount);
+      feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      collection = reader.readEntriesFromRooFeed(feed);
+      Assert.assertNotNull(collection);
+      Assert.assertEquals(newCount, collection.size());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      Assert.fail(ex.getMessage());
+    }
   }
 
   @Test
   public void testPaginatedWrapper() {
     System.out.println("::: testPaginatedWrapper :::");
+    final String rootFeedUriStr = "http://localhost:9090/feed";
+    FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
+        asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
+        SomeDomain.class);
+    try {
+      int newCount = 20;
+      URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
+
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      //Thread.sleep(10000);
+      PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
+      ArrayList<SomeDomain> domainList = new ArrayList<SomeDomain>(SomeDomainResource.DOMAIN_SIZE);
+      for (int i = 0; i < (SomeDomainResource.DOMAIN_SIZE / newCount); ++i) {
+        domainList.addAll(domains.getEntitiesForCurrentPage());
+        domains = domains.next();
+      }
+      Assert.assertNull(domains);
+      Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      Assert.fail(ex.getMessage());
+    }
   }
 }
