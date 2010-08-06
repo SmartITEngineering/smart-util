@@ -33,8 +33,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.Abdera;
+import org.apache.abdera.ext.opensearch.OpenSearchConstants;
+import org.apache.abdera.ext.opensearch.model.IntegerElement;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
@@ -63,7 +66,8 @@ public class SomeDomainResource {
   public UriInfo uriInfo;
   protected final Factory abderaFactory = Abdera.getNewFactory();
 
-  protected UriBuilder setBaseUri(final UriBuilder builder) throws IllegalArgumentException {
+  protected UriBuilder setBaseUri(final UriBuilder builder)
+      throws IllegalArgumentException {
     final URI baseUri = uriInfo.getBaseUri();
     UriBuilder result = UriBuilder.fromUri(baseUri);
     final URI uri = builder.build();
@@ -71,11 +75,14 @@ public class SomeDomainResource {
     return result;
   }
 
-  protected Feed getFeed(String title, Date updated) {
+  protected Feed getFeed(String title,
+                         Date updated) {
     return getFeed(uriInfo.getRequestUri().toString(), title, updated);
   }
 
-  protected Feed getFeed(String id, String title, Date updated) {
+  protected Feed getFeed(String id,
+                         String title,
+                         Date updated) {
     Feed feed = getFeed();
     feed.setId(id);
     feed.setTitle(title);
@@ -116,6 +123,31 @@ public class SomeDomainResource {
   @Path("feed")
   public Response getFeed(@QueryParam(STARTINDEX) @DefaultValue("0") final int startIndex,
                           @QueryParam(COUNT) @DefaultValue("5") final int count) {
+    Feed feed = getDomainFeed(startIndex, count);
+    final ResponseBuilder responseBuilder = Response.ok(feed);
+    return responseBuilder.build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  @Path("osfeed")
+  public Response getOpenSearchFeed(@QueryParam(STARTINDEX) @DefaultValue("0") final int startIndex,
+                                    @QueryParam(COUNT) @DefaultValue("5") final int count) {
+    final Feed feed = getDomainFeed(startIndex, count);
+    IntegerElement itemsPerPageElement = abderaFactory.newElement(OpenSearchConstants.ITEMS_PER_PAGE);
+    itemsPerPageElement.setValue(count);
+    feed.addExtension(itemsPerPageElement);
+    IntegerElement totalCountElement = abderaFactory.newElement(OpenSearchConstants.TOTAL_RESULTS);
+    totalCountElement.setValue(DOMAIN_SIZE);
+    feed.addExtension(totalCountElement);
+    final ResponseBuilder responseBuilder = Response.ok(feed);
+    return responseBuilder.build();
+  }
+
+  protected Feed getDomainFeed(final int startIndex,
+                               final int count)
+      throws IllegalArgumentException,
+             UriBuilderException {
     final Feed feed = getFeed("Feed!", new Date());
     final UriBuilder builder = uriInfo.getAbsolutePathBuilder();
     final int nextIndex = startIndex + count;
@@ -157,7 +189,6 @@ public class SomeDomainResource {
       link.setMimeType(MediaType.APPLICATION_JSON);
       feed.addEntry(entry);
     }
-    final ResponseBuilder responseBuilder = Response.ok(feed);
-    return responseBuilder.build();
+    return feed;
   }
 }
