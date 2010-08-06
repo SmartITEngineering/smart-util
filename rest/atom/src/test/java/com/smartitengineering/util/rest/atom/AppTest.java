@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -49,7 +50,8 @@ public class AppTest {
   }
 
   @BeforeClass
-  public static void setupServer() throws Exception {
+  public static void setupServer()
+      throws Exception {
     System.out.println("::: Starting server :::");
     jettyServer = new Server(9090);
     final String webapp = "./src/test/webapp";
@@ -62,7 +64,8 @@ public class AppTest {
   }
 
   @AfterClass
-  public static void shutdownServer() throws Exception {
+  public static void shutdownServer()
+      throws Exception {
     System.out.println("::: Stopping server :::");
     jettyServer.stop();
   }
@@ -83,11 +86,24 @@ public class AppTest {
   }
 
   @Test
-  public void testFeedReader() {
-    System.out.println("::: testFeedReader :::");
+  public void testFeed() {
+    System.out.println("::: testFeed :::");
     WebResource resource = client.resource("http://localhost:9090/feed");
     Feed feed = resource.get(Feed.class);
-    System.out.println("Feed: " + feed);
+    TestCase.assertNotNull(feed);
+  }
+
+  @Test
+  public void testJson() {
+    System.out.println("::: testJson :::");
+    WebResource resource = client.resource("http://localhost:9090/domain/0");
+    SomeDomain domain = resource.get(SomeDomain.class);
+    TestCase.assertNotNull(domain);
+  }
+
+  @Test
+  public void testFeedReader() {
+    System.out.println("::: testFeedReader :::");
   }
 
   @Test
