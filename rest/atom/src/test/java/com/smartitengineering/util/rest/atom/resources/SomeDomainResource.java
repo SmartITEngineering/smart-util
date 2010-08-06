@@ -21,16 +21,22 @@ import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
+import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 
@@ -41,6 +47,8 @@ import org.apache.abdera.model.Link;
 @Path("/")
 public class SomeDomainResource {
 
+  private static final String COUNT = "count";
+  private static final String STARTINDEX = "startIndex";
   private static final int DOMAIN_SIZE = 100;
   private static final SomeDomain[] DOMAIN_DATA;
 
@@ -57,10 +65,10 @@ public class SomeDomainResource {
 
   protected UriBuilder setBaseUri(final UriBuilder builder) throws IllegalArgumentException {
     final URI baseUri = uriInfo.getBaseUri();
-    builder.host(baseUri.getHost());
-    builder.port(baseUri.getPort());
-    builder.scheme(baseUri.getScheme());
-    return builder;
+    UriBuilder result = UriBuilder.fromUri(baseUri);
+    final URI uri = builder.build();
+    result.path(uri.getPath());
+    return result;
   }
 
   protected Feed getFeed(String title, Date updated) {
@@ -86,12 +94,74 @@ public class SomeDomainResource {
     Link selfLink = abderaFactory.newLink();
     selfLink.setHref(uriInfo.getRequestUri().toString());
     selfLink.setRel(Link.REL_SELF);
+    selfLink.setMimeType(MediaType.APPLICATION_ATOM_XML);
     return selfLink;
+  }
+
+  @HEAD
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response get() {
+    return Response.noContent().build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/domain/{index}")
+  public SomeDomain getDomain(@PathParam("index") int index) {
+    return DOMAIN_DATA[index];
   }
 
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
-  public Response get() {
-    return Response.noContent().build();
+  @Path("feed")
+  public Response getFeed(@QueryParam(STARTINDEX) @DefaultValue("0") final int startIndex,
+                          @QueryParam(COUNT) @DefaultValue("5") final int count) {
+    final Feed feed = getFeed("Feed!", new Date());
+    final UriBuilder builder = uriInfo.getAbsolutePathBuilder();
+    final int nextIndex = startIndex + count;
+    if (nextIndex < DOMAIN_SIZE) {
+      builder.queryParam(STARTINDEX, nextIndex);
+      builder.queryParam(COUNT, count);
+      Link link = abderaFactory.newLink();
+      link.setRel(Link.REL_NEXT);
+      link.setMimeType(MediaType.APPLICATION_ATOM_XML);
+      link.setHref(builder.toString());
+      feed.addLink(link);
+    }
+    final int previousIndex = startIndex - count;
+    if (previousIndex > 0) {
+      builder.queryParam(STARTINDEX, previousIndex);
+      builder.queryParam(COUNT, count);
+      Link link = abderaFactory.newLink();
+      link.setRel(Link.REL_PREVIOUS);
+      link.setMimeType(MediaType.APPLICATION_ATOM_XML);
+      link.setHref(builder.toString());
+      feed.addLink(link);
+    }
+    final int toIndex;
+    final int probableToIndex = startIndex + count - 1;
+    if (probableToIndex >= DOMAIN_SIZE) {
+      toIndex = DOMAIN_SIZE - 1;
+    }
+    else {
+      toIndex = probableToIndex;
+    }
+    System.out.println("START: " + startIndex);
+    System.out.println("COUNT: " + count);
+    System.out.println("TO: " + toIndex);
+    for (int i = startIndex; i <= toIndex; ++i) {
+      System.out.println("INDEX: " + i);
+      UriBuilder uriBuilder = UriBuilder.fromPath("/domain/" + i);
+      uriBuilder = setBaseUri(uriBuilder);
+      Entry entry = abderaFactory.newEntry();
+      entry.setId(Integer.toString(i));
+      entry.setTitle("Domain " + Integer.toString(i));
+      entry.setUpdated(new Date());
+      Link link = entry.addLink(uriBuilder.build().toString(), Link.REL_ALTERNATE);
+      link.setMimeType(MediaType.APPLICATION_JSON);
+      feed.addEntry(entry);
+    }
+    final ResponseBuilder responseBuilder = Response.ok(feed);
+    return responseBuilder.build();
   }
 }
