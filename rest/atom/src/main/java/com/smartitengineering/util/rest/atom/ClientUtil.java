@@ -19,6 +19,10 @@ package com.smartitengineering.util.rest.atom;
 
 import com.sun.jersey.api.client.WebResource;
 import java.net.URI;
+import javax.xml.namespace.QName;
+import org.apache.abdera.ext.opensearch.OpenSearchConstants;
+import org.apache.abdera.ext.opensearch.model.IntegerElement;
+import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.commons.lang.StringUtils;
 
@@ -56,5 +60,30 @@ public class ClientUtil {
       }
     }
     return null;
+  }
+
+  public static boolean isOpenSearchTotalResultPresent(Feed feed) {
+    return hasOpenSearchElement(feed, OpenSearchConstants.TOTAL_RESULTS);
+  }
+
+  public static boolean isOpenSearchItemsPerPagePresent(Feed feed) {
+    return hasOpenSearchElement(feed, OpenSearchConstants.ITEMS_PER_PAGE);
+  }
+
+  public static boolean hasOpenSearchElement(Feed feed, QName qName) {
+    return feed.getExtension(qName) != null;
+  }
+
+  public static int getOpenSearchTotalResult(Feed feed) {
+    return getIntFromOpenSearchIntegerElement(feed, OpenSearchConstants.TOTAL_RESULTS);
+  }
+
+  public static int getOpenSearchItemsPerPage(Feed feed) {
+    return getIntFromOpenSearchIntegerElement(feed, OpenSearchConstants.ITEMS_PER_PAGE);
+  }
+
+  public static int getIntFromOpenSearchIntegerElement(Feed feed, QName qName) {
+    IntegerElement element = feed.getExtension(qName);
+    return element.getValue();
   }
 }

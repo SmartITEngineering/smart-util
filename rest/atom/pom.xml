@@ -41,6 +41,10 @@
       <artifactId>abdera-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-extensions-opensearch</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
     </dependency>
