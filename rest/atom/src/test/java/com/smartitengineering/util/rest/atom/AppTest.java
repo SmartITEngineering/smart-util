@@ -17,13 +17,18 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.io.File;
+import junit.framework.TestCase;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 
 /**
  * Unit test for simple App.
@@ -31,6 +36,8 @@ import org.junit.Test;
 public class AppTest {
 
   private static Server jettyServer;
+
+  private Client client;
 
   /**
    * Create the test case
@@ -44,10 +51,10 @@ public class AppTest {
     System.out.println("::: Starting server :::");
     jettyServer = new Server(9090);
     final String webapp = "./src/test/webapp";
-    if(!new File(webapp).exists()) {
+    if (!new File(webapp).exists()) {
       throw new IllegalStateException("WebApp dir does not exist!");
     }
-    WebAppContext webAppContext = new WebAppContext(webapp,"/");
+    WebAppContext webAppContext = new WebAppContext(webapp, "/");
     jettyServer.setHandler(webAppContext);
     jettyServer.start();
   }
@@ -56,6 +63,19 @@ public class AppTest {
   public static void shutdownServer() throws Exception {
     System.out.println("::: Stopping server :::");
     jettyServer.stop();
+  }
+
+  @Before
+  public void setup() {
+    DefaultClientConfig config = new DefaultClientConfig();
+    client = Client.create(config);
+  }
+
+  @Test
+  public void testSimpleGet() {
+    System.out.println("::: testSimpleGet :::");
+    WebResource resource = client.resource("http://localhost:9090/");
+    TestCase.assertEquals(204, resource.head().getStatus());
   }
 
   @Test
