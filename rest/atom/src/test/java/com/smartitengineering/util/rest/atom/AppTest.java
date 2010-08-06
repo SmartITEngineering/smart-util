@@ -190,4 +190,35 @@ public class AppTest {
       Assert.fail(ex.getMessage());
     }
   }
+
+  @Test
+  public void testDynaPaginatedList() {
+    System.out.println("::: testDynaPaginatedList :::");
+    final String rootFeedUriStr = "http://localhost:9090/osfeed";
+    FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
+        asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
+        SomeDomain.class);
+    try {
+      int newCount = 20;
+      URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
+      DynamicPaginatedEntitiesList<SomeDomain> dynaDomainList = new DynamicPaginatedEntitiesList<SomeDomain>(domains);
+      List<SomeDomain> domainList = dynaDomainList;
+      Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
+      Assert.assertEquals(0, dynaDomainList.getBackedupList().size());
+      Assert.assertNotNull(domainList.get(0));
+      Assert.assertEquals(newCount, dynaDomainList.getBackedupList().size());
+      final int midSize = SomeDomainResource.DOMAIN_SIZE / 2;
+      Assert.assertNotNull(domainList.get(midSize));
+      Assert.assertEquals(new Double(Math.ceil(midSize / (double) newCount)).intValue() * newCount, dynaDomainList.
+          getBackedupList().size());
+      Assert.assertNotNull(domainList.get(SomeDomainResource.DOMAIN_SIZE - 1));
+      Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, dynaDomainList.getBackedupList().size());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      Assert.fail(ex.getMessage());
+    }
+  }
 }
