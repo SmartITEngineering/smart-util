@@ -21,6 +21,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
+import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
 import junit.framework.TestCase;
@@ -71,7 +72,7 @@ public class AppTest {
     DefaultClientConfig config = new DefaultClientConfig();
     config.getClasses().add(FeedProvider.class);
     config.getClasses().add(JSONRootElementProvider.App.class);
-    client = Client.create(config);
+    client = ApacheHttpClient.create(config);
   }
 
   @Test
