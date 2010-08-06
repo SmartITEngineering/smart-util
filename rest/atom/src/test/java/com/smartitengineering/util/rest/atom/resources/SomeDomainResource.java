@@ -146,11 +146,7 @@ public class SomeDomainResource {
     else {
       toIndex = probableToIndex;
     }
-    System.out.println("START: " + startIndex);
-    System.out.println("COUNT: " + count);
-    System.out.println("TO: " + toIndex);
     for (int i = startIndex; i <= toIndex; ++i) {
-      System.out.println("INDEX: " + i);
       UriBuilder uriBuilder = UriBuilder.fromPath("/domain/" + i);
       uriBuilder = setBaseUri(uriBuilder);
       Entry entry = abderaFactory.newEntry();
