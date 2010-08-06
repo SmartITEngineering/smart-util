@@ -31,6 +31,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
@@ -152,13 +153,37 @@ public class AppTest {
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       //Thread.sleep(10000);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
-      ArrayList<SomeDomain> domainList = new ArrayList<SomeDomain>(SomeDomainResource.DOMAIN_SIZE);
+      List<SomeDomain> domainList = new ArrayList<SomeDomain>(SomeDomainResource.DOMAIN_SIZE);
       for (int i = 0; i < (SomeDomainResource.DOMAIN_SIZE / newCount); ++i) {
         domainList.addAll(domains.getEntitiesForCurrentPage());
         domains = domains.next();
       }
       Assert.assertNull(domains);
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      Assert.fail(ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testPaginatedList() {
+    System.out.println("::: testPaginatedList :::");
+    final String rootFeedUriStr = "http://localhost:9090/feed";
+    FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
+        asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
+        SomeDomain.class);
+    try {
+      int newCount = 20;
+      URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
+      List<SomeDomain> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
+      Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
+      final int midSize = SomeDomainResource.DOMAIN_SIZE / 2;
+      domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains, midSize);
+      Assert.assertEquals(new Double(Math.ceil(midSize / (double) newCount)).intValue() * newCount, domainList.size());
     }
     catch (Exception ex) {
       ex.printStackTrace();
