@@ -47,10 +47,10 @@ import org.apache.abdera.model.Link;
 @Path("/")
 public class SomeDomainResource {
 
-  private static final String COUNT = "count";
-  private static final String STARTINDEX = "startIndex";
-  private static final int DOMAIN_SIZE = 100;
-  private static final SomeDomain[] DOMAIN_DATA;
+  public static final String COUNT = "count";
+  public static final String STARTINDEX = "startIndex";
+  public static final int DOMAIN_SIZE = 100;
+  public static final SomeDomain[] DOMAIN_DATA;
 
   static {
     DOMAIN_DATA = new SomeDomain[DOMAIN_SIZE];
@@ -125,7 +125,7 @@ public class SomeDomainResource {
       Link link = abderaFactory.newLink();
       link.setRel(Link.REL_NEXT);
       link.setMimeType(MediaType.APPLICATION_ATOM_XML);
-      link.setHref(builder.toString());
+      link.setHref(builder.build().toString());
       feed.addLink(link);
     }
     final int previousIndex = startIndex - count;
@@ -135,7 +135,7 @@ public class SomeDomainResource {
       Link link = abderaFactory.newLink();
       link.setRel(Link.REL_PREVIOUS);
       link.setMimeType(MediaType.APPLICATION_ATOM_XML);
-      link.setHref(builder.toString());
+      link.setHref(builder.build().toString());
       feed.addLink(link);
     }
     final int toIndex;
