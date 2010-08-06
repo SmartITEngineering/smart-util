@@ -68,6 +68,7 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
     this.max = max;
     this.object = new Object();
     service = Executors.newSingleThreadExecutor();
+    working = true;
     service.execute(new EntityLoader());
   }
 
@@ -121,6 +122,7 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
           ex.printStackTrace();
         }
       }
+      working = false;
     }
   }
 }
