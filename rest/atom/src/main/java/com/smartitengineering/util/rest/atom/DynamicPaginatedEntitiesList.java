@@ -71,6 +71,10 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<T> {
     }
   }
 
+  protected ArrayList<T> getBackedupList() {
+    return backedupList;
+  }
+
   @Override
   public int size() {
     return size;
