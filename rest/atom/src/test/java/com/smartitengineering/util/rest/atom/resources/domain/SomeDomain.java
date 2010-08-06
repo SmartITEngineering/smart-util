@@ -17,10 +17,13 @@
  */
 package com.smartitengineering.util.rest.atom.resources.domain;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  *
  * @author imyousuf
  */
+@XmlRootElement
 public class SomeDomain {
 
   private String testName;
