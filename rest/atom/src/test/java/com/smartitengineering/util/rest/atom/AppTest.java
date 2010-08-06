@@ -19,10 +19,12 @@ package com.smartitengineering.util.rest.atom;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
+import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
 import junit.framework.TestCase;
+import org.apache.abdera.model.Feed;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
@@ -36,7 +38,6 @@ import org.junit.Test;
 public class AppTest {
 
   private static Server jettyServer;
-
   private Client client;
 
   /**
@@ -68,6 +69,8 @@ public class AppTest {
   @Before
   public void setup() {
     DefaultClientConfig config = new DefaultClientConfig();
+    config.getClasses().add(FeedProvider.class);
+    config.getClasses().add(JSONRootElementProvider.App.class);
     client = Client.create(config);
   }
 
@@ -81,6 +84,9 @@ public class AppTest {
   @Test
   public void testFeedReader() {
     System.out.println("::: testFeedReader :::");
+    WebResource resource = client.resource("http://localhost:9090/feed");
+    Feed feed = resource.get(Feed.class);
+    System.out.println("Feed: " + feed);
   }
 
   @Test
