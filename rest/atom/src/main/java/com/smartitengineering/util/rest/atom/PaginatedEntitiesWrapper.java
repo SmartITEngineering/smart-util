@@ -77,4 +77,16 @@ public class PaginatedEntitiesWrapper<T> {
   public Collection<T> getEntitiesForCurrentPage() {
     return feedEntryReader.readEntriesFromRooFeed(rootFeed);
   }
+
+  public HttpClient getClient() {
+    return client;
+  }
+
+  public FeedEntryReader<T> getFeedEntryReader() {
+    return feedEntryReader;
+  }
+
+  public Feed getRootFeed() {
+    return rootFeed;
+  }
 }
