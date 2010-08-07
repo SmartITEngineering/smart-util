@@ -1,4 +1,4 @@
-package com.smartitengineering.smartutil.rest.atom.server;
+package com.smartitengineering.util.rest.atom.server;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
