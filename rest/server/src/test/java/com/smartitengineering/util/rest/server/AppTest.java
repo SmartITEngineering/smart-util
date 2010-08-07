@@ -1,4 +1,4 @@
-package com.smartitengineering.smartutil.rest.server;
+package com.smartitengineering.util.rest.server;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
