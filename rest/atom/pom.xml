@@ -54,6 +54,12 @@
       <version>4.8.1</version>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-util.rest</groupId>
+      <artifactId>atom-server</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-apache-client</artifactId>
       <scope>test</scope>

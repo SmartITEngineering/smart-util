@@ -18,6 +18,7 @@
 package com.smartitengineering.util.rest.atom.resources;
 
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
+import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
@@ -28,17 +29,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
-import javax.ws.rs.core.UriInfo;
-import org.apache.abdera.Abdera;
 import org.apache.abdera.ext.opensearch.OpenSearchConstants;
 import org.apache.abdera.ext.opensearch.model.IntegerElement;
-import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
@@ -48,7 +45,7 @@ import org.apache.abdera.model.Link;
  * @author imyousuf
  */
 @Path("/")
-public class SomeDomainResource {
+public class SomeDomainResource extends AbstractResource {
 
   public static final String COUNT = "count";
   public static final String STARTINDEX = "startIndex";
@@ -61,48 +58,6 @@ public class SomeDomainResource {
       DOMAIN_DATA[i] = new SomeDomain();
       DOMAIN_DATA[i].setTestName(UUID.randomUUID().toString());
     }
-  }
-  @Context
-  public UriInfo uriInfo;
-  protected final Factory abderaFactory = Abdera.getNewFactory();
-
-  protected UriBuilder setBaseUri(final UriBuilder builder)
-      throws IllegalArgumentException {
-    final URI baseUri = uriInfo.getBaseUri();
-    UriBuilder result = UriBuilder.fromUri(baseUri);
-    final URI uri = builder.build();
-    result.path(uri.getPath());
-    return result;
-  }
-
-  protected Feed getFeed(String title,
-                         Date updated) {
-    return getFeed(uriInfo.getRequestUri().toString(), title, updated);
-  }
-
-  protected Feed getFeed(String id,
-                         String title,
-                         Date updated) {
-    Feed feed = getFeed();
-    feed.setId(id);
-    feed.setTitle(title);
-    feed.setUpdated(updated);
-    return feed;
-  }
-
-  protected Feed getFeed() {
-    Feed feed = abderaFactory.newFeed();
-    feed.addLink(getSelfLink());
-    feed.addAuthor("author");     ///error in adding getDefaultAuthor();
-    return feed;
-  }
-
-  protected Link getSelfLink() {
-    Link selfLink = abderaFactory.newLink();
-    selfLink.setHref(uriInfo.getRequestUri().toString());
-    selfLink.setRel(Link.REL_SELF);
-    selfLink.setMimeType(MediaType.APPLICATION_ATOM_XML);
-    return selfLink;
   }
 
   @HEAD
@@ -134,10 +89,10 @@ public class SomeDomainResource {
   public Response getOpenSearchFeed(@QueryParam(STARTINDEX) @DefaultValue("0") final int startIndex,
                                     @QueryParam(COUNT) @DefaultValue("5") final int count) {
     final Feed feed = getDomainFeed(startIndex, count);
-    IntegerElement itemsPerPageElement = abderaFactory.newElement(OpenSearchConstants.ITEMS_PER_PAGE);
+    IntegerElement itemsPerPageElement = getAbderaFactory().newElement(OpenSearchConstants.ITEMS_PER_PAGE);
     itemsPerPageElement.setValue(count);
     feed.addExtension(itemsPerPageElement);
-    IntegerElement totalCountElement = abderaFactory.newElement(OpenSearchConstants.TOTAL_RESULTS);
+    IntegerElement totalCountElement = getAbderaFactory().newElement(OpenSearchConstants.TOTAL_RESULTS);
     totalCountElement.setValue(DOMAIN_SIZE);
     feed.addExtension(totalCountElement);
     final ResponseBuilder responseBuilder = Response.ok(feed);
@@ -149,25 +104,19 @@ public class SomeDomainResource {
       throws IllegalArgumentException,
              UriBuilderException {
     final Feed feed = getFeed("Feed!", new Date());
-    final UriBuilder builder = uriInfo.getAbsolutePathBuilder();
+    final UriBuilder builder = getUriInfo().getAbsolutePathBuilder();
     final int nextIndex = startIndex + count;
     if (nextIndex < DOMAIN_SIZE) {
       builder.queryParam(STARTINDEX, nextIndex);
       builder.queryParam(COUNT, count);
-      Link link = abderaFactory.newLink();
-      link.setRel(Link.REL_NEXT);
-      link.setMimeType(MediaType.APPLICATION_ATOM_XML);
-      link.setHref(builder.build().toString());
+      Link link = getLink(builder.build(), Link.REL_NEXT, MediaType.APPLICATION_ATOM_XML);
       feed.addLink(link);
     }
     final int previousIndex = startIndex - count;
     if (previousIndex > 0) {
       builder.queryParam(STARTINDEX, previousIndex);
       builder.queryParam(COUNT, count);
-      Link link = abderaFactory.newLink();
-      link.setRel(Link.REL_PREVIOUS);
-      link.setMimeType(MediaType.APPLICATION_ATOM_XML);
-      link.setHref(builder.build().toString());
+      Link link = getLink(builder.build(), Link.REL_PREVIOUS, MediaType.APPLICATION_ATOM_XML);
       feed.addLink(link);
     }
     final int toIndex;
@@ -179,16 +128,19 @@ public class SomeDomainResource {
       toIndex = probableToIndex;
     }
     for (int i = startIndex; i <= toIndex; ++i) {
-      UriBuilder uriBuilder = UriBuilder.fromPath("/domain/" + i);
-      uriBuilder = setBaseUri(uriBuilder);
-      Entry entry = abderaFactory.newEntry();
-      entry.setId(Integer.toString(i));
-      entry.setTitle("Domain " + Integer.toString(i));
-      entry.setUpdated(new Date());
-      Link link = entry.addLink(uriBuilder.build().toString(), Link.REL_ALTERNATE);
-      link.setMimeType(MediaType.APPLICATION_JSON);
+      UriBuilder uriBuilder = getAbsoluteURIBuilder().path("/domain/" + i);
+      final String id = Integer.toString(i);
+      final String name = "Domain " + Integer.toString(i);
+      final Date updated = new Date();
+      Link link = getLink(uriBuilder.build(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON);
+      Entry entry = getEntry(id, name, updated, link);
       feed.addEntry(entry);
     }
     return feed;
+  }
+
+  @Override
+  protected String getAuthor() {
+    return "author";
   }
 }
