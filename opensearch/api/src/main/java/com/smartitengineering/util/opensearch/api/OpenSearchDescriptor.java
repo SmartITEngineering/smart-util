@@ -57,4 +57,22 @@ public interface OpenSearchDescriptor {
   public Locale getLanguage();
 
   public boolean containsAdultContent();
+
+  public enum SyndicationRightEnum {
+
+    OPEN("open"), LIMITED("limited"), PRIVATE("private"), CLOSED("closed");
+    private final String value;
+
+    SyndicationRightEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    public static SyndicationRightEnum getDefault() {
+      return OPEN;
+    }
+  }
 }
