@@ -42,7 +42,7 @@ class ImageImpl implements Image {
     this.height = height;
   }
 
-  public void setImageUri(URI imageUri) {
+  public final void setImageUri(URI imageUri) {
     if(imageUri == null) {
       throw new IllegalArgumentException("Image URI can not be set to Null!");
     }
@@ -63,18 +63,22 @@ class ImageImpl implements Image {
     this.width = width;
   }
 
+  @Override
   public int getHeight() {
     return height;
   }
 
+  @Override
   public int getWidth() {
     return width;
   }
 
+  @Override
   public String getMimeType() {
     return mimeType;
   }
 
+  @Override
   public URI getImageUri() {
     return imageUri;
   }
