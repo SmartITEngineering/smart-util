@@ -19,11 +19,8 @@ package com.smartitengineering.util.rest.atom;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import javax.xml.namespace.QName;
-import org.apache.abdera.Abdera;
 import org.apache.abdera.ext.opensearch.OpenSearchConstants;
 import org.apache.abdera.ext.opensearch.model.IntegerElement;
 import org.apache.abdera.model.Feed;
