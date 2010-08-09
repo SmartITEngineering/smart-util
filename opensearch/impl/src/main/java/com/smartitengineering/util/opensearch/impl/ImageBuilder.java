@@ -30,15 +30,17 @@ public class ImageBuilder {
   private int height, width;
   private String mimeType;
 
-  public static ImageBuilder getImageBuilder(URI imageUri) {
-    return new ImageBuilder(imageUri);
+  public static ImageBuilder getImageBuilder() {
+    return new ImageBuilder();
   }
 
-  protected ImageBuilder(URI imageUri) {
-    imageUri(imageUri);
+  protected ImageBuilder() {
   }
 
   public Image build() {
+    if(imageUri == null) {
+      throw new IllegalStateException("Image URI is must!");
+    }
     ImageImpl image = new ImageImpl(imageUri);
     image.setHeight(height);
     image.setWidth(width);
