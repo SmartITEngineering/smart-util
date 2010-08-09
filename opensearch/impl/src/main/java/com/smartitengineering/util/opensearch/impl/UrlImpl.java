@@ -18,6 +18,10 @@
 package com.smartitengineering.util.opensearch.impl;
 
 import com.smartitengineering.util.opensearch.api.Url;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
@@ -30,10 +34,30 @@ class UrlImpl implements Url {
   private Map<String, String> customAttributes;
   private int indexOffset, pageOffset;
   private String template, type;
-  private Rel rel;
+  private Collection<Rel> rels;
 
-  public void setRel(Rel rel) {
-    this.rel = rel;
+  UrlImpl() {
+    customAttributes = new HashMap<String, String>();
+    rels = new ArrayList<Rel>();
+  }
+
+  public void setRels(Collection<Rel> rels) {
+    if (rels != null) {
+      this.rels.clear();
+      this.rels.addAll(rels);
+    }
+  }
+
+  public void addRel(Rel rel) {
+    if (rel != null) {
+      this.rels.add(rel);
+    }
+  }
+
+  public void removeRel(Rel rel) {
+    if (rel != null) {
+      this.rels.remove(rel);
+    }
   }
 
   public void setTemplate(String template) {
@@ -84,11 +108,11 @@ class UrlImpl implements Url {
   }
 
   @Override
-  public Rel getRel() {
-    if (rel == null) {
-      return Rel.getDefault();
+  public Collection<Rel> getRels() {
+    if (rels.isEmpty()) {
+      return Collections.<Rel>singleton(RelEnum.getDefault());
     }
-    return rel;
+    return Collections.unmodifiableCollection(rels);
   }
 
   @Override

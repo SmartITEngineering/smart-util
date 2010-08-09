@@ -18,7 +18,8 @@
 package com.smartitengineering.util.opensearch.impl;
 
 import com.smartitengineering.util.opensearch.api.Url;
-import com.smartitengineering.util.opensearch.api.Url.Rel;
+import com.smartitengineering.util.opensearch.api.Url.RelEnum;
+import java.net.URL;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -44,7 +45,7 @@ public class UrlBuilder {
     UrlImpl url = new UrlImpl();
     url.setType(urlImpl.getType());
     url.setTemplate(urlImpl.getTemplate());
-    url.setRel(urlImpl.getRel());
+    url.setRels(urlImpl.getRels());
     url.setPageOffset(urlImpl.getPageOffset());
     url.setIndexOffset(urlImpl.getIndexOffset());
     url.setCustomAttributes(urlImpl.getCustomAttributes());
@@ -56,8 +57,33 @@ public class UrlBuilder {
     return this;
   }
 
-  public UrlBuilder rel(Rel rel) {
-    urlImpl.setRel(rel);
+  public UrlBuilder rel(String relValue) {
+    urlImpl.addRel(new RelImpl(relValue));
+    return this;
+  }
+
+  public UrlBuilder rel(URL relValue) {
+    urlImpl.addRel(new RelImpl(relValue));
+    return this;
+  }
+
+  public UrlBuilder rel(RelEnum rel) {
+    urlImpl.addRel(new RelImpl(rel.getValue()));
+    return this;
+  }
+
+  public UrlBuilder removeRel(String relValue) {
+    urlImpl.removeRel(new RelImpl(relValue));
+    return this;
+  }
+
+  public UrlBuilder removeRel(URL relValue) {
+    urlImpl.removeRel(new RelImpl(relValue));
+    return this;
+  }
+
+  public UrlBuilder removeRel(RelEnum rel) {
+    urlImpl.removeRel(new RelImpl(rel.getValue()));
     return this;
   }
 

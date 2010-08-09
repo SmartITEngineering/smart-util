@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.opensearch.api;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public interface Url {
 
   public String getType();
 
-  public Rel getRel();
+  public Collection<Rel> getRels();
 
   public int getIndexOffset();
 
@@ -37,12 +38,16 @@ public interface Url {
 
   public Map<String, String> getCustomAttributes();
 
-  public enum Rel {
+  public static interface Rel {
+    public String getValue();
+  }
+
+  public enum RelEnum implements Rel {
 
     RESULTS("results"), SUGGESTIONS("suggestions"), SELF("self"), COLLECTION("collection");
     private final String value;
 
-    Rel(String value) {
+    RelEnum(String value) {
       this.value = value;
     }
 
@@ -50,7 +55,7 @@ public interface Url {
       return value;
     }
 
-    public static Rel getDefault() {
+    public static RelEnum getDefault() {
       return RESULTS;
     }
   }
