@@ -17,9 +17,13 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import javax.xml.namespace.QName;
+import org.apache.abdera.Abdera;
 import org.apache.abdera.ext.opensearch.OpenSearchConstants;
 import org.apache.abdera.ext.opensearch.model.IntegerElement;
 import org.apache.abdera.model.Feed;
@@ -31,6 +35,22 @@ import org.apache.commons.lang.StringUtils;
  * @author imyousuf
  */
 public class ClientUtil {
+
+  public static Feed getFeed(ClientResponse response) {
+    return response.getEntity(Feed.class);
+  }
+
+  public static <T> T getResponseEntity(ClientResponse response, Class<? extends T> clazz) {
+    return response.getEntity(clazz);
+  }
+
+  public static ClientResponse readClientResponse(URI uri, HttpClient client, String acceptType) {
+    return readEntity(uri, client, acceptType, ClientResponse.class);
+  }
+
+  public static ClientResponse readClientResponse(Link link, HttpClient client, String acceptType) {
+    return readEntity(link, client, acceptType, ClientResponse.class);
+  }
 
   public static <T> T readEntity(Link link, HttpClient client, String acceptType, Class<? extends T> clazz) {
     if (link != null && client != null && clazz != null) {
