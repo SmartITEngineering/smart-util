@@ -20,6 +20,7 @@ package com.smartitengineering.util.rest.atom;
 import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
@@ -27,6 +28,7 @@ import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,10 +101,17 @@ public class AppTest {
 
   @Test
   public void testFeed() {
-    System.out.println("::: testFeed :::");
-    WebResource resource = client.resource("http://localhost:9090/feed");
-    Feed feed = resource.get(Feed.class);
-    Assert.assertNotNull(feed);
+    try {
+      System.out.println("::: testFeed :::");
+      URI uri = new URI("http://localhost:9090/feed");
+      ClientResponse response =
+                     ClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
+      Feed feed = ClientUtil.getFeed(response);
+      Assert.assertNotNull(feed);
+    }
+    catch (URISyntaxException ex) {
+      Assert.fail(ex.getMessage());
+    }
   }
 
   @Test
@@ -121,7 +130,7 @@ public class AppTest {
     Feed feed = resource.get(Feed.class);
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
-        SomeDomain.class);
+                                                                         SomeDomain.class);
     Collection<SomeDomain> collection = reader.readEntriesFromRooFeed(feed);
     Assert.assertNotNull(collection);
     Assert.assertEquals(5, collection.size());
@@ -145,7 +154,7 @@ public class AppTest {
     final String rootFeedUriStr = "http://localhost:9090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
-        SomeDomain.class);
+                                                                         SomeDomain.class);
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
@@ -173,7 +182,7 @@ public class AppTest {
     final String rootFeedUriStr = "http://localhost:9090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
-        SomeDomain.class);
+                                                                         SomeDomain.class);
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
@@ -197,7 +206,7 @@ public class AppTest {
     final String rootFeedUriStr = "http://localhost:9090/osfeed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
-        SomeDomain.class);
+                                                                         SomeDomain.class);
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);

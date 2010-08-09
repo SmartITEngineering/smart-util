@@ -19,7 +19,6 @@ package com.smartitengineering.util.rest.atom.resources;
 
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
-import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
 import javax.ws.rs.DefaultValue;
