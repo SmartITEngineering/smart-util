@@ -35,5 +35,6 @@
     <module>jaxrs</module>
     <module>api</module>
     <module>impl</module>
+    <module>dom-io</module>
   </modules>
 </project>

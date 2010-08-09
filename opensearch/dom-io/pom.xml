@@ -28,9 +28,9 @@
     <version>0.2-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.opensearch</groupId>
-  <artifactId>jaxrs</artifactId>
+  <artifactId>dom-io</artifactId>
   <version>0.2-SNAPSHOT</version>
-  <name>OpenSearch JAX-RS Provider</name>
+  <name>Open Search IO DOM Impl</name>
   <dependencies>
     <dependency>
       <groupId>com.smartitengineering.smart-util.opensearch</groupId>
@@ -41,15 +41,6 @@
       <groupId>com.smartitengineering.smart-util.opensearch</groupId>
       <artifactId>impl</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-util.opensearch</groupId>
-      <artifactId>dom-io</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
