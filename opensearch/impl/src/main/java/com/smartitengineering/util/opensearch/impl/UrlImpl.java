@@ -110,7 +110,7 @@ class UrlImpl implements Url {
   @Override
   public Collection<Rel> getRels() {
     if (rels.isEmpty()) {
-      return Collections.<Rel>singleton(RelEnum.getDefault());
+      return Collections.<Rel>singleton(new RelImpl(RelEnum.getDefault().getValue()));
     }
     return Collections.unmodifiableCollection(rels);
   }
