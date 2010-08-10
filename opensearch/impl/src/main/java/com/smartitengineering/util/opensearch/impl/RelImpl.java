@@ -43,6 +43,7 @@ class RelImpl implements Rel {
     this.value = value.toLowerCase();
   }
 
+  @Override
   public String getValue() {
     return value;
   }
@@ -67,5 +68,10 @@ class RelImpl implements Rel {
     int hash = 7;
     hash = 59 * hash + (this.value != null ? this.value.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return getValue();
   }
 }
