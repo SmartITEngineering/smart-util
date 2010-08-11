@@ -18,6 +18,7 @@
 package com.smartitengineering.util.opensearch.api.io;
 
 import com.smartitengineering.util.opensearch.api.OpenSearchDescriptor;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -33,7 +34,7 @@ public interface OpenSearchIO {
    * @param outputStream The stream to write to
    * @param descriptor The descriptor to serialize
    */
-  public void writeOpenSearchDescriptor(OutputStream outputStream, OpenSearchDescriptor descriptor);
+  public void writeOpenSearchDescriptor(OutputStream outputStream, OpenSearchDescriptor descriptor) throws IOException;
 
   /**
    * Read the open search descriptor as per specification to the output stream. The mime-type, format will be determined
@@ -41,5 +42,5 @@ public interface OpenSearchIO {
    * @param inputStream The input stream to read the descriptor data from
    * @return The deserialized descriptor
    */
-  public OpenSearchDescriptor readOpenSearchDescriptor(InputStream inputStream);
+  public OpenSearchDescriptor readOpenSearchDescriptor(InputStream inputStream) throws IOException;
 }
