@@ -191,6 +191,7 @@ class OpenSearchDescriptorWriter implements XmlConstants {
       }
       if (isNamespace) {
         namespaceUris.put(prefix, value);
+        parentElement.addNamespaceDeclaration(prefix, value);
         return null;
       }
       else {
