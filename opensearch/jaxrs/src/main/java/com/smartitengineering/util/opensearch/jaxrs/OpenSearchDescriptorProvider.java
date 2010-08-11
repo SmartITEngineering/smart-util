@@ -64,6 +64,7 @@ public class OpenSearchDescriptorProvider implements MessageBodyWriter<OpenSearc
     if (isWriteable(type, genericType, annotations, mediaType)) {
       DomIOImpl impl = new DomIOImpl();
       impl.writeOpenSearchDescriptor(entityStream, t);
+      return;
     }
     throw new IOException("Write not supported!");
   }
