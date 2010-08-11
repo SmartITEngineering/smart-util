@@ -38,18 +38,18 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author imyousuf
  */
-public class OpenSearchDescriptorWriter implements XmlConstants {
+class OpenSearchDescriptorWriter implements XmlConstants {
 
   private OutputStream sink;
   private OpenSearchDescriptor descriptor;
   private boolean closeOnFinish;
   private final Map<String, String> namespaceUris;
 
-  public OpenSearchDescriptorWriter(OutputStream sink, OpenSearchDescriptor descriptor) {
+  OpenSearchDescriptorWriter(OutputStream sink, OpenSearchDescriptor descriptor) {
     this(sink, descriptor, false);
   }
 
-  public OpenSearchDescriptorWriter(OutputStream sink, OpenSearchDescriptor descriptor, boolean closeOnFinish) {
+  OpenSearchDescriptorWriter(OutputStream sink, OpenSearchDescriptor descriptor, boolean closeOnFinish) {
     if (sink == null) {
       throw new IllegalArgumentException("Source stream can not be null!");
     }
