@@ -65,6 +65,11 @@ public class OpenSearchDescriptorBuilder {
     return descriptor;
   }
 
+  public OpenSearchDescriptorBuilder attribution(String attribution) {
+    descriptorImpl.setAttribution(attribution);
+    return this;
+  }
+
   public OpenSearchDescriptorBuilder setAdultContent() {
     descriptorImpl.setAdultContent(true);
     return this;
