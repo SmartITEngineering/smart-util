@@ -134,5 +134,6 @@
     <module>simple-util</module>
     <module>smart-bean-spring-util</module>
     <module>rest</module>
+    <module>opensearch</module>
   </modules>
 </project>
