@@ -19,6 +19,10 @@ package com.smartitengineering.util.opensearch.impl;
 
 import com.smartitengineering.util.opensearch.api.Image;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * A builder that can be used to build an image
@@ -38,7 +42,7 @@ public class ImageBuilder {
   }
 
   public Image build() {
-    if(imageUri == null) {
+    if (imageUri == null) {
       throw new IllegalStateException("Image URI is must!");
     }
     ImageImpl image = new ImageImpl(imageUri);
@@ -68,6 +72,19 @@ public class ImageBuilder {
       throw new IllegalArgumentException("Image URI can not be null!");
     }
     this.imageUri = imageUri;
+    return this;
+  }
+
+  public ImageBuilder imageUri(String imageUri) {
+    if (StringUtils.isBlank(imageUri)) {
+      throw new IllegalArgumentException("Image URI can not be null!");
+    }
+    try {
+      this.imageUri = new URI(imageUri);
+    }
+    catch (URISyntaxException ex) {
+      throw new IllegalArgumentException(ex);
+    }
     return this;
   }
 }
