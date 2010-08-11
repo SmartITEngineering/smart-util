@@ -160,42 +160,52 @@ class OpenSearchDescriptorImpl implements OpenSearchDescriptor {
     }
   }
 
+  @Override
   public String getShortName() {
     return shortName;
   }
 
+  @Override
   public String getDescription() {
     return description;
   }
 
+  @Override
   public String getContact() {
     return contact;
   }
 
+  @Override
   public String getLongName() {
     return longName;
   }
 
+  @Override
   public String getDeveloper() {
     return developer;
   }
 
+  @Override
   public String getInputEncoding() {
     return inputEncoding;
   }
 
+  @Override
   public String getOutputEncoding() {
     return outputEncoding;
   }
 
+  @Override
   public String getAttribution() {
     return attribution;
   }
 
+  @Override
   public Set<String> getTags() {
     return Collections.unmodifiableSet(tags);
   }
 
+  @Override
   public SyndicationRightEnum getSyndicationRight() {
     if (syndicationRight == null) {
       return SyndicationRightEnum.getDefault();
@@ -203,22 +213,27 @@ class OpenSearchDescriptorImpl implements OpenSearchDescriptor {
     return syndicationRight;
   }
 
+  @Override
   public Collection<Url> getUrls() {
     return Collections.unmodifiableCollection(urls);
   }
 
+  @Override
   public Collection<Image> getImages() {
     return Collections.unmodifiableCollection(images);
   }
 
+  @Override
   public Collection<Query> getQueries() {
     return Collections.unmodifiableCollection(queries);
   }
 
+  @Override
   public Locale getLanguage() {
     return language;
   }
 
+  @Override
   public boolean containsAdultContent() {
     return adultContent;
   }
