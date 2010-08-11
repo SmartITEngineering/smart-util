@@ -35,7 +35,7 @@ class QueryImpl implements Query {
   private Map<String, String> customAttributes;
   private Role role;
   private String title, searchTerms, language, inputEncoding, outputEncoding;
-  private int totalResults, startPage, startIndex, count;
+  private int totalResults = -1, startPage = -1, startIndex = -1, count = -1;
 
   QueryImpl(Role role) {
     setRole(role);
