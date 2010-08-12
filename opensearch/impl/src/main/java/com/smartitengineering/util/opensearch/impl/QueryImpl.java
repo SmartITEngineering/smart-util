@@ -159,4 +159,68 @@ class QueryImpl implements Query {
   public String getOutputEncoding() {
     return outputEncoding;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final QueryImpl other = (QueryImpl) obj;
+    if (this.customAttributes != other.customAttributes &&
+        (this.customAttributes == null || !this.customAttributes.equals(other.customAttributes))) {
+      return false;
+    }
+    if (this.role != other.role && (this.role == null || !this.role.equals(other.role))) {
+      return false;
+    }
+    if ((this.title == null) ? (other.title != null) : !this.title.equals(other.title)) {
+      return false;
+    }
+    if ((this.searchTerms == null) ? (other.searchTerms != null) : !this.searchTerms.equals(other.searchTerms)) {
+      return false;
+    }
+    if ((this.language == null) ? (other.language != null) : !this.language.equals(other.language)) {
+      return false;
+    }
+    if ((this.inputEncoding == null) ? (other.inputEncoding != null) : !this.inputEncoding.equals(other.inputEncoding)) {
+      return false;
+    }
+    if ((this.outputEncoding == null) ? (other.outputEncoding != null)
+        : !this.outputEncoding.equals(other.outputEncoding)) {
+      return false;
+    }
+    if (this.totalResults != other.totalResults) {
+      return false;
+    }
+    if (this.startPage != other.startPage) {
+      return false;
+    }
+    if (this.startIndex != other.startIndex) {
+      return false;
+    }
+    if (this.count != other.count) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 71 * hash + (this.customAttributes != null ? this.customAttributes.hashCode() : 0);
+    hash = 71 * hash + (this.role != null ? this.role.hashCode() : 0);
+    hash = 71 * hash + (this.title != null ? this.title.hashCode() : 0);
+    hash = 71 * hash + (this.searchTerms != null ? this.searchTerms.hashCode() : 0);
+    hash = 71 * hash + (this.language != null ? this.language.hashCode() : 0);
+    hash = 71 * hash + (this.inputEncoding != null ? this.inputEncoding.hashCode() : 0);
+    hash = 71 * hash + (this.outputEncoding != null ? this.outputEncoding.hashCode() : 0);
+    hash = 71 * hash + this.totalResults;
+    hash = 71 * hash + this.startPage;
+    hash = 71 * hash + this.startIndex;
+    hash = 71 * hash + this.count;
+    return hash;
+  }
 }

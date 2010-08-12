@@ -39,4 +39,26 @@ class RoleImpl implements Role {
     return roleAsString;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final RoleImpl other = (RoleImpl) obj;
+    if ((this.roleAsString == null) ? (other.roleAsString != null) : !this.roleAsString.equals(other.roleAsString)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 61 * hash + (this.roleAsString != null ? this.roleAsString.hashCode() : 0);
+    return hash;
+  }
+
 }

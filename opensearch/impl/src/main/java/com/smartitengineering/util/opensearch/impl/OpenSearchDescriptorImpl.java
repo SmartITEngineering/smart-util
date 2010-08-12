@@ -237,4 +237,83 @@ class OpenSearchDescriptorImpl implements OpenSearchDescriptor {
   public boolean containsAdultContent() {
     return adultContent;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final OpenSearchDescriptorImpl other = (OpenSearchDescriptorImpl) obj;
+    if ((this.shortName == null) ? (other.shortName != null) : !this.shortName.equals(other.shortName)) {
+      return false;
+    }
+    if ((this.description == null) ? (other.description != null) : !this.description.equals(other.description)) {
+      return false;
+    }
+    if ((this.contact == null) ? (other.contact != null) : !this.contact.equals(other.contact)) {
+      return false;
+    }
+    if ((this.longName == null) ? (other.longName != null) : !this.longName.equals(other.longName)) {
+      return false;
+    }
+    if ((this.developer == null) ? (other.developer != null) : !this.developer.equals(other.developer)) {
+      return false;
+    }
+    if ((this.inputEncoding == null) ? (other.inputEncoding != null) : !this.inputEncoding.equals(other.inputEncoding)) {
+      return false;
+    }
+    if ((this.outputEncoding == null) ? (other.outputEncoding != null)
+        : !this.outputEncoding.equals(other.outputEncoding)) {
+      return false;
+    }
+    if ((this.attribution == null) ? (other.attribution != null) : !this.attribution.equals(other.attribution)) {
+      return false;
+    }
+    if (this.tags != other.tags && (this.tags == null || !this.tags.equals(other.tags))) {
+      return false;
+    }
+    if (this.syndicationRight != other.syndicationRight) {
+      return false;
+    }
+    if (this.urls != other.urls && (this.urls == null || !this.urls.equals(other.urls))) {
+      return false;
+    }
+    if (this.images != other.images && (this.images == null || !this.images.equals(other.images))) {
+      return false;
+    }
+    if (this.queries != other.queries && (this.queries == null || !this.queries.equals(other.queries))) {
+      return false;
+    }
+    if (this.language != other.language && (this.language == null || !this.language.equals(other.language))) {
+      return false;
+    }
+    if (this.adultContent != other.adultContent) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 53 * hash + (this.shortName != null ? this.shortName.hashCode() : 0);
+    hash = 53 * hash + (this.description != null ? this.description.hashCode() : 0);
+    hash = 53 * hash + (this.contact != null ? this.contact.hashCode() : 0);
+    hash = 53 * hash + (this.longName != null ? this.longName.hashCode() : 0);
+    hash = 53 * hash + (this.developer != null ? this.developer.hashCode() : 0);
+    hash = 53 * hash + (this.inputEncoding != null ? this.inputEncoding.hashCode() : 0);
+    hash = 53 * hash + (this.outputEncoding != null ? this.outputEncoding.hashCode() : 0);
+    hash = 53 * hash + (this.attribution != null ? this.attribution.hashCode() : 0);
+    hash = 53 * hash + (this.tags != null ? this.tags.hashCode() : 0);
+    hash = 53 * hash + (this.syndicationRight != null ? this.syndicationRight.hashCode() : 0);
+    hash = 53 * hash + (this.urls != null ? this.urls.hashCode() : 0);
+    hash = 53 * hash + (this.images != null ? this.images.hashCode() : 0);
+    hash = 53 * hash + (this.queries != null ? this.queries.hashCode() : 0);
+    hash = 53 * hash + (this.language != null ? this.language.hashCode() : 0);
+    hash = 53 * hash + (this.adultContent ? 1 : 0);
+    return hash;
+  }
 }

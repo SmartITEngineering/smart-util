@@ -83,4 +83,38 @@ class ImageImpl implements Image {
     return imageUri;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ImageImpl other = (ImageImpl) obj;
+    if (this.height != other.height) {
+      return false;
+    }
+    if (this.width != other.width) {
+      return false;
+    }
+    if ((this.mimeType == null) ? (other.mimeType != null) : !this.mimeType.equals(other.mimeType)) {
+      return false;
+    }
+    if (this.imageUri != other.imageUri && (this.imageUri == null || !this.imageUri.equals(other.imageUri))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 97 * hash + this.height;
+    hash = 97 * hash + this.width;
+    hash = 97 * hash + (this.mimeType != null ? this.mimeType.hashCode() : 0);
+    hash = 97 * hash + (this.imageUri != null ? this.imageUri.hashCode() : 0);
+    return hash;
+  }
+
 }

@@ -135,4 +135,47 @@ class UrlImpl implements Url {
   public Map<String, String> getCustomAttributes() {
     return customAttributes;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final UrlImpl other = (UrlImpl) obj;
+    if (this.customAttributes != other.customAttributes &&
+        (this.customAttributes == null || !this.customAttributes.equals(other.customAttributes))) {
+      return false;
+    }
+    if (this.indexOffset != other.indexOffset) {
+      return false;
+    }
+    if (this.pageOffset != other.pageOffset) {
+      return false;
+    }
+    if ((this.template == null) ? (other.template != null) : !this.template.equals(other.template)) {
+      return false;
+    }
+    if ((this.type == null) ? (other.type != null) : !this.type.equals(other.type)) {
+      return false;
+    }
+    if (this.rels != other.rels && (this.rels == null || !this.rels.equals(other.rels))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 47 * hash + (this.customAttributes != null ? this.customAttributes.hashCode() : 0);
+    hash = 47 * hash + this.indexOffset;
+    hash = 47 * hash + this.pageOffset;
+    hash = 47 * hash + (this.template != null ? this.template.hashCode() : 0);
+    hash = 47 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 47 * hash + (this.rels != null ? this.rels.hashCode() : 0);
+    return hash;
+  }
 }
