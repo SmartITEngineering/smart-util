@@ -17,13 +17,17 @@
  */
 package com.smartitengineering.util.opensearch.jaxrs;
 
+import com.smartitengineering.util.opensearch.api.OpenSearchDescriptor;
+import com.smartitengineering.util.opensearch.io.impl.dom.DomIOImpl;
 import com.smartitengineering.util.opensearch.io.impl.dom.DomIOImplTest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.apache.ApacheHttpClient;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import junit.framework.Assert;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -73,5 +77,26 @@ public class OpenSearchJaxrsProviderTest {
     final String entity = response.getEntity(String.class);
     Assert.assertEquals(200, response.getStatus());
     Assert.assertEquals(DomIOImplTest.MAX, entity);
+  }
+
+  @Test
+  public void testDeserialization() {
+    System.out.println("::: testDeserialization :::");
+    WebResource resource = client.resource("http://localhost:9090/");
+    resource.accept(MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML_TYPE);
+    final ClientResponse response = resource.get(ClientResponse.class);
+    final OpenSearchDescriptor entity = response.getEntity(OpenSearchDescriptor.class);
+    Assert.assertEquals(200, response.getStatus());
+    Assert.assertNotNull(entity);
+    DomIOImpl iOImpl = new DomIOImpl();
+    try {
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      iOImpl.writeOpenSearchDescriptor(outputStream, entity);
+      Assert.assertEquals(DomIOImplTest.MAX, outputStream.toString());
+    }
+    catch (IOException ex) {
+      ex.printStackTrace();
+      Assert.fail(ex.getMessage());
+    }
   }
 }

@@ -41,6 +41,8 @@ import javax.ws.rs.ext.Provider;
 public class OpenSearchDescriptorProvider implements MessageBodyWriter<OpenSearchDescriptor>,
                                                      MessageBodyReader<OpenSearchDescriptor> {
 
+  private final DomIOImpl impl = new DomIOImpl();
+
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     if (com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML_TYPE.equals(
@@ -62,7 +64,7 @@ public class OpenSearchDescriptorProvider implements MessageBodyWriter<OpenSearc
                       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
                                                                                                     WebApplicationException {
     if (isWriteable(type, genericType, annotations, mediaType)) {
-      DomIOImpl impl = new DomIOImpl();
+
       impl.writeOpenSearchDescriptor(entityStream, t);
       return;
     }
@@ -78,8 +80,7 @@ public class OpenSearchDescriptorProvider implements MessageBodyWriter<OpenSearc
   public OpenSearchDescriptor readFrom(Class<OpenSearchDescriptor> type, Type genericType, Annotation[] annotations,
                                        MediaType mediaType,
                                        MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws
-      IOException,
-      WebApplicationException {
-    throw new UnsupportedOperationException("Not supported yet.");
+      IOException, WebApplicationException {
+    return impl.readOpenSearchDescriptor(entityStream);
   }
 }
