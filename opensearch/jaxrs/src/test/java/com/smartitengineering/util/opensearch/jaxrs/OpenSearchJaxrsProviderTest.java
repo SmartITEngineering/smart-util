@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.opensearch.jaxrs;
 
+import com.smartitengineering.util.opensearch.io.impl.dom.DomIOImplTest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -64,12 +65,13 @@ public class OpenSearchJaxrsProviderTest {
   }
 
   @Test
-  public void testApp() {
-    System.out.println("::: testSimpleGet :::");
+  public void testSerialization() {
+    System.out.println("::: testSerialization :::");
     WebResource resource = client.resource("http://localhost:9090/");
     resource.accept(MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML_TYPE);
     final ClientResponse response = resource.get(ClientResponse.class);
-    System.out.println(response.getEntity(String.class));
+    final String entity = response.getEntity(String.class);
     Assert.assertEquals(200, response.getStatus());
+    Assert.assertEquals(DomIOImplTest.MAX, entity);
   }
 }
