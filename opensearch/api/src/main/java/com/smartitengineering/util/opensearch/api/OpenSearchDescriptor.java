@@ -74,5 +74,19 @@ public interface OpenSearchDescriptor {
     public static SyndicationRightEnum getDefault() {
       return OPEN;
     }
+
+    public static SyndicationRightEnum getEnumForValue(String value) {
+      if (value == null) {
+        return getDefault();
+      }
+      else {
+        for (SyndicationRightEnum val : values()) {
+          if (val.getValue().equals(value)) {
+            return val;
+          }
+        }
+        return getDefault();
+      }
+    }
   }
 }
