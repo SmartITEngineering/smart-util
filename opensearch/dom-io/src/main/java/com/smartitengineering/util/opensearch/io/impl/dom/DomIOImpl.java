@@ -25,12 +25,15 @@ import java.io.OutputStream;
 
 public class DomIOImpl implements OpenSearchIO {
 
+  @Override
   public void writeOpenSearchDescriptor(OutputStream outputStream, OpenSearchDescriptor descriptor) throws IOException {
     OpenSearchDescriptorWriter writer = new OpenSearchDescriptorWriter(outputStream, descriptor);
     writer.write();
   }
 
+  @Override
   public OpenSearchDescriptor readOpenSearchDescriptor(InputStream inputStream) throws IOException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    OpenSearchDescriptorParser parser = new OpenSearchDescriptorParser(inputStream);
+    return parser.parse();
   }
 }
