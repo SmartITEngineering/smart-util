@@ -74,7 +74,7 @@ public class PaginatedEntitiesWrapper<T> {
 
   }
 
-  public Collection<T> getEntitiesForCurrentPage() {
+  public Collection<Resource<T>> getEntitiesForCurrentPage() {
     return feedEntryReader.readEntriesFromRooFeed(rootFeed);
   }
 

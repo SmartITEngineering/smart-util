@@ -131,7 +131,7 @@ public class AppTest {
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
-    Collection<SomeDomain> collection = reader.readEntriesFromRooFeed(feed);
+    Collection<Resource<SomeDomain>> collection = reader.readEntriesFromRooFeed(feed);
     Assert.assertNotNull(collection);
     Assert.assertEquals(5, collection.size());
     try {
@@ -162,7 +162,7 @@ public class AppTest {
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       //Thread.sleep(10000);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
-      List<SomeDomain> domainList = new ArrayList<SomeDomain>(SomeDomainResource.DOMAIN_SIZE);
+      List<Resource<SomeDomain>> domainList = new ArrayList<Resource<SomeDomain>>(SomeDomainResource.DOMAIN_SIZE);
       for (int i = 0; i < (SomeDomainResource.DOMAIN_SIZE / newCount); ++i) {
         domainList.addAll(domains.getEntitiesForCurrentPage());
         domains = domains.next();
@@ -188,7 +188,7 @@ public class AppTest {
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
-      List<SomeDomain> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
+      List<Resource<SomeDomain>> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
       final int midSize = SomeDomainResource.DOMAIN_SIZE / 2;
       domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains, midSize);
@@ -213,7 +213,7 @@ public class AppTest {
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       DynamicPaginatedEntitiesList<SomeDomain> dynaDomainList = new DynamicPaginatedEntitiesList<SomeDomain>(domains);
-      List<SomeDomain> domainList = dynaDomainList;
+      List<Resource<SomeDomain>> domainList = dynaDomainList;
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
       Assert.assertEquals(0, dynaDomainList.getBackedupList().size());
       Assert.assertNotNull(domainList.get(0));

@@ -70,8 +70,8 @@ public class FeedEntryReader<T> {
    * @param deserializer The deserializer know-how-to
    * @throws IllegalArgumentException If deserializer is null
    */
-  public FeedEntryReader(StreamBasedEntityDeserializer<T> deserializer) throws IllegalArgumentException{
-    if(deserializer == null) {
+  public FeedEntryReader(StreamBasedEntityDeserializer<T> deserializer) throws IllegalArgumentException {
+    if (deserializer == null) {
       throw new IllegalArgumentException("Deserializer can not be null!");
     }
     this.deserializer = deserializer;
@@ -87,12 +87,12 @@ public class FeedEntryReader<T> {
    * @param rootFeed The feed to fetch the entries for
    * @return Return the object instances for the entries of the feed.
    */
-  public List<T> readEntriesFromRooFeed(Feed rootFeed) {
+  public List<Resource<T>> readEntriesFromRooFeed(Feed rootFeed) {
     if (rootFeed == null || rootFeed.getEntries() == null || rootFeed.getEntries().isEmpty()) {
       return Collections.emptyList();
     }
     List<org.apache.abdera.model.Entry> entries = rootFeed.getEntries();
-    ArrayList<T> result = new ArrayList<T>(entries.size());
+    ArrayList<Resource<T>> result = new ArrayList<Resource<T>>(entries.size());
     if (entryAsContent) {
       readEntriesFromTheirContent(entries, result);
     }
@@ -102,11 +102,12 @@ public class FeedEntryReader<T> {
     return result;
   }
 
-  protected void readEntriesFromTheirContent(List<org.apache.abdera.model.Entry> entries, List<T> entities) {
+  protected void readEntriesFromTheirContent(List<org.apache.abdera.model.Entry> entries, List<Resource<T>> entities) {
     for (org.apache.abdera.model.Entry entry : entries) {
       try {
-        entities.add(deserializer.deserialze(entry.getContentStream(),
-            entry.getContentSrc().toURI(), entry.getContentMimeType().toString()));
+        final URI src = entry.getContentSrc().toURI();
+        final T entity = deserializer.deserialze(entry.getContentStream(), src, entry.getContentMimeType().toString());
+        entities.add(new Resource<T>(entity, src, null));
       }
       catch (Exception ex) {
         ex.printStackTrace();
@@ -114,13 +115,13 @@ public class FeedEntryReader<T> {
     }
   }
 
-  protected void readEntriesFromTheirLink(List<org.apache.abdera.model.Entry> entries, List<T> entities) {
+  protected void readEntriesFromTheirLink(List<org.apache.abdera.model.Entry> entries, List<Resource<T>> entities) {
     for (org.apache.abdera.model.Entry entry : entries) {
       Map.Entry<String, String> linkSpec = getLinkSpec(0);
       List<Link> links = entry.getLinks(linkSpec.getKey());
       Link mainLink = getWantedLink(links, linkSpec);
       if (mainLink != null) {
-        entities.add(fetchObject(mainLink, 1));
+        entities.add(fetchObject(mainLink, 1, null));
       }
       else {
         entities.add(null);
@@ -128,7 +129,7 @@ public class FeedEntryReader<T> {
     }
   }
 
-  protected T fetchObject(Link fetchLink, int depth) {
+  protected Resource<T> fetchObject(Link fetchLink, int depth, Resource parent) {
     try {
       URI rsrcUri = fetchLink.getHref().toURI();
       Builder webRsrc = client.getWebResource(rsrcUri).accept(fetchLink.getMimeType().toString());
@@ -138,14 +139,14 @@ public class FeedEntryReader<T> {
         List<Link> links = nestedFeed.getLinks(linkSpec.getKey());
         Link mainLink = getWantedLink(links, linkSpec);
         if (mainLink != null) {
-          return fetchObject(mainLink, depth++);
+          return fetchObject(mainLink, depth++, new Resource(nestedFeed, rsrcUri, parent));
         }
         else {
           return null;
         }
       }
       else {
-        return webRsrc.get(clazz);
+        return new Resource(webRsrc.get(clazz), rsrcUri, parent);
       }
     }
     catch (Exception ex) {
