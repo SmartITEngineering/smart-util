@@ -26,12 +26,12 @@ import java.util.ArrayList;
  * could discover all the entities.
  * @author imyousuf
  */
-public class DynamicPaginatedEntitiesList<T> extends AbstractList<T> {
+public class DynamicPaginatedEntitiesList<T> extends AbstractList<Resource<T>> {
 
   private final PaginatedEntitiesWrapper<T> rootWrapper;
   private PaginatedEntitiesWrapper<T> currentWrapper;
   private final int size;
-  private final ArrayList<T> backedupList;
+  private final ArrayList<Resource<T>> backedupList;
 
   /**
    * Construct the dynamic list formed using the root feed wrapper.
@@ -48,11 +48,11 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<T> {
     }
     currentWrapper = rootWrapper;
     size = ClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
-    backedupList = new ArrayList<T>(size);
+    backedupList = new ArrayList<Resource<T>>(size);
   }
 
   @Override
-  public T get(int index) {
+  public Resource<T> get(int index) {
     if (index >= size) {
       throw new IndexOutOfBoundsException("Size is " + size + " but request index is " + index);
     }
@@ -71,7 +71,7 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<T> {
     }
   }
 
-  protected ArrayList<T> getBackedupList() {
+  protected ArrayList<Resource<T>> getBackedupList() {
     return backedupList;
   }
 

@@ -28,12 +28,12 @@ import java.util.concurrent.Executors;
  * next one could discover all the entities.
  * @author imyousuf
  */
-public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
+public class PaginatedFeedEntitiesList<T> extends AbstractList<Resource<T>> {
 
   private final PaginatedEntitiesWrapper<T> rootWrapper;
   private PaginatedEntitiesWrapper<T> currentWrapper;
   private final int max;
-  private final ArrayList<T> backedupList;
+  private final ArrayList<Resource<T>> backedupList;
   private final Object object;
   private boolean working = false;
   private final ExecutorService service;
@@ -60,10 +60,10 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
     currentWrapper = rootWrapper;
     if (ClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
       int size = ClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
-      backedupList = new ArrayList<T>(Math.min(max, size));
+      backedupList = new ArrayList<Resource<T>>(Math.min(max, size));
     }
     else {
-      backedupList = new ArrayList<T>();
+      backedupList = new ArrayList<Resource<T>>();
     }
     this.max = max;
     this.object = new Object();
@@ -73,7 +73,7 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
   }
 
   @Override
-  public T get(int index) {
+  public Resource<T> get(int index) {
     tryAndWait();
     if (index < size()) {
       return backedupList.get(index);
