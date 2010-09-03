@@ -45,11 +45,13 @@ public class CacheableClient
 
     client.getParams().setAuthenticationPreemptive(
         config.getPropertyAsFeature(ApacheHttpClientConfig.PROPERTY_PREEMPTIVE_AUTHENTICATION));
-    */
+    
+
     final Integer connectTimeout = (Integer) config.getProperty(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT);
     if (connectTimeout != null) {
       client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
     }
+*/
   }
 
   public CacheableClient(CacheableClientHandler root,

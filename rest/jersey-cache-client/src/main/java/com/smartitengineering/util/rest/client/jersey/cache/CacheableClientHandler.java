@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
+import org.codehaus.httpcache4j.HTTPMethod;
 import org.codehaus.httpcache4j.HTTPRequest;
 import org.codehaus.httpcache4j.HTTPResponse;
 import org.codehaus.httpcache4j.Header;
@@ -69,7 +70,6 @@ public class CacheableClientHandler
     ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
           getMessageBodyWorkers());
       return response;
-    }
   }
 
 
