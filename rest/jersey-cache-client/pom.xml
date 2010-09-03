@@ -3,7 +3,7 @@
  *
  * This is a utility project for wide range of applications
  *
- * Copyright (C) 2008  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,28 +19,34 @@
  *
  *
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>smart-util</artifactId>
-    <groupId>com.smartitengineering</groupId>
+    <artifactId>rest</artifactId>
+    <groupId>com.smartitengineering.smart-util</groupId>
     <version>0.2-SNAPSHOT</version>
   </parent>
-  <groupId>com.smartitengineering.smart-util</groupId>
-  <artifactId>rest</artifactId>
-  <packaging>pom</packaging>
+  <groupId>com.smartitengineering.smart-util.rest</groupId>
+  <artifactId>jersey-cache-client</artifactId>
   <version>0.2-SNAPSHOT</version>
-  <name>RESTful WS Util</name>
+  <name>Jersey Cache Client</name>
   <dependencies>
+    <dependency>
+      <groupId>org.codehaus.httpcache4j</groupId>
+      <artifactId>httpcache4j-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.httpcache4j.resolvers</groupId>
+      <artifactId>resolvers-commons-httpclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-apache-client</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
   </dependencies>
-  <modules>
-    <module>atom</module>
-    <module>server</module>
-    <module>atom-server</module>
-    <module>jersey-cache-client</module>
-  </modules>
 </project>
