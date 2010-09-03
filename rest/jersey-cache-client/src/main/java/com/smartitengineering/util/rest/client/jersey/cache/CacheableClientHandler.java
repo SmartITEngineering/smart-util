@@ -47,8 +47,7 @@ import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
 public class CacheableClientHandler
     extends TerminatingClientHandler {
 
-  private ApacheHttpClientHandler apacheHttpClientHandler;
-  private HTTPCache cache;
+  private final HTTPCache cache;
 
   public CacheableClientHandler(HttpClient httpClient) {
     this(httpClient, new MemoryCacheStorage());
@@ -56,45 +55,29 @@ public class CacheableClientHandler
 
   public CacheableClientHandler(HttpClient httpClient,
                                 CacheStorage storage) {
-    apacheHttpClientHandler = new ApacheHttpClientHandler(httpClient);
     cache = new HTTPCache(storage, new HTTPClientResponseResolver(httpClient));
   }
 
   @Override
   public ClientResponse handle(ClientRequest cr)
       throws ClientHandlerException {
-    /*
-     * Handle GET requests only as thats what we will be supporting cache for only
-     */
-    if (cr.getMethod().equals("GET")) {
-      HTTPResponse cachedResponse = cache.doCachedRequest(new HTTPRequest(cr.getURI()));
-      Headers headers = cachedResponse.getHeaders();
-      InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
-      final InputStream entity = getEntityStream(cachedResponse);
-      ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
+    HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
+    HTTPResponse cachedResponse = cache.doCachedRequest(new HTTPRequest(cr.getURI(), method));
+    Headers headers = cachedResponse.getHeaders();
+    InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
+    final InputStream entity = getEntityStream(cachedResponse);
+    ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
           getMessageBodyWorkers());
       return response;
     }
-    /*
-     * Leave the rest to the default jersey apache http client handler to ensure number of bugs is less
-     */
-    else {
-      return apacheHttpClientHandler.handle(cr);
-    }
   }
 
-  public ApacheHttpClientHandler getApacheHttpClientHandler() {
-    return apacheHttpClientHandler;
-  }
 
   public HTTPCache getCache() {
     return cache;
   }
 
-  public HttpClient getHttpClient() {
-    return getApacheHttpClientHandler().getHttpClient();
-  }
-
+  //HUH?
   protected InputStream getEntityStream(HTTPResponse cachedResponse) {
     final InputStream entity;
     if (cachedResponse.hasPayload()) {
@@ -114,9 +97,7 @@ public class CacheableClientHandler
 
   protected InBoundHeaders getInBoundHeaders(Headers headers) {
     InBoundHeaders inBoundHeaders = new InBoundHeaders();
-    Iterator<Header> headerIterator = headers.iterator();
-    while (headerIterator.hasNext()) {
-      Header header = headerIterator.next();
+    for (Header header : headers) {
       List<String> list = inBoundHeaders.get(header.getName());
       if (list == null) {
         list = new ArrayList<String>();

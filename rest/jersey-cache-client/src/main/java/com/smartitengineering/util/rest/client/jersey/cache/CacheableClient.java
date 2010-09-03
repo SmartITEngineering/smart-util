@@ -34,16 +34,18 @@ public class CacheableClient
 
   private CacheableClientHandler clientHandler;
 
-  public CacheableClient(CacheableClientHandler root,
+  public CacheableClient(CacheableClientHandler handler,
                          ClientConfig config,
                          IoCComponentProviderFactory provider) {
-    super(root, config, provider);
-    this.clientHandler = root;
+    super(handler, config, provider);
+    this.clientHandler = handler;
+    //Don't do this.
+    /*
     HttpClient client = root.getApacheHttpClientHandler().getHttpClient();
 
     client.getParams().setAuthenticationPreemptive(
         config.getPropertyAsFeature(ApacheHttpClientConfig.PROPERTY_PREEMPTIVE_AUTHENTICATION));
-
+    */
     final Integer connectTimeout = (Integer) config.getProperty(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT);
     if (connectTimeout != null) {
       client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
