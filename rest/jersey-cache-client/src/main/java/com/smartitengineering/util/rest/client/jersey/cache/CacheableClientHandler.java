@@ -72,14 +72,13 @@ public class CacheableClientHandler
   public ClientResponse handle(ClientRequest cr)
       throws ClientHandlerException {
     final HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
-    final HTTPRequest request = new HTTPRequest(cr.getURI(), method);
-    processRequest(cr, request);
+    HTTPRequest request = processRequest(cr, method);
     HTTPResponse cachedResponse = cache.doCachedRequest(request);
     Headers headers = cachedResponse.getHeaders();
     InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
     final InputStream entity = getEntityStream(cachedResponse);
     ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
-        getMessageBodyWorkers());
+                                                 getMessageBodyWorkers());
     return response;
   }
 
@@ -121,18 +120,20 @@ public class CacheableClientHandler
     return inBoundHeaders;
   }
 
-  protected void processRequest(ClientRequest cr,
-                                final HTTPRequest request) {
+  protected HTTPRequest processRequest(ClientRequest cr,
+                                       final HTTPMethod method) {
+    HTTPRequest request = new HTTPRequest(cr.getURI(), method);
     final Map<String, Object> props = cr.getProperties();
     /*
      * Add authorization challenge
      */
     if (props.containsKey(CacheableClientConfigProps.USERNAME) &&
         props.containsKey(CacheableClientConfigProps.PASSWORD)) {
+      final String username = (String) props.get(CacheableClientConfigProps.USERNAME);
+      final String password = (String) props.get(CacheableClientConfigProps.PASSWORD);
       Challenge challenge =
-                new UsernamePasswordChallenge((String) props.get(CacheableClientConfigProps.USERNAME),
-          (String) props.get(CacheableClientConfigProps.PASSWORD));
-      request.challenge(challenge);
+                new UsernamePasswordChallenge(username, password);
+      request = request.challenge(challenge);
     }
     /*
      * Copy headers set by user explicitly
@@ -148,6 +149,7 @@ public class CacheableClientHandler
       }
       requestHeaders.add(key, headers);
     }
+    request = request.headers(requestHeaders);
     /*
      * Copy payload set into the request if any
      */
@@ -163,7 +165,8 @@ public class CacheableClientHandler
         throw new ClientHandlerException(ex);
       }
       Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
-      request.payload(payload);
+      request = request.payload(payload);
     }
+    return request;
   }
 }
