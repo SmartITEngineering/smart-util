@@ -107,8 +107,8 @@ public class AppTest {
       System.out.println("::: testFeed :::");
       URI uri = new URI("http://localhost:9090/feed");
       ClientResponse response =
-                     ClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
-      Feed feed = ClientUtil.getFeed(response);
+                     AtomClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
+      Feed feed = AtomClientUtil.getFeed(response);
       Assert.assertNotNull(feed);
     }
     catch (URISyntaxException ex) {
@@ -139,7 +139,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?count=" + newCount);
-      feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       collection = reader.readEntriesFromRooFeed(feed);
       Assert.assertNotNull(collection);
       Assert.assertEquals(newCount, collection.size());
@@ -161,7 +161,7 @@ public class AppTest {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
 
-      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       //Thread.sleep(10000);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       List<EntityResource<SomeDomain>> domainList = new ArrayList<EntityResource<SomeDomain>>(SomeDomainResource.DOMAIN_SIZE);
@@ -188,7 +188,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
-      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       List<EntityResource<SomeDomain>> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
@@ -212,7 +212,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
-      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       DynamicPaginatedEntitiesList<SomeDomain> dynaDomainList = new DynamicPaginatedEntitiesList<SomeDomain>(domains);
       List<EntityResource<SomeDomain>> domainList = dynaDomainList;

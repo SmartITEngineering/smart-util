@@ -65,7 +65,7 @@ public class PaginatedEntitiesWrapper<T> {
   protected PaginatedEntitiesWrapper<T> getPaginatedWrapperFromFeedLink(Link link) {
     try {
       if (link != null && link.getMimeType().match(MediaType.APPLICATION_ATOM_XML)) {
-        Feed newFeed = ClientUtil.readEntity(link, client, MediaType.APPLICATION_ATOM_XML, Feed.class);
+        Feed newFeed = AtomClientUtil.readEntity(link, client, MediaType.APPLICATION_ATOM_XML, Feed.class);
         return new PaginatedEntitiesWrapper<T>(newFeed, client, feedEntryReader);
       }
     }

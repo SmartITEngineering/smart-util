@@ -59,8 +59,8 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<EntityResource<T>
     }
     this.rootWrapper = wrapper;
     currentWrapper = rootWrapper;
-    if (ClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
-      int size = ClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
+    if (AtomClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
+      int size = AtomClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
       backedupList = new ArrayList<EntityResource<T>>(Math.min(max, size));
     }
     else {

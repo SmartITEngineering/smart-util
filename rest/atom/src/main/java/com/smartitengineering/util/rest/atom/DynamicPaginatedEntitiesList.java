@@ -44,11 +44,11 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<EntityResource
       throw new IllegalArgumentException("Wrapper can not be null!");
     }
     this.rootWrapper = wrapper;
-    if (!ClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
+    if (!AtomClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
       throw new IllegalArgumentException("Root feed must have total results specified!");
     }
     currentWrapper = rootWrapper;
-    size = ClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
+    size = AtomClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
     backedupList = new ArrayList<EntityResource<T>>(size);
   }
 
