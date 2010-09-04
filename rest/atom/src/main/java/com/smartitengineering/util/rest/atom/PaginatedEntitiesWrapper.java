@@ -17,6 +17,8 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.HttpClient;
+import com.smartitengineering.util.rest.client.Resource;
 import java.util.Collection;
 import javax.activation.MimeTypeParseException;
 import javax.ws.rs.core.MediaType;

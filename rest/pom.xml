@@ -42,5 +42,6 @@
     <module>server</module>
     <module>atom-server</module>
     <module>jersey-cache-client</module>
+    <module>generic-client</module>
   </modules>
 </project>

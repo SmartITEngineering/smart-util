@@ -17,6 +17,8 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.util.rest.client.HttpClient;
 import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;

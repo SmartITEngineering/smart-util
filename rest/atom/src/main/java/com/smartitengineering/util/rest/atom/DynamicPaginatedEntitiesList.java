@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.Resource;
 import java.util.AbstractList;
 import java.util.ArrayList;
 

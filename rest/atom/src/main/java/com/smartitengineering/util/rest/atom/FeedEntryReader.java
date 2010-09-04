@@ -17,6 +17,8 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.HttpClient;
+import com.smartitengineering.util.rest.client.Resource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import java.net.URI;
 import java.util.ArrayList;
