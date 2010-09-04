@@ -26,10 +26,13 @@ import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.httpclient.HttpClient;
 import org.codehaus.httpcache4j.Challenge;
 import org.codehaus.httpcache4j.HTTPMethod;
@@ -37,11 +40,14 @@ import org.codehaus.httpcache4j.HTTPRequest;
 import org.codehaus.httpcache4j.HTTPResponse;
 import org.codehaus.httpcache4j.Header;
 import org.codehaus.httpcache4j.Headers;
+import org.codehaus.httpcache4j.MIMEType;
 import org.codehaus.httpcache4j.UsernamePasswordChallenge;
 import org.codehaus.httpcache4j.cache.CacheStorage;
 import org.codehaus.httpcache4j.cache.HTTPCache;
 import org.codehaus.httpcache4j.cache.MemoryCacheStorage;
 import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
+import org.codehaus.httpcache4j.payload.InputStreamPayload;
+import org.codehaus.httpcache4j.payload.Payload;
 
 /**
  *
@@ -121,12 +127,46 @@ public class CacheableClientHandler
   protected void processRequest(ClientRequest cr,
                                 final HTTPRequest request) {
     final Map<String, Object> props = cr.getProperties();
+    /*
+     * Add authorization challenge
+     */
     if (props.containsKey(CacheableClientConfigProps.USERNAME) &&
         props.containsKey(CacheableClientConfigProps.PASSWORD)) {
       Challenge challenge =
                 new UsernamePasswordChallenge((String) props.get(CacheableClientConfigProps.USERNAME),
           (String) props.get(CacheableClientConfigProps.PASSWORD));
       request.challenge(challenge);
+    }
+    /*
+     * Copy headers set by user explicitly
+     */
+    Headers requestHeaders = new Headers();
+    MultivaluedMap<String, Object> map = cr.getHeaders();
+    for (String key : map.keySet()) {
+      List<Object> values = map.get(key);
+      ArrayList<Header> headers = new ArrayList<Header>(values.size());
+      for (Object value : values) {
+        Header header = new Header(key, ClientRequest.getHeaderValue(value));
+        headers.add(header);
+      }
+      requestHeaders.add(key, headers);
+    }
+    /*
+     * Copy payload set into the request if any
+     */
+    if (cr.getEntity() != null) {
+      final RequestEntityWriter requestEntityWriter = getRequestEntityWriter(cr);
+      final MIMEType mimeType = new MIMEType(requestEntityWriter.getMediaType().getType(), requestEntityWriter.
+          getMediaType().getSubtype());
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      try {
+        requestEntityWriter.writeRequestEntity(outputStream);
+      }
+      catch (IOException ex) {
+        throw new ClientHandlerException(ex);
+      }
+      Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
+      request.payload(payload);
     }
   }
 }
