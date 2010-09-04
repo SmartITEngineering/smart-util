@@ -17,21 +17,18 @@
  */
 package com.smartitengineering.util.rest.client;
 
-import java.net.URI;
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  *
- * @author modhu7
+ * @author imyousuf
  */
-public interface Resource<T> {
+public interface WritableResource<T> extends Resource<T> {
 
-  public String getResourceRepresentationType();
+  public <P> ClientResponse put(String contentType, P param);
 
-  public Class<? extends T> getEntityClass();
+  public <P> ClientResponse post(String contentType, P param);
 
-  public URI getUri();
+  public ClientResponse delete();
 
-  public T get();
-
-  public T getLastReadStateOfEntity();
 }

@@ -21,6 +21,7 @@ import com.smartitengineering.util.rest.client.EntityResource;
 import com.smartitengineering.util.rest.client.HttpClient;
 import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
+import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -107,7 +108,7 @@ public class AppTest {
       System.out.println("::: testFeed :::");
       URI uri = new URI("http://localhost:9090/feed");
       ClientResponse response =
-                     AtomClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
+                     ClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
       Feed feed = AtomClientUtil.getFeed(response);
       Assert.assertNotNull(feed);
     }
@@ -139,7 +140,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?count=" + newCount);
-      feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       collection = reader.readEntriesFromRooFeed(feed);
       Assert.assertNotNull(collection);
       Assert.assertEquals(newCount, collection.size());
@@ -161,7 +162,7 @@ public class AppTest {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
 
-      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       //Thread.sleep(10000);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       List<EntityResource<SomeDomain>> domainList = new ArrayList<EntityResource<SomeDomain>>(SomeDomainResource.DOMAIN_SIZE);
@@ -188,7 +189,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
-      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       List<EntityResource<SomeDomain>> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
@@ -212,7 +213,7 @@ public class AppTest {
     try {
       int newCount = 20;
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
-      Feed feed = AtomClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
+      Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       DynamicPaginatedEntitiesList<SomeDomain> dynaDomainList = new DynamicPaginatedEntitiesList<SomeDomain>(domains);
       List<EntityResource<SomeDomain>> domainList = dynaDomainList;
