@@ -50,21 +50,42 @@ public class HttpClient {
   }
 
   public WebResource getWebResource(URI resourceUri) {
-    if (resourceUri == null) {
+    return getWebResource(resourceUri, null);
+  }
+
+  public WebResource getWebResource(URI resourceUri, URI referrerUri) {
+    URI absUri = getAbsoluteUri(resourceUri, referrerUri);
+    if (absUri == null) {
       return null;
     }
-    final WebResource resource;
-    if (StringUtils.isNotBlank(resourceUri.getHost())) {
-      resource = client.resource(resourceUri);
+    final WebResource resource = client.resource(absUri);
+    return resource;
+  }
+
+  public URI getAbsoluteUri(URI targetUri, URI currentUri) {
+    if (targetUri == null) {
+      return null;
+    }
+    if (StringUtils.isNotBlank(targetUri.getHost())) {
+      return targetUri;
+    }
+    else if (targetUri.getPath().startsWith("/")) {
+      UriBuilder builder = UriBuilder.fromUri(targetUri);
+      builder.host(host).port(port).scheme("http");
+      return builder.build();
     }
     else {
-      UriBuilder builder = UriBuilder.fromUri(resourceUri);
-      builder.host(host);
-      builder.port(port);
-      builder.scheme("http");
-      resource = client.resource(builder.build());
+      final UriBuilder builder;
+      if (currentUri != null) {
+        builder = UriBuilder.fromUri(currentUri);
+        builder.path(targetUri.getPath());
+      }
+      else {
+        builder = UriBuilder.fromUri(targetUri);
+      }
+      builder.host(host).port(port).scheme("http");
+      return builder.build();
     }
-    return resource;
   }
 
   public Client getClient() {
