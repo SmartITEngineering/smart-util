@@ -21,16 +21,17 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.TerminatingClientHandler;
-import com.sun.jersey.client.apache.ApacheHttpClientHandler;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.codehaus.httpcache4j.HTTPMethod;
 import org.codehaus.httpcache4j.HTTPRequest;
 import org.codehaus.httpcache4j.HTTPResponse;
@@ -49,6 +50,7 @@ public class CacheableClientHandler
     extends TerminatingClientHandler {
 
   private final HTTPCache cache;
+  private final HttpClient httpClient;
 
   public CacheableClientHandler(HttpClient httpClient) {
     this(httpClient, new MemoryCacheStorage());
@@ -57,6 +59,7 @@ public class CacheableClientHandler
   public CacheableClientHandler(HttpClient httpClient,
                                 CacheStorage storage) {
     cache = new HTTPCache(storage, new HTTPClientResponseResolver(httpClient));
+    this.httpClient = httpClient;
   }
 
   @Override
@@ -68,16 +71,18 @@ public class CacheableClientHandler
     InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
     final InputStream entity = getEntityStream(cachedResponse);
     ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
-          getMessageBodyWorkers());
-      return response;
+        getMessageBodyWorkers());
+    return response;
   }
 
+  public HttpClient getHttpClient() {
+    return httpClient;
+  }
 
   public HTTPCache getCache() {
     return cache;
   }
 
-  //HUH?
   protected InputStream getEntityStream(HTTPResponse cachedResponse) {
     final InputStream entity;
     if (cachedResponse.hasPayload()) {

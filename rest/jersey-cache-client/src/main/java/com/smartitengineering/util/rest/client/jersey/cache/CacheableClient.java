@@ -25,10 +25,6 @@ import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
-/**
- * Hello world!
- *
- */
 public class CacheableClient
     extends Client {
 
@@ -39,18 +35,13 @@ public class CacheableClient
                          IoCComponentProviderFactory provider) {
     super(handler, config, provider);
     this.clientHandler = handler;
-    //Don't do this.
-    /*
-    HttpClient client = root.getApacheHttpClientHandler().getHttpClient();
+    HttpClient client = handler.getHttpClient();
 
-    client.getParams().setAuthenticationPreemptive(
-        config.getPropertyAsFeature(ApacheHttpClientConfig.PROPERTY_PREEMPTIVE_AUTHENTICATION));
-    
     final Integer connectTimeout = (Integer) config.getProperty(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT);
     if (connectTimeout != null) {
       client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
     }
-*/
+
   }
 
   public CacheableClient(CacheableClientHandler root,
