@@ -25,6 +25,8 @@ import java.net.URI;
  */
 public interface Resource<T> {
 
+  public <V> Resource<V> getReferrer();
+
   public String getResourceRepresentationType();
 
   public Class<? extends T> getEntityClass();

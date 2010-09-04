@@ -38,24 +38,25 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   static {
     CONNECTION_CONFIG = ConfigFactory.getInstance().getConnectionConfig();
 
-    BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(CONNECTION_CONFIG.
-        getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
+    BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
+        CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
   }
   private static Client client;
   private static ClientConfig clientConfig;
   private static HttpClient httpClient;
-  private URI referrerUri;
+  private Resource referrer;
   private URI thisResourceUri;
   private URI absoluteThisResourceUri;
   private String representationType;
   private Class<? extends T> entityClass;
   private T lastReadStateOfEntity;
 
-  protected AbstractClientResource(URI referrerUri, URI thisResourceUri, String representationType,
+  protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass) {
-    this.referrerUri = referrerUri;
+    this.referrer = referrer;
     this.thisResourceUri = thisResourceUri;
-    this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrerUri);
+    this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
+        getUri());
   }
 
   @Override
@@ -105,12 +106,13 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     return webResource.post(ClientResponse.class, param);
   }
 
-  public URI getBaseUri() {
-    return BASE_URI;
+  @Override
+  public <V> Resource<V> getReferrer() {
+    return referrer;
   }
 
-  protected URI getReferrerUri() {
-    return referrerUri;
+  public URI getBaseUri() {
+    return BASE_URI;
   }
 
   protected URI getThisResourceUri() {
