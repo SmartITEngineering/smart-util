@@ -21,22 +21,23 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.TerminatingClientHandler;
+import com.sun.jersey.client.apache.config.DefaultCredentialsProvider;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
+import org.codehaus.httpcache4j.Challenge;
 import org.codehaus.httpcache4j.HTTPMethod;
 import org.codehaus.httpcache4j.HTTPRequest;
 import org.codehaus.httpcache4j.HTTPResponse;
 import org.codehaus.httpcache4j.Header;
 import org.codehaus.httpcache4j.Headers;
+import org.codehaus.httpcache4j.UsernamePasswordChallenge;
 import org.codehaus.httpcache4j.cache.CacheStorage;
 import org.codehaus.httpcache4j.cache.HTTPCache;
 import org.codehaus.httpcache4j.cache.MemoryCacheStorage;
@@ -49,6 +50,8 @@ import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
 public class CacheableClientHandler
     extends TerminatingClientHandler {
 
+  private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER =
+                                                  new DefaultCredentialsProvider();
   private final HTTPCache cache;
   private final HttpClient httpClient;
 
@@ -65,8 +68,10 @@ public class CacheableClientHandler
   @Override
   public ClientResponse handle(ClientRequest cr)
       throws ClientHandlerException {
-    HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
-    HTTPResponse cachedResponse = cache.doCachedRequest(new HTTPRequest(cr.getURI(), method));
+    final HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
+    final HTTPRequest request = new HTTPRequest(cr.getURI(), method);
+    processRequest(cr, request);
+    HTTPResponse cachedResponse = cache.doCachedRequest(request);
     Headers headers = cachedResponse.getHeaders();
     InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
     final InputStream entity = getEntityStream(cachedResponse);
@@ -111,5 +116,17 @@ public class CacheableClientHandler
       inBoundHeaders.put(header.getName(), list);
     }
     return inBoundHeaders;
+  }
+
+  protected void processRequest(ClientRequest cr,
+                                final HTTPRequest request) {
+    final Map<String, Object> props = cr.getProperties();
+    if (props.containsKey(CacheableClientConfigProps.USERNAME) &&
+        props.containsKey(CacheableClientConfigProps.PASSWORD)) {
+      Challenge challenge =
+                new UsernamePasswordChallenge((String) props.get(CacheableClientConfigProps.USERNAME),
+          (String) props.get(CacheableClientConfigProps.PASSWORD));
+      request.challenge(challenge);
+    }
   }
 }
