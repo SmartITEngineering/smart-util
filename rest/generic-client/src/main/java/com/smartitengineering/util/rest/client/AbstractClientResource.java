@@ -55,6 +55,8 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
                                    Class<? extends T> entityClass) {
     this.referrer = referrer;
     this.thisResourceUri = thisResourceUri;
+    this.representationType = representationType;
+    this.entityClass = entityClass;
     this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
         getUri());
   }
