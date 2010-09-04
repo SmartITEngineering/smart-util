@@ -24,4 +24,5 @@ package com.smartitengineering.util.rest.client.jersey.cache;
 public interface CacheableClientConfigProps {
   public static final String USERNAME = "cacheable.jersey.client.username";
   public static final String PASSWORD = "cacheable.jersey.client.password";
+  public static final String TIMEOUT = "cacheable.jersey.client.timeout";
 }

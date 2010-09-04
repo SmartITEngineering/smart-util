@@ -20,7 +20,6 @@ package com.smartitengineering.util.rest.client.jersey.cache;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -37,7 +36,7 @@ public class CacheableClient
     this.clientHandler = handler;
     HttpClient client = handler.getHttpClient();
 
-    final Integer connectTimeout = (Integer) config.getProperty(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT);
+    final Integer connectTimeout = (Integer) config.getProperty(CacheableClientConfigProps.TIMEOUT);
     if (connectTimeout != null) {
       client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
     }

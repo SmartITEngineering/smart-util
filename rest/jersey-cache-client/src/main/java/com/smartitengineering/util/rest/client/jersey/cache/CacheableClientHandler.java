@@ -21,7 +21,6 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.TerminatingClientHandler;
-import com.sun.jersey.client.apache.config.DefaultCredentialsProvider;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
@@ -56,8 +55,6 @@ import org.codehaus.httpcache4j.payload.Payload;
 public class CacheableClientHandler
     extends TerminatingClientHandler {
 
-  private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER =
-                                                  new DefaultCredentialsProvider();
   private final HTTPCache cache;
   private final HttpClient httpClient;
 
