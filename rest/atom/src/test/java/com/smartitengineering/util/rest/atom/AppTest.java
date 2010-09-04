@@ -19,12 +19,12 @@ package com.smartitengineering.util.rest.atom;
 
 import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
+import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
-import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
 import java.net.URI;
@@ -88,7 +88,7 @@ public class AppTest {
     DefaultClientConfig config = new DefaultClientConfig();
     config.getClasses().add(FeedProvider.class);
     config.getClasses().add(JSONRootElementProvider.App.class);
-    client = ApacheHttpClient.create(config);
+    client = CacheableClient.create(config);
     httpClient = new HttpClient(client, "localhost", 9090);
   }
 

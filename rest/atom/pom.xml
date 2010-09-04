@@ -60,8 +60,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-apache-client</artifactId>
+      <groupId>com.smartitengineering.smart-util.rest</groupId>
+      <artifactId>jersey-cache-client</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
