@@ -21,15 +21,32 @@ import java.net.URI;
 
 /**
  *
- * @author modhu7
+ * @author imyousuf
  */
-public interface Resource<T> {
+public class EntityResource<T> {
 
-  public String getResourceRepresentationType();
+  private T entity;
+  private URI resourceUri;
+  private EntityResource parent;
 
-  public Class<? extends T> getEntityClass();
+  public EntityResource(T entity, URI resourceUri, EntityResource parent) {
+    if (entity == null || resourceUri == null) {
+      throw new IllegalArgumentException();
+    }
+    this.entity = entity;
+    this.parent = parent;
+    this.resourceUri = resourceUri;
+  }
 
-  public URI getUri();
+  public T getEntity() {
+    return entity;
+  }
 
-  public T get();
+  public <P> EntityResource<P> getParent() {
+    return parent;
+  }
+
+  public URI getResourceUri() {
+    return resourceUri;
+  }
 }

@@ -24,5 +24,13 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-util</groupId>
+      <artifactId>smart-bean-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-util.rest</groupId>
+      <artifactId>jersey-cache-client</artifactId>
+    </dependency>
   </dependencies>
 </project>

@@ -18,7 +18,7 @@
 package com.smartitengineering.util.rest.atom;
 
 import com.smartitengineering.util.rest.client.HttpClient;
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.util.rest.client.EntityResource;
 import java.util.Collection;
 import javax.activation.MimeTypeParseException;
 import javax.ws.rs.core.MediaType;
@@ -76,7 +76,7 @@ public class PaginatedEntitiesWrapper<T> {
 
   }
 
-  public Collection<Resource<T>> getEntitiesForCurrentPage() {
+  public Collection<EntityResource<T>> getEntitiesForCurrentPage() {
     return feedEntryReader.readEntriesFromRooFeed(rootFeed);
   }
 
