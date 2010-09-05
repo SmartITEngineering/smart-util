@@ -20,16 +20,21 @@ package com.smartitengineering.util.rest.client;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.net.URI;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.lang.StringUtils;
 
 /**
- *
- * @author russel
+ * An abstract resource representation on client side for a client to a RESTful Web Service. It is designed to have one
+ * configuration application wide and one Apache Http Client application wide. It uses the Jersey Cacheable Client which
+ * uses HTTPCache4J and thus if the configuration is changed for username/password it will reflect on next request.
+ * @author imyousuf
+ * @since 0.2
  */
 public abstract class AbstractClientResource<T> implements Resource<T>, WritableResource<T> {
 
@@ -54,20 +59,68 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   private MultivaluedMap<String, ResouceLink> relatedResourceUris;
   private ClientUtil clientUtil;
 
+  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass) throws
+      IllegalArgumentException, UniformInterfaceException {
+    this(referrer, resouceLink, entityClass, null);
+  }
+
+  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+                                   ClientUtil clientUtil) throws IllegalArgumentException, UniformInterfaceException {
+    this(referrer, resouceLink, entityClass, clientUtil, true);
+  }
+
+  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+                                   ClientUtil clientUtil, boolean invokeGet) throws IllegalArgumentException,
+                                                                                    UniformInterfaceException {
+    this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet);
+  }
+
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
-                                   Class<? extends T> entityClass) {
+                                   Class<? extends T> entityClass) throws IllegalArgumentException,
+                                                                          UniformInterfaceException {
     this(referrer, thisResourceUri, representationType, entityClass, null);
   }
+
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
-                                   Class<? extends T> entityClass, ClientUtil clientUtil) {
+                                   Class<? extends T> entityClass, ClientUtil clientUtil) throws
+      IllegalArgumentException, UniformInterfaceException {
+    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, true);
+  }
+
+  /**
+   * Construct a generic HTTP client resource's super class with necessary information for it to work properly
+   * @param referrer The resource from which one arrived to this resource
+   * @param thisResourceUri The URI, could be absolute or relative, of this resource.
+   * @param representationType The MIME Type to expect for this resource, a.k.a., Accept HTTP header
+   * @param entityClass The Entity class to ask Jersey to de-serialize the GET entity to.
+   * @param clientUtil The client util instance to parse linked resources for this representation entity.
+   * @param invokeGet If true GET will be issued during construction synchronously. By default its true
+   * @throws IllegalArgumentException If thisResourceUri or representationType or entityClass is null
+   * @throws UniformInterfaceException If status is anything but < 300 or 304.
+   */
+  protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
+                                   Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet) throws
+      IllegalArgumentException, UniformInterfaceException {
+    if (thisResourceUri == null) {
+      throw new IllegalArgumentException("URI to current resource can not be null");
+    }
+    if (StringUtils.isBlank(representationType)) {
+      throw new IllegalArgumentException("Accept header value can not be null!");
+    }
+    if (entityClass == null) {
+      throw new IllegalArgumentException("Entity class can not be null!");
+    }
     this.referrer = referrer;
     this.thisResourceUri = thisResourceUri;
     this.representationType = representationType;
     this.entityClass = entityClass;
-    this.relatedResourceUris = new ConcurrentMultivalueMap<String, com.smartitengineering.util.rest.client.ResouceLink>();
+    this.relatedResourceUris = new ConcurrentMultivalueMap<String, ResouceLink>();
     this.clientUtil = clientUtil;
     this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
         getUri());
+    if (invokeGet) {
+      get();
+    }
   }
 
   protected ClientUtil getClientUtil() {
@@ -90,17 +143,22 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
 
   @Override
   public T get() {
-    lastReadStateOfEntity = ClientUtil.readEntity(getUri(), getHttpClient(), getResourceRepresentationType(),
-                                                  getEntityClass());
-    if(getClientUtil() != null) {
-      try {
-        getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+    ClientResponse response = ClientUtil.readEntity(getUri(), getHttpClient(), getResourceRepresentationType(),
+                                                    ClientResponse.class);
+    if (response.getStatus() < 300 ||
+        (response.getStatus() == ClientResponse.Status.NOT_MODIFIED.getStatusCode() && response.hasEntity())) {
+      lastReadStateOfEntity = response.getEntity(getEntityClass());
+      if (getClientUtil() != null) {
+        try {
+          getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
       }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
+      return lastReadStateOfEntity;
     }
-    return lastReadStateOfEntity;
+    throw new UniformInterfaceException(response);
   }
 
   @Override
