@@ -23,10 +23,15 @@ import com.smartitengineering.util.rest.client.HttpClient;
 import com.smartitengineering.util.rest.client.ResouceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import java.net.URI;
+import java.net.URISyntaxException;
+import javax.activation.MimeType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.namespace.QName;
+import org.apache.abdera.Abdera;
 import org.apache.abdera.ext.opensearch.OpenSearchConstants;
 import org.apache.abdera.ext.opensearch.model.IntegerElement;
+import org.apache.abdera.factory.Factory;
+import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 
@@ -35,6 +40,8 @@ import org.apache.abdera.model.Link;
  * @author imyousuf
  */
 public class AtomClientUtil extends ClientUtil {
+
+  public static final Factory ABDERA_FACTORY = Abdera.getNewFactory();
 
   public static Feed getFeed(ClientResponse response) {
     return response.getEntity(Feed.class);
@@ -101,12 +108,45 @@ public class AtomClientUtil extends ClientUtil {
     if (entity instanceof Feed) {
       Feed feed = (Feed) entity;
       for (Link link : feed.getLinks()) {
-        DefaultResouceLinkImpl uri = new DefaultResouceLinkImpl();
-        uri.setMimeType(link.getMimeType().toString());
-        uri.setRel(link.getRel());
-        uri.setUri(link.getHref().toURI());
-        uris.add(link.getRel(), uri);
+        ResouceLink resouceLink = convertFromAtomLinkToResourceLinkInternally(link);
+        uris.add(link.getRel(), resouceLink);
       }
     }
+  }
+
+  public static ResouceLink convertFromAtomLinkToResourceLink(Link link) {
+    try {
+      return convertFromAtomLinkToResourceLinkInternally(link);
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      return null;
+    }
+  }
+
+  private static ResouceLink convertFromAtomLinkToResourceLinkInternally(Link link)
+      throws URISyntaxException {
+    DefaultResouceLinkImpl resourceLink = new DefaultResouceLinkImpl();
+    final MimeType mimeType = link.getMimeType();
+    if(mimeType != null) {
+      resourceLink.setMimeType(mimeType.toString());
+    }
+    resourceLink.setRel(link.getRel());
+    final IRI href = link.getHref();
+    if(href != null) {
+      resourceLink.setUri(href.toURI());
+    }
+    return resourceLink;
+  }
+
+  public static Link convertFromResourceLinkToAtomLink(ResouceLink resouceLink) {
+    Link link = ABDERA_FACTORY.newLink();
+    link.setRel(resouceLink.getRel());
+    link.setMimeType(resouceLink.getMimeType());
+    final URI uri = resouceLink.getUri();
+    if (uri != null) {
+      link.setHref(uri.toString());
+    }
+    return link;
   }
 }
