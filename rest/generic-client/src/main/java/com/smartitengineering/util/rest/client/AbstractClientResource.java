@@ -24,6 +24,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.net.URI;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 /**
@@ -50,6 +51,7 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   private String representationType;
   private Class<? extends T> entityClass;
   private T lastReadStateOfEntity;
+  private MultivaluedMap<String, ResouceLink> relatedResourceUris;
 
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass) {
@@ -59,6 +61,11 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     this.entityClass = entityClass;
     this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
         getUri());
+    this.relatedResourceUris = new ConcurrentMultivalueMap<String, com.smartitengineering.util.rest.client.ResouceLink>();
+  }
+
+  protected MultivaluedMap<String, ResouceLink> getRelatedResourceUris() {
+    return relatedResourceUris;
   }
 
   @Override
