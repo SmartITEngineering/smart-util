@@ -15,27 +15,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.rest.atom;
+package com.smartitengineering.util.rest.client;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.net.URI;
-import javax.xml.namespace.QName;
-import org.apache.abdera.ext.opensearch.OpenSearchConstants;
-import org.apache.abdera.ext.opensearch.model.IntegerElement;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.model.Link;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 
 /**
  * A utility method to read entities
  * @author imyousuf
  */
-public class ClientUtil {
-
-  public static Feed getFeed(ClientResponse response) {
-    return response.getEntity(Feed.class);
-  }
+public abstract class ClientUtil {
 
   public static <T> T getResponseEntity(ClientResponse response, Class<? extends T> clazz) {
     return response.getEntity(clazz);
@@ -43,23 +35,6 @@ public class ClientUtil {
 
   public static ClientResponse readClientResponse(URI uri, HttpClient client, String acceptType) {
     return readEntity(uri, client, acceptType, ClientResponse.class);
-  }
-
-  public static ClientResponse readClientResponse(Link link, HttpClient client, String acceptType) {
-    return readEntity(link, client, acceptType, ClientResponse.class);
-  }
-
-  public static <T> T readEntity(Link link, HttpClient client, String acceptType, Class<? extends T> clazz) {
-    if (link != null && client != null && clazz != null) {
-      try {
-        final URI uri = link.getHref().toURI();
-        return readEntity(uri, client, acceptType, clazz);
-      }
-      catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    return null;
   }
 
   public static <T> T readEntity(final URI uri, HttpClient client, String acceptType, Class<? extends T> clazz) {
@@ -79,28 +54,7 @@ public class ClientUtil {
     return null;
   }
 
-  public static boolean isOpenSearchTotalResultPresent(Feed feed) {
-    return hasOpenSearchElement(feed, OpenSearchConstants.TOTAL_RESULTS);
-  }
-
-  public static boolean isOpenSearchItemsPerPagePresent(Feed feed) {
-    return hasOpenSearchElement(feed, OpenSearchConstants.ITEMS_PER_PAGE);
-  }
-
-  public static boolean hasOpenSearchElement(Feed feed, QName qName) {
-    return feed.getExtension(qName) != null;
-  }
-
-  public static int getOpenSearchTotalResult(Feed feed) {
-    return getIntFromOpenSearchIntegerElement(feed, OpenSearchConstants.TOTAL_RESULTS);
-  }
-
-  public static int getOpenSearchItemsPerPage(Feed feed) {
-    return getIntFromOpenSearchIntegerElement(feed, OpenSearchConstants.ITEMS_PER_PAGE);
-  }
-
-  public static int getIntFromOpenSearchIntegerElement(Feed feed, QName qName) {
-    IntegerElement element = feed.getExtension(qName);
-    return element.getValue();
-  }
+  public abstract <T> void parseLinks(T entity,
+                                      MultivaluedMap<String, ResouceLink> uris)
+      throws Exception;
 }

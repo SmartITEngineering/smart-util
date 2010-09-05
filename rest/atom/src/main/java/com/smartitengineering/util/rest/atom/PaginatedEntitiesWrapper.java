@@ -17,6 +17,8 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.HttpClient;
+import com.smartitengineering.util.rest.client.EntityResource;
 import java.util.Collection;
 import javax.activation.MimeTypeParseException;
 import javax.ws.rs.core.MediaType;
@@ -63,7 +65,7 @@ public class PaginatedEntitiesWrapper<T> {
   protected PaginatedEntitiesWrapper<T> getPaginatedWrapperFromFeedLink(Link link) {
     try {
       if (link != null && link.getMimeType().match(MediaType.APPLICATION_ATOM_XML)) {
-        Feed newFeed = ClientUtil.readEntity(link, client, MediaType.APPLICATION_ATOM_XML, Feed.class);
+        Feed newFeed = AtomClientUtil.readEntity(link, client, MediaType.APPLICATION_ATOM_XML, Feed.class);
         return new PaginatedEntitiesWrapper<T>(newFeed, client, feedEntryReader);
       }
     }
@@ -74,7 +76,7 @@ public class PaginatedEntitiesWrapper<T> {
 
   }
 
-  public Collection<Resource<T>> getEntitiesForCurrentPage() {
+  public Collection<EntityResource<T>> getEntitiesForCurrentPage() {
     return feedEntryReader.readEntriesFromRooFeed(rootFeed);
   }
 

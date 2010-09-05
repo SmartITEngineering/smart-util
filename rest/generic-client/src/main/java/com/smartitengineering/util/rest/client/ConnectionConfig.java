@@ -15,38 +15,48 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  10-1  USA
  */
-package com.smartitengineering.util.rest.atom;
-
-import java.net.URI;
+package com.smartitengineering.util.rest.client;
 
 /**
  *
- * @author imyousuf
+ * @author russel
  */
-public class Resource<T> {
+public class ConnectionConfig {
 
-  private T entity;
-  private URI resourceUri;
-  private Resource parent;
+    private String basicUri;
+    private int port;
+    private String host;
+    private String contextPath;
 
-  public Resource(T entity, URI resourceUri, Resource parent) {
-    if (entity == null || resourceUri == null) {
-      throw new IllegalArgumentException();
+  public String getHost() {
+    return host;
+  }
+
+  public void setHost(String host) {
+    this.host = host;
+  }
+
+    public String getBasicUri() {
+        return basicUri;
     }
-    this.entity = entity;
-    this.parent = parent;
-    this.resourceUri = resourceUri;
-  }
 
-  public T getEntity() {
-    return entity;
-  }
+    public void setBasicUri(String basicUrl) {
+        this.basicUri = basicUrl;
+    }
 
-  public <P> Resource<P> getParent() {
-    return parent;
-  }
+    public String getContextPath() {
+        return contextPath;
+    }
 
-  public URI getResourceUri() {
-    return resourceUri;
-  }
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

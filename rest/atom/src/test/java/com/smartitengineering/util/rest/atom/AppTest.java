@@ -17,14 +17,17 @@
  */
 package com.smartitengineering.util.rest.atom;
 
+import com.smartitengineering.util.rest.client.EntityResource;
+import com.smartitengineering.util.rest.client.HttpClient;
 import com.smartitengineering.util.rest.atom.resources.SomeDomainResource;
 import com.smartitengineering.util.rest.atom.resources.domain.SomeDomain;
+import com.smartitengineering.util.rest.client.ClientUtil;
+import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
-import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.json.impl.provider.entity.JSONRootElementProvider;
 import java.io.File;
 import java.net.URI;
@@ -66,7 +69,7 @@ public class AppTest {
   public static void setupServer()
       throws Exception {
     System.out.println("::: Starting server :::");
-    jettyServer = new Server(9090);
+    jettyServer = new Server(20090);
     final String webapp = "./src/test/webapp";
     if (!new File(webapp).exists()) {
       throw new IllegalStateException("WebApp dir does not exist!");
@@ -88,14 +91,14 @@ public class AppTest {
     DefaultClientConfig config = new DefaultClientConfig();
     config.getClasses().add(FeedProvider.class);
     config.getClasses().add(JSONRootElementProvider.App.class);
-    client = ApacheHttpClient.create(config);
-    httpClient = new HttpClient(client, "localhost", 9090);
+    client = CacheableClient.create(config);
+    httpClient = new HttpClient(client, "localhost", 20090);
   }
 
   @Test
   public void testSimpleGet() {
     System.out.println("::: testSimpleGet :::");
-    WebResource resource = client.resource("http://localhost:9090/");
+    WebResource resource = client.resource("http://localhost:20090/");
     Assert.assertEquals(204, resource.head().getStatus());
   }
 
@@ -103,10 +106,10 @@ public class AppTest {
   public void testFeed() {
     try {
       System.out.println("::: testFeed :::");
-      URI uri = new URI("http://localhost:9090/feed");
+      URI uri = new URI("http://localhost:20090/feed");
       ClientResponse response =
                      ClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
-      Feed feed = ClientUtil.getFeed(response);
+      Feed feed = AtomClientUtil.getFeed(response);
       Assert.assertNotNull(feed);
     }
     catch (URISyntaxException ex) {
@@ -117,7 +120,7 @@ public class AppTest {
   @Test
   public void testJson() {
     System.out.println("::: testJson :::");
-    WebResource resource = client.resource("http://localhost:9090/domain/0");
+    WebResource resource = client.resource("http://localhost:20090/domain/0");
     SomeDomain domain = resource.get(SomeDomain.class);
     Assert.assertNotNull(domain);
   }
@@ -125,13 +128,13 @@ public class AppTest {
   @Test
   public void testFeedReader() {
     System.out.println("::: testFeedReader :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     WebResource resource = client.resource(rootFeedUriStr);
     Feed feed = resource.get(Feed.class);
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
-    Collection<Resource<SomeDomain>> collection = reader.readEntriesFromRooFeed(feed);
+    Collection<EntityResource<SomeDomain>> collection = reader.readEntriesFromRooFeed(feed);
     Assert.assertNotNull(collection);
     Assert.assertEquals(5, collection.size());
     try {
@@ -151,7 +154,7 @@ public class AppTest {
   @Test
   public void testPaginatedWrapper() {
     System.out.println("::: testPaginatedWrapper :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
@@ -162,7 +165,7 @@ public class AppTest {
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       //Thread.sleep(10000);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
-      List<Resource<SomeDomain>> domainList = new ArrayList<Resource<SomeDomain>>(SomeDomainResource.DOMAIN_SIZE);
+      List<EntityResource<SomeDomain>> domainList = new ArrayList<EntityResource<SomeDomain>>(SomeDomainResource.DOMAIN_SIZE);
       for (int i = 0; i < (SomeDomainResource.DOMAIN_SIZE / newCount); ++i) {
         domainList.addAll(domains.getEntitiesForCurrentPage());
         domains = domains.next();
@@ -179,7 +182,7 @@ public class AppTest {
   @Test
   public void testPaginatedList() {
     System.out.println("::: testPaginatedList :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
@@ -188,7 +191,7 @@ public class AppTest {
       URI uri = new URI(rootFeedUriStr + "?" + SomeDomainResource.COUNT + "=" + newCount);
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
-      List<Resource<SomeDomain>> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
+      List<EntityResource<SomeDomain>> domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains);
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
       final int midSize = SomeDomainResource.DOMAIN_SIZE / 2;
       domainList = new PaginatedFeedEntitiesList<SomeDomain>(domains, midSize);
@@ -203,7 +206,7 @@ public class AppTest {
   @Test
   public void testDynaPaginatedList() {
     System.out.println("::: testDynaPaginatedList :::");
-    final String rootFeedUriStr = "http://localhost:9090/osfeed";
+    final String rootFeedUriStr = "http://localhost:20090/osfeed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
@@ -213,7 +216,7 @@ public class AppTest {
       Feed feed = ClientUtil.readEntity(uri, httpClient, MediaType.APPLICATION_ATOM_XML, Feed.class);
       PaginatedEntitiesWrapper<SomeDomain> domains = new PaginatedEntitiesWrapper<SomeDomain>(feed, httpClient, reader);
       DynamicPaginatedEntitiesList<SomeDomain> dynaDomainList = new DynamicPaginatedEntitiesList<SomeDomain>(domains);
-      List<Resource<SomeDomain>> domainList = dynaDomainList;
+      List<EntityResource<SomeDomain>> domainList = dynaDomainList;
       Assert.assertEquals(SomeDomainResource.DOMAIN_SIZE, domainList.size());
       Assert.assertEquals(0, dynaDomainList.getBackedupList().size());
       Assert.assertNotNull(domainList.get(0));
