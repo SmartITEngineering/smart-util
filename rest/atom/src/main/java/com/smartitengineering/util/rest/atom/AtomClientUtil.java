@@ -18,9 +18,12 @@
 package com.smartitengineering.util.rest.atom;
 
 import com.smartitengineering.util.rest.client.ClientUtil;
+import com.smartitengineering.util.rest.client.DefaultResouceLinkImpl;
 import com.smartitengineering.util.rest.client.HttpClient;
+import com.smartitengineering.util.rest.client.ResouceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import java.net.URI;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.namespace.QName;
 import org.apache.abdera.ext.opensearch.OpenSearchConstants;
 import org.apache.abdera.ext.opensearch.model.IntegerElement;
@@ -31,7 +34,7 @@ import org.apache.abdera.model.Link;
  * A utility method to read entities
  * @author imyousuf
  */
-public class AtomClientUtil {
+public class AtomClientUtil extends ClientUtil {
 
   public static Feed getFeed(ClientResponse response) {
     return response.getEntity(Feed.class);
@@ -77,5 +80,33 @@ public class AtomClientUtil {
   public static int getIntFromOpenSearchIntegerElement(Feed feed, QName qName) {
     IntegerElement element = feed.getExtension(qName);
     return element.getValue();
+  }
+  private static final AtomClientUtil ATOM_CLIENT_UTIL;
+
+  static {
+    ATOM_CLIENT_UTIL = new AtomClientUtil();
+  }
+
+  protected AtomClientUtil() {
+  }
+
+  public static AtomClientUtil getInstance() {
+    return ATOM_CLIENT_UTIL;
+  }
+
+  @Override
+  public <T> void parseLinks(T entity,
+                             MultivaluedMap<String, ResouceLink> uris)
+      throws Exception {
+    if (entity instanceof Feed) {
+      Feed feed = (Feed) entity;
+      for (Link link : feed.getLinks()) {
+        DefaultResouceLinkImpl uri = new DefaultResouceLinkImpl();
+        uri.setMimeType(link.getMimeType().toString());
+        uri.setRel(link.getRel());
+        uri.setUri(link.getHref().toURI());
+        uris.add(link.getRel(), uri);
+      }
+    }
   }
 }

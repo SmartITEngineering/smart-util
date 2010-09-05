@@ -20,13 +20,14 @@ package com.smartitengineering.util.rest.client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.net.URI;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 
 /**
  * A utility method to read entities
  * @author imyousuf
  */
-public class ClientUtil {
+public abstract class ClientUtil {
 
   public static <T> T getResponseEntity(ClientResponse response, Class<? extends T> clazz) {
     return response.getEntity(clazz);
@@ -52,4 +53,8 @@ public class ClientUtil {
     }
     return null;
   }
+
+  public abstract <T> void parseLinks(T entity,
+                                      MultivaluedMap<String, ResouceLink> uris)
+      throws Exception;
 }
