@@ -69,7 +69,7 @@ public class AppTest {
   public static void setupServer()
       throws Exception {
     System.out.println("::: Starting server :::");
-    jettyServer = new Server(9090);
+    jettyServer = new Server(20090);
     final String webapp = "./src/test/webapp";
     if (!new File(webapp).exists()) {
       throw new IllegalStateException("WebApp dir does not exist!");
@@ -92,13 +92,13 @@ public class AppTest {
     config.getClasses().add(FeedProvider.class);
     config.getClasses().add(JSONRootElementProvider.App.class);
     client = CacheableClient.create(config);
-    httpClient = new HttpClient(client, "localhost", 9090);
+    httpClient = new HttpClient(client, "localhost", 20090);
   }
 
   @Test
   public void testSimpleGet() {
     System.out.println("::: testSimpleGet :::");
-    WebResource resource = client.resource("http://localhost:9090/");
+    WebResource resource = client.resource("http://localhost:20090/");
     Assert.assertEquals(204, resource.head().getStatus());
   }
 
@@ -106,7 +106,7 @@ public class AppTest {
   public void testFeed() {
     try {
       System.out.println("::: testFeed :::");
-      URI uri = new URI("http://localhost:9090/feed");
+      URI uri = new URI("http://localhost:20090/feed");
       ClientResponse response =
                      ClientUtil.readClientResponse(uri, httpClient, MediaType.APPLICATION_ATOM_XML);
       Feed feed = AtomClientUtil.getFeed(response);
@@ -120,7 +120,7 @@ public class AppTest {
   @Test
   public void testJson() {
     System.out.println("::: testJson :::");
-    WebResource resource = client.resource("http://localhost:9090/domain/0");
+    WebResource resource = client.resource("http://localhost:20090/domain/0");
     SomeDomain domain = resource.get(SomeDomain.class);
     Assert.assertNotNull(domain);
   }
@@ -128,7 +128,7 @@ public class AppTest {
   @Test
   public void testFeedReader() {
     System.out.println("::: testFeedReader :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     WebResource resource = client.resource(rootFeedUriStr);
     Feed feed = resource.get(Feed.class);
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
@@ -154,7 +154,7 @@ public class AppTest {
   @Test
   public void testPaginatedWrapper() {
     System.out.println("::: testPaginatedWrapper :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
@@ -182,7 +182,7 @@ public class AppTest {
   @Test
   public void testPaginatedList() {
     System.out.println("::: testPaginatedList :::");
-    final String rootFeedUriStr = "http://localhost:9090/feed";
+    final String rootFeedUriStr = "http://localhost:20090/feed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
@@ -206,7 +206,7 @@ public class AppTest {
   @Test
   public void testDynaPaginatedList() {
     System.out.println("::: testDynaPaginatedList :::");
-    final String rootFeedUriStr = "http://localhost:9090/osfeed";
+    final String rootFeedUriStr = "http://localhost:20090/osfeed";
     FeedEntryReader<SomeDomain> reader = new FeedEntryReader<SomeDomain>(httpClient, Arrays.<Entry<String, String>>
         asList(new AbstractMap.SimpleEntry<String, String>(Link.REL_ALTERNATE, MediaType.APPLICATION_JSON)),
                                                                          SomeDomain.class);
