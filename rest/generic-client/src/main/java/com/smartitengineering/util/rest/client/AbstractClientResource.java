@@ -17,13 +17,11 @@
  */
 package com.smartitengineering.util.rest.client;
 
-import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.net.URI;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
@@ -31,12 +29,13 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * An abstract resource representation on client side for a client to a RESTful Web Service. It is designed to have one
- * configuration application wide and one Apache Http Client application wide. It uses the Jersey Cacheable Client which
- * uses HTTPCache4J and thus if the configuration is changed for username/password it will reflect on next request.
+ * configuration application wide and one Apache Http Client application wide by default. It uses the Jersey Cacheable
+ * Client which uses HTTPCache4J and thus if the configuration is changed for username/password it will reflect on next
+ * request. But it is possible to change the client, config by simply specifying your own {@link ClientFactory}
  * @author imyousuf
  * @since 0.2
  */
-public abstract class AbstractClientResource<T> implements Resource<T>, WritableResource<T> {
+public abstract class AbstractClientResource<T> implements Resource<T>, WritableResource<T>, ConfigProcessor {
 
   protected static final URI BASE_URI;
   protected static final ConnectionConfig CONNECTION_CONFIG;
@@ -47,9 +46,6 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
         CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
   }
-  private static Client client;
-  private static ClientConfig clientConfig;
-  private static HttpClient httpClient;
   private Resource referrer;
   private URI thisResourceUri;
   private URI absoluteThisResourceUri;
@@ -58,6 +54,7 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   private T lastReadStateOfEntity;
   private MultivaluedMap<String, ResouceLink> relatedResourceUris;
   private ClientUtil clientUtil;
+  private ClientFactory clientFactory;
 
   protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -72,7 +69,13 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
                                    ClientUtil clientUtil, boolean invokeGet) throws IllegalArgumentException,
                                                                                     UniformInterfaceException {
-    this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet);
+    this(referrer, resouceLink, entityClass, clientUtil, invokeGet, null);
+  }
+
+  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+                                   ClientUtil clientUtil, boolean invokeGet, ClientFactory clientFactory)
+      throws IllegalArgumentException, UniformInterfaceException {
+    this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet, clientFactory);
   }
 
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
@@ -84,7 +87,7 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass, ClientUtil clientUtil) throws
       IllegalArgumentException, UniformInterfaceException {
-    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, true);
+    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, true, null);
   }
 
   /**
@@ -99,8 +102,9 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
    * @throws UniformInterfaceException If status is anything but < 300 or 304.
    */
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
-                                   Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet) throws
-      IllegalArgumentException, UniformInterfaceException {
+                                   Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet,
+                                   ClientFactory clientFactory) throws IllegalArgumentException,
+                                                                       UniformInterfaceException {
     if (thisResourceUri == null) {
       throw new IllegalArgumentException("URI to current resource can not be null");
     }
@@ -110,6 +114,10 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     if (entityClass == null) {
       throw new IllegalArgumentException("Entity class can not be null!");
     }
+    if (clientFactory == null) {
+      clientFactory = ApplicationWideClientFactoryImpl.getClientFactory(CONNECTION_CONFIG, this);
+    }
+    this.clientFactory = clientFactory;
     this.referrer = referrer;
     this.thisResourceUri = thisResourceUri;
     this.representationType = representationType;
@@ -196,6 +204,7 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     return referrer;
   }
 
+  @Deprecated
   public URI getBaseUri() {
     return BASE_URI;
   }
@@ -208,35 +217,31 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
     return absoluteThisResourceUri;
   }
 
+  @Deprecated
   protected UriBuilder getBaseUriBuilder() {
     return UriBuilder.fromUri(BASE_URI.toString());
   }
 
-  protected Client getClient() {
-    if (client == null) {
-      client = initializeClient();
-    }
-    return client;
+  protected UriBuilder getCurrentUriBuilder() {
+    return UriBuilder.fromUri(getAbsoluteThisResourceUri());
   }
 
-  protected Client initializeClient() {
-    processClientConfig(getClientConfig());
-    return CacheableClient.create(getClientConfig());
+  protected final Client getClient() {
+    return clientFactory.getClient();
   }
 
-  protected ClientConfig getClientConfig() {
-    if (clientConfig == null) {
-      clientConfig = new DefaultClientConfig();
-    }
-    return clientConfig;
+  protected final ClientConfig getClientConfig() {
+    return clientFactory.getClientConfig();
   }
 
   protected final HttpClient getHttpClient() {
-    if (httpClient == null) {
-      httpClient = new HttpClient(getClient(), BASE_URI.getHost(), CONNECTION_CONFIG.getPort());
-    }
-    return httpClient;
+    return clientFactory.getHttpClient();
   }
 
   protected abstract void processClientConfig(ClientConfig clientConfig);
+
+  @Override
+  public final void process(ClientConfig clientConfig) {
+    processClientConfig(clientConfig);
+  }
 }
