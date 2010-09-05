@@ -52,16 +52,26 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   private Class<? extends T> entityClass;
   private T lastReadStateOfEntity;
   private MultivaluedMap<String, ResouceLink> relatedResourceUris;
+  private ClientUtil clientUtil;
 
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass) {
+    this(referrer, thisResourceUri, representationType, entityClass, null);
+  }
+  protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
+                                   Class<? extends T> entityClass, ClientUtil clientUtil) {
     this.referrer = referrer;
     this.thisResourceUri = thisResourceUri;
     this.representationType = representationType;
     this.entityClass = entityClass;
+    this.relatedResourceUris = new ConcurrentMultivalueMap<String, com.smartitengineering.util.rest.client.ResouceLink>();
+    this.clientUtil = clientUtil;
     this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
         getUri());
-    this.relatedResourceUris = new ConcurrentMultivalueMap<String, com.smartitengineering.util.rest.client.ResouceLink>();
+  }
+
+  protected ClientUtil getClientUtil() {
+    return clientUtil;
   }
 
   protected MultivaluedMap<String, ResouceLink> getRelatedResourceUris() {
@@ -82,6 +92,14 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   public T get() {
     lastReadStateOfEntity = ClientUtil.readEntity(getUri(), getHttpClient(), getResourceRepresentationType(),
                                                   getEntityClass());
+    if(getClientUtil() != null) {
+      try {
+        getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
     return lastReadStateOfEntity;
   }
 
