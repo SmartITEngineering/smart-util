@@ -78,4 +78,10 @@ public class CacheableClient
                                        IoCComponentProviderFactory provider) {
     return new CacheableClient(createDefaultClientHander(), cc, provider);
   }
+
+  public static CacheableClient create(ClientConfig cc,
+                                       CacheableClientHandler clientHandler,
+                                       IoCComponentProviderFactory provider) {
+    return new CacheableClient(clientHandler, cc, provider);
+  }
 }
