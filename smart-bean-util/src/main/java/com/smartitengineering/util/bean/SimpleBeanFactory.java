@@ -38,7 +38,7 @@ public class SimpleBeanFactory
 				this.beanContainer = beanContainer;
 		}
 
-		public boolean containsBean(String beanName)
+		public boolean containsBean(String beanName, Class beanClass)
 						throws IllegalArgumentException {
 				if (StringUtils.isBlank(beanName)) {
 						throw new IllegalArgumentException("Bean Name can not be blank!");
@@ -52,7 +52,7 @@ public class SimpleBeanFactory
 				if (StringUtils.isBlank(beanName)) {
 						throw new IllegalArgumentException("Bean Name can not be blank!");
 				}
-				if (!containsBean(beanName)) {
+				if (!containsBean(beanName, beanClass)) {
 						throw new IllegalArgumentException("No such bean in factory!");
 				}
 				return get(beanName);

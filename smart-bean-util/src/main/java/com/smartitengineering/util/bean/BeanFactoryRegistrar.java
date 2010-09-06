@@ -103,9 +103,8 @@ public class BeanFactoryRegistrar {
 						if (StringUtils.isNotEmpty(beanName)) {
 								try {
 										declaredField.setAccessible(true);
-										if (beanFactory.containsBean(beanName)) {
-												final Class<?> fieldType =
-																			 declaredField.getType();
+                    final Class<?> fieldType = declaredField.getType();
+										if (beanFactory.containsBean(beanName, fieldType)) {
 												declaredField.set(aggregator, beanFactory.getBean(
 																beanName, fieldType));
 										}
