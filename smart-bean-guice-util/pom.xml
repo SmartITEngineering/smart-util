@@ -40,5 +40,9 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-util</groupId>
+      <artifactId>smart-bean-util</artifactId>
+    </dependency>
   </dependencies>
 </project>
