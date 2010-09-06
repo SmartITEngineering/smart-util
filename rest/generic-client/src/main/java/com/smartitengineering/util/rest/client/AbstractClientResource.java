@@ -58,7 +58,7 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
 
   protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
-    this(referrer, resouceLink, entityClass, null);
+    this(referrer, resouceLink, entityClass, ClientUtilFactory.getInstance().getClientUtil(entityClass));
   }
 
   protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
@@ -81,7 +81,8 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass) throws IllegalArgumentException,
                                                                           UniformInterfaceException {
-    this(referrer, thisResourceUri, representationType, entityClass, null);
+    this(referrer, thisResourceUri, representationType, entityClass, ClientUtilFactory.getInstance().getClientUtil(
+        entityClass));
   }
 
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
