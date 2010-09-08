@@ -56,6 +56,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private MultivaluedMap<String, ResouceLink> relatedResourceUris;
   private ClientUtil clientUtil;
   private ClientFactory clientFactory;
+  private int getInvocationCount;
 
   protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -133,6 +134,16 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     }
   }
 
+  protected void getIfFirstTimeRequest() {
+    if (getGetInvocationCount() <= 0) {
+      get();
+    }
+  }
+
+  protected int getGetInvocationCount() {
+    return getInvocationCount;
+  }
+
   protected ClientUtil getClientUtil() {
     return clientUtil;
   }
@@ -153,6 +164,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
 
   @Override
   public T get() {
+    getInvocationCount++;
     ClientResponse response = ClientUtil.readEntity(getUri(), getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
     if (response.getStatus() < 300 ||
@@ -262,7 +274,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   protected abstract ResouceLink getPreviousUri();
 
   protected P getPageableResource(ResouceLink link) {
-    if(link == null) {
+    if (link == null) {
       return null;
     }
     return instantiatePageableResource(link);
