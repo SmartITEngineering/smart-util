@@ -35,7 +35,8 @@ import org.apache.commons.lang.StringUtils;
  * @author imyousuf
  * @since 0.2
  */
-public abstract class AbstractClientResource<T> implements Resource<T>, WritableResource<T>, ConfigProcessor {
+public abstract class AbstractClientResource<T, P extends Resource> implements Resource<T>, WritableResource<T>,
+                                                                               PaginatedResource<P>, ConfigProcessor {
 
   protected static final URI BASE_URI;
   protected static final ConnectionConfig CONNECTION_CONFIG;
@@ -245,4 +246,27 @@ public abstract class AbstractClientResource<T> implements Resource<T>, Writable
   public final void process(ClientConfig clientConfig) {
     processClientConfig(clientConfig);
   }
+
+  @Override
+  public P next() {
+    return getPageableResource(getNextUri());
+  }
+
+  @Override
+  public P previous() {
+    return getPageableResource(getPreviousUri());
+  }
+
+  protected abstract ResouceLink getNextUri();
+
+  protected abstract ResouceLink getPreviousUri();
+
+  protected P getPageableResource(ResouceLink link) {
+    if(link == null) {
+      return null;
+    }
+    return instantiatePageableResource(link);
+  }
+
+  protected abstract P instantiatePageableResource(ResouceLink link);
 }
