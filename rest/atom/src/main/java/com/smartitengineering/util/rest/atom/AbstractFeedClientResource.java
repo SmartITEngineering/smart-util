@@ -19,7 +19,7 @@ package com.smartitengineering.util.rest.atom;
 
 import com.smartitengineering.util.rest.client.AbstractClientResource;
 import com.smartitengineering.util.rest.client.ClientFactory;
-import com.smartitengineering.util.rest.client.ResouceLink;
+import com.smartitengineering.util.rest.client.ResourceLink;
 import com.smartitengineering.util.rest.client.Resource;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import java.net.URI;
@@ -33,17 +33,17 @@ import org.apache.abdera.model.Link;
  */
 public abstract class AbstractFeedClientResource<P extends Resource<? extends Feed>> extends AbstractClientResource<Feed, P> {
 
-  protected AbstractFeedClientResource(Resource referrer, ResouceLink resouceLink) throws
+  protected AbstractFeedClientResource(Resource referrer, ResourceLink resouceLink) throws
       IllegalArgumentException, UniformInterfaceException {
     this(referrer, resouceLink, true);
   }
 
-  protected AbstractFeedClientResource(Resource referrer, ResouceLink resouceLink, boolean invokeGet) throws
+  protected AbstractFeedClientResource(Resource referrer, ResourceLink resouceLink, boolean invokeGet) throws
       IllegalArgumentException, UniformInterfaceException {
     this(referrer, resouceLink, invokeGet, null);
   }
 
-  protected AbstractFeedClientResource(Resource referrer, ResouceLink resouceLink, boolean invokeGet,
+  protected AbstractFeedClientResource(Resource referrer, ResourceLink resouceLink, boolean invokeGet,
                                        ClientFactory clientFactory) throws IllegalArgumentException,
                                                                            UniformInterfaceException {
     this(referrer, resouceLink.getUri(), invokeGet, clientFactory);
@@ -62,13 +62,13 @@ public abstract class AbstractFeedClientResource<P extends Resource<? extends Fe
   }
 
   @Override
-  protected ResouceLink getNextUri() {
+  protected ResourceLink getNextUri() {
     getIfFirstTimeRequest();
     return getRelatedResourceUris().getFirst(Link.REL_NEXT);
   }
 
   @Override
-  protected ResouceLink getPreviousUri() {
+  protected ResourceLink getPreviousUri() {
     getIfFirstTimeRequest();
     return getRelatedResourceUris().getFirst(Link.REL_PREVIOUS);
   }

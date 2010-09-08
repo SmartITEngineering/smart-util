@@ -45,17 +45,17 @@ public class SimpleResourceImpl<T> extends AbstractClientResource<T, Resource> {
   }
 
   @Override
-  protected ResouceLink getNextUri() {
+  protected ResourceLink getNextUri() {
     return null;
   }
 
   @Override
-  protected ResouceLink getPreviousUri() {
+  protected ResourceLink getPreviousUri() {
     return null;
   }
 
   @Override
-  protected Resource instantiatePageableResource(ResouceLink link) {
+  protected Resource instantiatePageableResource(ResourceLink link) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

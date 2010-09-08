@@ -37,6 +37,14 @@ public abstract class ClientUtil {
     return readEntity(uri, client, acceptType, ClientResponse.class);
   }
 
+  public static ResourceLink createResourceLink(String rel, URI uri, String mimeType) {
+    DefaultResouceLinkImpl linkImpl = new DefaultResouceLinkImpl();
+    linkImpl.setMimeType(mimeType);
+    linkImpl.setRel(rel);
+    linkImpl.setUri(uri);
+    return linkImpl;
+  }
+
   public static <T> T readEntity(final URI uri, HttpClient client, String acceptType, Class<? extends T> clazz) {
     if (uri != null && client != null && clazz != null) {
       try {
@@ -55,6 +63,6 @@ public abstract class ClientUtil {
   }
 
   public abstract <T> void parseLinks(T entity,
-                                      MultivaluedMap<String, ResouceLink> uris)
+                                      MultivaluedMap<String, ResourceLink> uris)
       throws Exception;
 }

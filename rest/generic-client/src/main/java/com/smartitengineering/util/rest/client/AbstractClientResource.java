@@ -53,28 +53,28 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private String representationType;
   private Class<? extends T> entityClass;
   private T lastReadStateOfEntity;
-  private MultivaluedMap<String, ResouceLink> relatedResourceUris;
+  private MultivaluedMap<String, ResourceLink> relatedResourceUris;
   private ClientUtil clientUtil;
   private ClientFactory clientFactory;
   private int getInvocationCount;
 
-  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass) throws
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
     this(referrer, resouceLink, entityClass, ClientUtilFactory.getInstance().getClientUtil(entityClass));
   }
 
-  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass,
                                    ClientUtil clientUtil) throws IllegalArgumentException, UniformInterfaceException {
     this(referrer, resouceLink, entityClass, clientUtil, true);
   }
 
-  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass,
                                    ClientUtil clientUtil, boolean invokeGet) throws IllegalArgumentException,
                                                                                     UniformInterfaceException {
     this(referrer, resouceLink, entityClass, clientUtil, invokeGet, null);
   }
 
-  protected AbstractClientResource(Resource referrer, ResouceLink resouceLink, Class<? extends T> entityClass,
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass,
                                    ClientUtil clientUtil, boolean invokeGet, ClientFactory clientFactory)
       throws IllegalArgumentException, UniformInterfaceException {
     this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet, clientFactory);
@@ -125,7 +125,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     this.thisResourceUri = thisResourceUri;
     this.representationType = representationType;
     this.entityClass = entityClass;
-    this.relatedResourceUris = new ConcurrentMultivalueMap<String, ResouceLink>();
+    this.relatedResourceUris = new ConcurrentMultivalueMap<String, ResourceLink>();
     this.clientUtil = clientUtil;
     this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
         getUri());
@@ -148,7 +148,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     return clientUtil;
   }
 
-  protected MultivaluedMap<String, ResouceLink> getRelatedResourceUris() {
+  protected MultivaluedMap<String, ResourceLink> getRelatedResourceUris() {
     return relatedResourceUris;
   }
 
@@ -269,16 +269,16 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     return getPageableResource(getPreviousUri());
   }
 
-  protected abstract ResouceLink getNextUri();
+  protected abstract ResourceLink getNextUri();
 
-  protected abstract ResouceLink getPreviousUri();
+  protected abstract ResourceLink getPreviousUri();
 
-  protected P getPageableResource(ResouceLink link) {
+  protected P getPageableResource(ResourceLink link) {
     if (link == null) {
       return null;
     }
     return instantiatePageableResource(link);
   }
 
-  protected abstract P instantiatePageableResource(ResouceLink link);
+  protected abstract P instantiatePageableResource(ResourceLink link);
 }

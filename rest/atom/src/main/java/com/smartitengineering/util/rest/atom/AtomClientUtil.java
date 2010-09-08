@@ -20,7 +20,7 @@ package com.smartitengineering.util.rest.atom;
 import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.DefaultResouceLinkImpl;
 import com.smartitengineering.util.rest.client.HttpClient;
-import com.smartitengineering.util.rest.client.ResouceLink;
+import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -103,18 +103,18 @@ public class AtomClientUtil extends ClientUtil {
 
   @Override
   public <T> void parseLinks(T entity,
-                             MultivaluedMap<String, ResouceLink> uris)
+                             MultivaluedMap<String, ResourceLink> uris)
       throws Exception {
     if (entity instanceof Feed) {
       Feed feed = (Feed) entity;
       for (Link link : feed.getLinks()) {
-        ResouceLink resouceLink = convertFromAtomLinkToResourceLinkInternally(link);
+        ResourceLink resouceLink = convertFromAtomLinkToResourceLinkInternally(link);
         uris.add(link.getRel(), resouceLink);
       }
     }
   }
 
-  public static ResouceLink convertFromAtomLinkToResourceLink(Link link) {
+  public static ResourceLink convertFromAtomLinkToResourceLink(Link link) {
     try {
       return convertFromAtomLinkToResourceLinkInternally(link);
     }
@@ -124,7 +124,7 @@ public class AtomClientUtil extends ClientUtil {
     }
   }
 
-  private static ResouceLink convertFromAtomLinkToResourceLinkInternally(Link link)
+  private static ResourceLink convertFromAtomLinkToResourceLinkInternally(Link link)
       throws URISyntaxException {
     DefaultResouceLinkImpl resourceLink = new DefaultResouceLinkImpl();
     final MimeType mimeType = link.getMimeType();
@@ -139,7 +139,7 @@ public class AtomClientUtil extends ClientUtil {
     return resourceLink;
   }
 
-  public static Link convertFromResourceLinkToAtomLink(ResouceLink resouceLink) {
+  public static Link convertFromResourceLinkToAtomLink(ResourceLink resouceLink) {
     Link link = ABDERA_FACTORY.newLink();
     link.setRel(resouceLink.getRel());
     link.setMimeType(resouceLink.getMimeType());

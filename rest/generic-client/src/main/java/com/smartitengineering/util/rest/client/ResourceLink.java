@@ -23,7 +23,7 @@ import java.net.URI;
  *
  * @author imyousuf
  */
-public interface ResouceLink {
+public interface ResourceLink {
 
   public URI getUri();
 

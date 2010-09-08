@@ -23,7 +23,7 @@ import java.net.URI;
  *
  * @author imyousuf
  */
-public class DefaultResouceLinkImpl implements ResouceLink {
+public class DefaultResouceLinkImpl implements ResourceLink {
 
   private URI uri;
   private String mimeType;
