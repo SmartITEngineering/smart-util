@@ -23,6 +23,10 @@ package com.smartitengineering.util.rest.client;
  */
 public interface PaginatedResource<T extends Resource> {
 
+  ResourceLink nextUri();
+
+  ResourceLink previousUri();
+
   T next();
 
   T previous();

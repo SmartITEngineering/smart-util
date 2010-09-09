@@ -260,13 +260,23 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   }
 
   @Override
+  public ResourceLink nextUri() {
+    return getNextUri();
+  }
+
+  @Override
+  public ResourceLink previousUri() {
+    return getPreviousUri();
+  }
+
+  @Override
   public P next() {
-    return getPageableResource(getNextUri());
+    return getPageableResource(nextUri());
   }
 
   @Override
   public P previous() {
-    return getPageableResource(getPreviousUri());
+    return getPageableResource(previousUri());
   }
 
   protected abstract ResourceLink getNextUri();
