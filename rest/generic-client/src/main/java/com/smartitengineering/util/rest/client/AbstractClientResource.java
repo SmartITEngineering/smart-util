@@ -185,6 +185,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
 
   @Override
   public T getLastReadStateOfEntity() {
+    getIfFirstTimeRequest();
     return lastReadStateOfEntity;
   }
 
