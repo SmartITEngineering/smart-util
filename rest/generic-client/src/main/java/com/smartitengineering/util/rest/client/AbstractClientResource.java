@@ -21,6 +21,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.net.URI;
 import javax.ws.rs.core.MultivaluedMap;
@@ -203,15 +204,15 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public <P> ClientResponse put(String contentType, P param) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    webResource.type(contentType);
-    return webResource.put(ClientResponse.class, param);
+    Builder builder = webResource.type(contentType);
+    return builder.put(ClientResponse.class, param);
   }
 
   @Override
   public <P> ClientResponse post(String contentType, P param) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    webResource.type(contentType);
-    return webResource.post(ClientResponse.class, param);
+    Builder builder = webResource.type(contentType);
+    return builder.post(ClientResponse.class, param);
   }
 
   @Override
