@@ -57,8 +57,14 @@ public abstract class AbstractFeedClientResource<P extends Resource<? extends Fe
   protected AbstractFeedClientResource(Resource referrer, URI thisResourceUri, boolean invokeGet,
                                        ClientFactory clientFactory) throws IllegalArgumentException,
                                                                            UniformInterfaceException {
+    this(referrer, thisResourceUri, invokeGet, clientFactory, true);
+  }
+
+  protected AbstractFeedClientResource(Resource referrer, URI thisResourceUri, boolean invokeGet,
+                                       ClientFactory clientFactory, boolean followRedirection) throws
+      IllegalArgumentException, UniformInterfaceException {
     super(referrer, thisResourceUri, MediaType.APPLICATION_ATOM_XML, Feed.class, AtomClientUtil.getInstance(), invokeGet,
-          clientFactory);
+          clientFactory, followRedirection);
   }
 
   @Override

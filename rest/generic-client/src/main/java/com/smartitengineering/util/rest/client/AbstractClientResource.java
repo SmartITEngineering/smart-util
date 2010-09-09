@@ -60,6 +60,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private ClientUtil clientUtil;
   private ClientFactory clientFactory;
   private int getInvocationCount;
+  private boolean followRedirection;
 
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -80,7 +81,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass,
                                    ClientUtil clientUtil, boolean invokeGet, ClientFactory clientFactory)
       throws IllegalArgumentException, UniformInterfaceException {
-    this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet, clientFactory);
+    this(referrer, resouceLink.getUri(), resouceLink.getMimeType(), entityClass, clientUtil, invokeGet, clientFactory,
+         true);
   }
 
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
@@ -93,7 +95,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass, ClientUtil clientUtil) throws
       IllegalArgumentException, UniformInterfaceException {
-    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, true, null);
+    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, true, null, true);
   }
 
   /**
@@ -109,8 +111,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
    */
   protected AbstractClientResource(Resource referrer, URI thisResourceUri, String representationType,
                                    Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet,
-                                   ClientFactory clientFactory) throws IllegalArgumentException,
-                                                                       UniformInterfaceException {
+                                   ClientFactory clientFactory, boolean followRedirection) throws
+      IllegalArgumentException, UniformInterfaceException {
     if (thisResourceUri == null) {
       throw new IllegalArgumentException("URI to current resource can not be null");
     }
@@ -130,11 +132,21 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     this.entityClass = entityClass;
     this.relatedResourceUris = new ConcurrentMultivalueMap<String, ResourceLink>();
     this.clientUtil = clientUtil;
-    this.absoluteThisResourceUri = getHttpClient().getAbsoluteUri(thisResourceUri, referrer == null ? null : referrer.
-        getUri());
+    this.absoluteThisResourceUri = generateAbsoluteUri();
+    this.followRedirection = followRedirection;
     if (invokeGet) {
       get();
     }
+  }
+
+  protected final URI generateAbsoluteUri() {
+    final URI thisUri = this.thisResourceUri;
+    final URI referrerUri = getReferrerUri();
+    return getHttpClient().getAbsoluteUri(thisUri, referrerUri);
+  }
+
+  protected final URI getReferrerUri() {
+    return this.referrer == null ? null : this.referrer.getUri();
   }
 
   protected void getIfFirstTimeRequest() {
@@ -167,11 +179,32 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
 
   @Override
   public T get() {
+    return get(getUri());
+  }
+
+  protected T get(URI uri) {
     getInvocationCount++;
-    ClientResponse response = ClientUtil.readEntity(getUri(), getHttpClient(), getResourceRepresentationType(),
+    ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
-    if (response.getStatus() < 300 ||
-        (response.getStatus() == ClientResponse.Status.NOT_MODIFIED.getStatusCode() && response.hasEntity())) {
+    final int status = response.getStatus();
+    if (followRedirection && status == ClientResponse.Status.MOVED_PERMANENTLY.getStatusCode()) {
+      final URI location = response.getLocation();
+      if (location != null) {
+        this.thisResourceUri = location;
+        this.absoluteThisResourceUri = generateAbsoluteUri();
+        return get();
+      }
+    }
+    if (followRedirection && (status == ClientResponse.Status.FOUND.getStatusCode() ||
+                              status == ClientResponse.Status.SEE_OTHER.getStatusCode())) {
+      final URI location = response.getLocation();
+      if (location != null) {
+        URI absolutionLocation = getHttpClient().getAbsoluteUri(location, getReferrerUri());
+        return get(absolutionLocation);
+      }
+    }
+    if (status < 300 ||
+        (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode() && response.hasEntity())) {
       lastReadStateOfEntity = response.getEntity(getEntityClass());
       if (getClientUtil() != null) {
         try {

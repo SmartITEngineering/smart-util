@@ -33,7 +33,15 @@ public class SimpleResourceImpl<T> extends AbstractClientResource<T, Resource> {
                             Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet,
                             ClientFactory clientFactory, ConfigProcessor processor) throws IllegalArgumentException,
                                                                                            UniformInterfaceException {
-    super(referrer, thisResourceUri, representationType, entityClass, clientUtil, invokeGet, clientFactory);
+    this(referrer, thisResourceUri, representationType, entityClass, clientUtil, invokeGet, clientFactory, true,
+         processor);
+  }
+
+  public SimpleResourceImpl(Resource referrer, URI thisResourceUri, String representationType,
+                            Class<? extends T> entityClass, ClientUtil clientUtil, boolean invokeGet,
+                            ClientFactory clientFactory, boolean followRedirection, ConfigProcessor processor) throws
+      IllegalArgumentException, UniformInterfaceException {
+    super(referrer, thisResourceUri, representationType, entityClass, clientUtil, invokeGet, clientFactory, true);
     this.processor = processor;
   }
 
