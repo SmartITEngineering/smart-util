@@ -19,11 +19,13 @@ package com.smartitengineering.util.rest.client;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.net.URI;
+import java.util.Arrays;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -196,23 +198,29 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   }
 
   @Override
-  public ClientResponse delete() {
+  public ClientResponse delete(Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    return webResource.delete(ClientResponse.class);
+    final ClientResponse response = webResource.delete(ClientResponse.class);
+    checkStatus(response, status);
+    return response;
   }
 
   @Override
-  public <P> ClientResponse put(String contentType, P param) {
+  public <P> ClientResponse put(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
     Builder builder = webResource.type(contentType);
-    return builder.put(ClientResponse.class, param);
+    final ClientResponse response = builder.put(ClientResponse.class, param);
+    checkStatus(response, status);
+    return response;
   }
 
   @Override
-  public <P> ClientResponse post(String contentType, P param) {
+  public <P> ClientResponse post(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
     Builder builder = webResource.type(contentType);
-    return builder.post(ClientResponse.class, param);
+    final ClientResponse response = builder.post(ClientResponse.class, param);
+    checkStatus(response, status);
+    return response;
   }
 
   @Override
@@ -293,4 +301,14 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   }
 
   protected abstract P instantiatePageableResource(ResourceLink link);
+
+  protected void checkStatus(ClientResponse response, Status... status) {
+    if (status == null || status.length == 0) {
+      return;
+    }
+    if (Arrays.<Status>asList(status).contains(response.getClientResponseStatus())) {
+      return;
+    }
+    throw new UniformInterfaceException(response);
+  }
 }

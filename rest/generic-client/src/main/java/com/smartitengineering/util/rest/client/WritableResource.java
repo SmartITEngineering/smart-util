@@ -18,6 +18,7 @@
 package com.smartitengineering.util.rest.client;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 /**
  *
@@ -25,10 +26,10 @@ import com.sun.jersey.api.client.ClientResponse;
  */
 public interface WritableResource<T> extends Resource<T> {
 
-  public <P> ClientResponse put(String contentType, P param);
+  public <P> ClientResponse put(String contentType, P param, Status... status);
 
-  public <P> ClientResponse post(String contentType, P param);
+  public <P> ClientResponse post(String contentType, P param, Status... status);
 
-  public ClientResponse delete();
+  public ClientResponse delete(Status... status);
 
 }
