@@ -137,4 +137,7 @@
     <module>opensearch</module>
     <module>smart-bean-guice-util</module>
   </modules>
+  <properties>
+    <jersey.version>1.4-SNAPSHOT</jersey.version>
+  </properties>
 </project>
