@@ -20,7 +20,7 @@ package com.smartitengineering.util.rest.client;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 
 /**
  *
@@ -36,7 +36,7 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
     if(connectionConfig == null) {
       throw new IllegalArgumentException("Connection config can not be null!");
     }
-    clientConfig = new DefaultClientConfig();
+    clientConfig = new DefaultApacheHttpClientConfig();
     if (processor != null) {
       processor.process(clientConfig);
     }
