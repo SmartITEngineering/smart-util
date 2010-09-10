@@ -21,6 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.smartitengineering.util.bean.BeanFactory;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -46,13 +47,23 @@ public class GoogleGuiceBeanFactory
   public boolean containsBean(String beanName,
                               Class beanClass)
       throws IllegalArgumentException {
-    return injector.getInstance(Key.get(beanClass, Names.named(beanName))) != null;
+    return getBean(beanName, beanClass) != null;
   }
 
   @Override
   public Object getBean(String beanName,
                         Class beanClass)
       throws IllegalArgumentException {
-    return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+    if (StringUtils.isNotBlank(beanName)) {
+      return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+    }
+    else {
+      return injector.getInstance(beanClass);
+    }
+  }
+
+  @Override
+  public boolean isNameMandatory() {
+    return false;
   }
 }

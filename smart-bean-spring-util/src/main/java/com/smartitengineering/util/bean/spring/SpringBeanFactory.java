@@ -61,4 +61,9 @@ public class SpringBeanFactory
 						return beanFactory.getBean(beanName, beanClass);
 				}
     }
+
+  @Override
+  public boolean isNameMandatory() {
+    return true;
+  }
 }

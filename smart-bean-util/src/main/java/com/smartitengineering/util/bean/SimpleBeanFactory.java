@@ -65,4 +65,9 @@ public class SimpleBeanFactory
 		protected Object get(String beanName) {
 				return beanContainer.get(beanName);
 		}
+
+  @Override
+  public boolean isNameMandatory() {
+    return true;
+  }
 }

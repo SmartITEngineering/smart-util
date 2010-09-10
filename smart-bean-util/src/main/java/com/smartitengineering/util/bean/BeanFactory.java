@@ -46,4 +46,6 @@ public interface BeanFactory {
 		public Object getBean(String beanName,
 													Class beanClass)
 						throws IllegalArgumentException;
+
+    public boolean isNameMandatory();
 }
