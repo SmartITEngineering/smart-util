@@ -93,7 +93,7 @@ public class PropertiesLocator {
         return searchLocations;
     }
 
-    public void setSearchLocations(String[] searchLocations) {
+    public void setSearchLocations(String... searchLocations) {
         this.searchLocations = searchLocations;
     }
 
@@ -101,7 +101,7 @@ public class PropertiesLocator {
         return smartLocations;
     }
 
-    public void setSmartLocations(String[] smartLocations) {
+    public void setSmartLocations(String... smartLocations) {
         this.smartLocations = smartLocations;
     }
 
