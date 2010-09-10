@@ -27,10 +27,11 @@ public interface BeanFactory {
 		/**
 		 * Checks whether the bean is available in the factory of not.
 		 * @param beanName Name of the bean to search with
+     * @param beanClass Class expected from the bean factory
 		 * @return True iff there is a bean in this name
 		 * @throws java.lang.IllegalArgumentException If beanName is blank
 		 */
-		public boolean containsBean(String beanName)
+		public boolean containsBean(String beanName, Class beanClass)
 						throws IllegalArgumentException;
 
 		/**
@@ -45,4 +46,6 @@ public interface BeanFactory {
 		public Object getBean(String beanName,
 													Class beanClass)
 						throws IllegalArgumentException;
+
+    public boolean isNameMandatory();
 }

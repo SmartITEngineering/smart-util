@@ -32,92 +32,92 @@ import org.apache.commons.lang.StringUtils;
  */
 public class BeanFactoryRegistrar {
 
-		private static final Map<String, BeanFactory> beanFactories =
-																									new WeakHashMap<String, BeanFactory>();
+  private static final Map<String, BeanFactory> beanFactories =
+                                                new WeakHashMap<String, BeanFactory>();
 
-		public static void registerBeanFactory(final String beanFactoryContextName,
-																					 final BeanFactory beanFactory) {
-				if (beanFactory == null || StringUtils.isBlank(beanFactoryContextName)) {
-						throw new IllegalArgumentException();
-				}
-				synchronized (beanFactories) {
-						beanFactories.put(beanFactoryContextName, beanFactory);
-				}
-		}
+  public static void registerBeanFactory(final String beanFactoryContextName,
+                                         final BeanFactory beanFactory) {
+    if (beanFactory == null || StringUtils.isBlank(beanFactoryContextName)) {
+      throw new IllegalArgumentException();
+    }
+    synchronized (beanFactories) {
+      beanFactories.put(beanFactoryContextName, beanFactory);
+    }
+  }
 
-		public static void deregisterBeanFactory(final String beanFactoryContextName) {
-				if (StringUtils.isBlank(beanFactoryContextName)) {
-						throw new IllegalArgumentException();
-				}
-				synchronized (beanFactories) {
-						beanFactories.remove(beanFactoryContextName);
-				}
-		}
+  public static void deregisterBeanFactory(final String beanFactoryContextName) {
+    if (StringUtils.isBlank(beanFactoryContextName)) {
+      throw new IllegalArgumentException();
+    }
+    synchronized (beanFactories) {
+      beanFactories.remove(beanFactoryContextName);
+    }
+  }
 
-		public static BeanFactory getBeanFactorForContext(
-						final String beanFactoryContextName) {
-				return beanFactories.get(beanFactoryContextName);
-		}
+  public static BeanFactory getBeanFactorForContext(
+      final String beanFactoryContextName) {
+    return beanFactories.get(beanFactoryContextName);
+  }
 
-		public static void aggregate(Object aggregator) {
-				if (aggregator == null || aggregator.getClass().equals(Object.class)) {
-						return;
-				}
-				Class<? extends Object> aggregatorClass = aggregator.getClass();
-				if (aggregate(aggregatorClass, aggregator)) {
-						return;
-				}
-		}
+  public static void aggregate(Object aggregator) {
+    if (aggregator == null || aggregator.getClass().equals(Object.class)) {
+      return;
+    }
+    Class<? extends Object> aggregatorClass = aggregator.getClass();
+    if (aggregate(aggregatorClass, aggregator)) {
+      return;
+    }
+  }
 
-		private static boolean aggregate(Class<? extends Object> aggregatorClass,
-																		 Object aggregator)
-						throws SecurityException {
-				if (aggregatorClass.equals(Object.class)) {
-						return true;
-				}
-				Class<? extends Object> superClass = aggregatorClass.getSuperclass();
-				if (superClass != null) {
-						aggregate(superClass, aggregator);
-				}
-				Aggregator aggregatorAnnotation =
-									 aggregatorClass.getAnnotation(Aggregator.class);
-				if (aggregatorAnnotation == null ||
-						StringUtils.isBlank(aggregatorAnnotation.contextName())) {
-						return true;
-				}
-				BeanFactory beanFactory =
-										getBeanFactorForContext(aggregatorAnnotation.contextName());
-				if (beanFactory == null) {
-						return true;
-				}
-				Field[] declaredFields = aggregatorClass.getDeclaredFields();
-				for (Field declaredField : declaredFields) {
-						InjectableField injectableField =
-														declaredField.getAnnotation(InjectableField.class);
-						if (injectableField == null) {
-								continue;
-						}
-						String beanName =
-									 StringUtils.isBlank(injectableField.beanName())
-									 ? declaredField.getName() : injectableField.beanName();
-						if (StringUtils.isNotEmpty(beanName)) {
-								try {
-										declaredField.setAccessible(true);
-										if (beanFactory.containsBean(beanName)) {
-												final Class<?> fieldType =
-																			 declaredField.getType();
-												declaredField.set(aggregator, beanFactory.getBean(
-																beanName, fieldType));
-										}
-								}
-								catch (IllegalArgumentException ex) {
-										ex.printStackTrace();
-								}
-								catch (IllegalAccessException ex) {
-										ex.printStackTrace();
-								}
-						}
-				}
-				return false;
-		}
+  private static boolean aggregate(Class<? extends Object> aggregatorClass,
+                                   Object aggregator)
+      throws SecurityException {
+    if (aggregatorClass.equals(Object.class)) {
+      return true;
+    }
+    Class<? extends Object> superClass = aggregatorClass.getSuperclass();
+    if (superClass != null) {
+      aggregate(superClass, aggregator);
+    }
+    Aggregator aggregatorAnnotation =
+               aggregatorClass.getAnnotation(Aggregator.class);
+    if (aggregatorAnnotation == null ||
+        StringUtils.isBlank(aggregatorAnnotation.contextName())) {
+      return true;
+    }
+    BeanFactory beanFactory =
+                getBeanFactorForContext(aggregatorAnnotation.contextName());
+    if (beanFactory == null) {
+      return true;
+    }
+    Field[] declaredFields = aggregatorClass.getDeclaredFields();
+    for (Field declaredField : declaredFields) {
+      InjectableField injectableField =
+                      declaredField.getAnnotation(InjectableField.class);
+      if (injectableField == null) {
+        continue;
+      }
+      String beanName = StringUtils.isBlank(injectableField.beanName()) && beanFactory.isNameMandatory() ? declaredField.
+          getName() : injectableField.beanName();
+      if (StringUtils.isBlank(beanName) && beanFactory.isNameMandatory()) {
+        return true;
+      }
+      try {
+        declaredField.setAccessible(true);
+        final Class<?> fieldType = declaredField.getType();
+        if (beanFactory.containsBean(beanName, fieldType)) {
+          declaredField.set(aggregator, beanFactory.getBean(
+              beanName, fieldType));
+        }
+      }
+      catch (IllegalArgumentException ex) {
+        ex.printStackTrace();
+      }
+      catch (IllegalAccessException ex) {
+        ex.printStackTrace();
+      }
+
+    }
+    return false;
+  }
 }
