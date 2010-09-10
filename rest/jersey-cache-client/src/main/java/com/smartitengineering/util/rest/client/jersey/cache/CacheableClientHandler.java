@@ -21,6 +21,9 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.TerminatingClientHandler;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.client.apache.ApacheHttpMethodProcessor;
+import com.sun.jersey.client.apache.DefaultApacheHttpMethodProcessor;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
@@ -47,6 +50,7 @@ import org.codehaus.httpcache4j.cache.MemoryCacheStorage;
 import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
 import org.codehaus.httpcache4j.payload.InputStreamPayload;
 import org.codehaus.httpcache4j.payload.Payload;
+import org.codehaus.httpcache4j.resolver.ResponseResolver;
 
 /**
  *
@@ -57,15 +61,32 @@ public class CacheableClientHandler
 
   private final HTTPCache cache;
   private final HttpClient httpClient;
+  private final boolean internalResolver;
+  private final ThreadLocal<ClientRequest> requestHolder;
+  private final ApacheHttpMethodProcessor methodProcessor;
 
-  public CacheableClientHandler(HttpClient httpClient) {
-    this(httpClient, new MemoryCacheStorage());
+  public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig) {
+    this(httpClient, clientConfig, new MemoryCacheStorage());
   }
 
-  public CacheableClientHandler(HttpClient httpClient,
+  public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig,
                                 CacheStorage storage) {
-    cache = new HTTPCache(storage, new HTTPClientResponseResolver(httpClient));
+    this(httpClient, clientConfig, storage, null);
+  }
+
+  public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig,
+                                CacheStorage storage, ResponseResolver responseResolver) {
     this.httpClient = httpClient;
+    requestHolder = new ThreadLocal<ClientRequest>();
+    if (responseResolver == null) {
+      methodProcessor = DefaultApacheHttpMethodProcessor.getProcessorInstance(httpClient, clientConfig, requestHolder);
+      responseResolver = new CustomApacheHttpClientResponseResolver(methodProcessor);
+    }
+    else {
+      methodProcessor = null;
+    }
+    cache = new HTTPCache(storage, responseResolver);
+    internalResolver = responseResolver instanceof CustomApacheHttpClientResponseResolver;
   }
 
   @Override
@@ -73,7 +94,13 @@ public class CacheableClientHandler
       throws ClientHandlerException {
     final HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
     HTTPRequest request = processRequest(cr, method);
+    if (internalResolver) {
+      requestHolder.set(cr);
+    }
     HTTPResponse cachedResponse = cache.doCachedRequest(request);
+    if (internalResolver) {
+      requestHolder.remove();
+    }
     Headers headers = cachedResponse.getHeaders();
     InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
     final InputStream entity = getEntityStream(cachedResponse);
@@ -123,50 +150,56 @@ public class CacheableClientHandler
   protected HTTPRequest processRequest(ClientRequest cr,
                                        final HTTPMethod method) {
     HTTPRequest request = new HTTPRequest(cr.getURI(), method);
-    final Map<String, Object> props = cr.getProperties();
-    /*
-     * Add authorization challenge
-     */
-    if (props.containsKey(CacheableClientConfigProps.USERNAME) &&
-        props.containsKey(CacheableClientConfigProps.PASSWORD)) {
-      final String username = (String) props.get(CacheableClientConfigProps.USERNAME);
-      final String password = (String) props.get(CacheableClientConfigProps.PASSWORD);
-      Challenge challenge =
-                new UsernamePasswordChallenge(username, password);
-      request = request.challenge(challenge);
-    }
-    /*
-     * Copy headers set by user explicitly
-     */
-    Headers requestHeaders = new Headers();
-    MultivaluedMap<String, Object> map = cr.getHeaders();
-    for (String key : map.keySet()) {
-      List<Object> values = map.get(key);
-      ArrayList<Header> headers = new ArrayList<Header>(values.size());
-      for (Object value : values) {
-        Header header = new Header(key, ClientRequest.getHeaderValue(value));
-        headers.add(header);
+    if (!internalResolver) {
+      final Map<String, Object> props = cr.getProperties();
+      /*
+       * Add authorization challenge
+       */
+      if (props.containsKey(CacheableClientConfigProps.USERNAME) &&
+          props.containsKey(CacheableClientConfigProps.PASSWORD)) {
+        final String username = (String) props.get(CacheableClientConfigProps.USERNAME);
+        final String password = (String) props.get(CacheableClientConfigProps.PASSWORD);
+        Challenge challenge =
+                  new UsernamePasswordChallenge(username, password);
+        request = request.challenge(challenge);
       }
-      requestHeaders.add(key, headers);
-    }
-    request = request.headers(requestHeaders);
-    /*
-     * Copy payload set into the request if any
-     */
-    if (cr.getEntity() != null) {
-      final RequestEntityWriter requestEntityWriter = getRequestEntityWriter(cr);
-      final MIMEType mimeType = new MIMEType(requestEntityWriter.getMediaType().getType(), requestEntityWriter.
-          getMediaType().getSubtype());
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      try {
-        requestEntityWriter.writeRequestEntity(outputStream);
+      /*
+       * Copy headers set by user explicitly
+       */
+      Headers requestHeaders = new Headers();
+      MultivaluedMap<String, Object> map = cr.getHeaders();
+      for (String key : map.keySet()) {
+        List<Object> values = map.get(key);
+        ArrayList<Header> headers = new ArrayList<Header>(values.size());
+        for (Object value : values) {
+          Header header = new Header(key, ClientRequest.getHeaderValue(value));
+          headers.add(header);
+        }
+        requestHeaders.add(key, headers);
       }
-      catch (IOException ex) {
-        throw new ClientHandlerException(ex);
+      request = request.headers(requestHeaders);
+      /*
+       * Copy payload set into the request if any
+       */
+      if (cr.getEntity() != null) {
+        final RequestEntityWriter requestEntityWriter = getRequestEntityWriter(cr);
+        final MIMEType mimeType = new MIMEType(requestEntityWriter.getMediaType().getType(), requestEntityWriter.
+            getMediaType().getSubtype());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+          requestEntityWriter.writeRequestEntity(outputStream);
+        }
+        catch (IOException ex) {
+          throw new ClientHandlerException(ex);
+        }
+        Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
+        request = request.payload(payload);
       }
-      Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
-      request = request.payload(payload);
     }
     return request;
+  }
+
+  public ApacheHttpMethodProcessor getMethodProcessor() {
+    return methodProcessor;
   }
 }

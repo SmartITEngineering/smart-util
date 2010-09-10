@@ -34,13 +34,9 @@ public class CacheableClient
                          IoCComponentProviderFactory provider) {
     super(handler, config, provider);
     this.clientHandler = handler;
-    HttpClient client = handler.getHttpClient();
-
-    final Integer connectTimeout = (Integer) config.getProperty(CacheableClientConfigProps.TIMEOUT);
-    if (connectTimeout != null) {
-      client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
+    if (this.clientHandler.getMethodProcessor() != null) {
+      getComponentProviderFactory().injectOnProviderInstance(this.clientHandler.getMethodProcessor());
     }
-
   }
 
   public CacheableClient(CacheableClientHandler root,
@@ -53,7 +49,7 @@ public class CacheableClient
   }
 
   public CacheableClient() {
-    this(createDefaultClientHander());
+    this(createDefaultClientHander(new DefaultClientConfig()));
 
   }
 
@@ -61,22 +57,22 @@ public class CacheableClient
     return clientHandler;
   }
 
-  private static CacheableClientHandler createDefaultClientHander() {
+  private static CacheableClientHandler createDefaultClientHander(ClientConfig clientConfig) {
     final HttpClient client = new HttpClient(new MultiThreadedHttpConnectionManager());
-    return new CacheableClientHandler(client);
+    return new CacheableClientHandler(client, clientConfig);
   }
 
   public static CacheableClient create() {
-    return new CacheableClient(createDefaultClientHander());
+    return create(new DefaultClientConfig());
   }
 
   public static CacheableClient create(ClientConfig cc) {
-    return new CacheableClient(createDefaultClientHander(), cc);
+    return create(cc, null);
   }
 
   public static CacheableClient create(ClientConfig cc,
                                        IoCComponentProviderFactory provider) {
-    return new CacheableClient(createDefaultClientHander(), cc, provider);
+    return create(cc, createDefaultClientHander(cc), provider);
   }
 
   public static CacheableClient create(ClientConfig cc,
