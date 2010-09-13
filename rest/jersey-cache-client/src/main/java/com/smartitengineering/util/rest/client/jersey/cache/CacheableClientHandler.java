@@ -45,7 +45,7 @@ import org.codehaus.httpcache4j.cache.CacheStorage;
 import org.codehaus.httpcache4j.cache.HTTPCache;
 import org.codehaus.httpcache4j.cache.MemoryCacheStorage;
 import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
-import org.codehaus.httpcache4j.payload.InputStreamPayload;
+import org.codehaus.httpcache4j.payload.ByteArrayPayload;
 import org.codehaus.httpcache4j.payload.Payload;
 
 /**
@@ -131,8 +131,7 @@ public class CacheableClientHandler
         props.containsKey(CacheableClientConfigProps.PASSWORD)) {
       final String username = (String) props.get(CacheableClientConfigProps.USERNAME);
       final String password = (String) props.get(CacheableClientConfigProps.PASSWORD);
-      Challenge challenge =
-                new UsernamePasswordChallenge(username, password);
+      Challenge challenge = new UsernamePasswordChallenge(username, password);
       request = request.challenge(challenge);
     }
     /*
@@ -164,8 +163,13 @@ public class CacheableClientHandler
       catch (IOException ex) {
         throw new ClientHandlerException(ex);
       }
-      Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
-      request = request.payload(payload);
+      try {
+        Payload payload = new ByteArrayPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
+        request = request.payload(payload);
+      }
+      catch (IOException ex) {
+        throw new ClientHandlerException(ex);
+      }
     }
     return request;
   }
