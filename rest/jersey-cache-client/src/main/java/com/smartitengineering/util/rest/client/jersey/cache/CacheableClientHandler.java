@@ -47,8 +47,7 @@ import org.codehaus.httpcache4j.UsernamePasswordChallenge;
 import org.codehaus.httpcache4j.cache.CacheStorage;
 import org.codehaus.httpcache4j.cache.HTTPCache;
 import org.codehaus.httpcache4j.cache.MemoryCacheStorage;
-import org.codehaus.httpcache4j.client.HTTPClientResponseResolver;
-import org.codehaus.httpcache4j.payload.InputStreamPayload;
+import org.codehaus.httpcache4j.payload.ByteArrayPayload;
 import org.codehaus.httpcache4j.payload.Payload;
 import org.codehaus.httpcache4j.resolver.ResponseResolver;
 
@@ -164,6 +163,23 @@ public class CacheableClientHandler
         request = request.challenge(challenge);
       }
       /*
+       * Copy payload set into the request if any
+       */
+      if (cr.getEntity() != null) {
+        final RequestEntityWriter requestEntityWriter = getRequestEntityWriter(cr);
+        final MIMEType mimeType = new MIMEType(requestEntityWriter.getMediaType().getType(), requestEntityWriter.
+            getMediaType().getSubtype());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+          requestEntityWriter.writeRequestEntity(outputStream);
+          Payload payload = new ByteArrayPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
+          request = request.payload(payload);
+        }
+        catch (IOException ex) {
+          throw new ClientHandlerException(ex);
+        }
+      }
+      /*
        * Copy headers set by user explicitly
        */
       Headers requestHeaders = new Headers();
@@ -175,26 +191,9 @@ public class CacheableClientHandler
           Header header = new Header(key, ClientRequest.getHeaderValue(value));
           headers.add(header);
         }
-        requestHeaders.add(key, headers);
+        requestHeaders = requestHeaders.add(key, headers);
       }
       request = request.headers(requestHeaders);
-      /*
-       * Copy payload set into the request if any
-       */
-      if (cr.getEntity() != null) {
-        final RequestEntityWriter requestEntityWriter = getRequestEntityWriter(cr);
-        final MIMEType mimeType = new MIMEType(requestEntityWriter.getMediaType().getType(), requestEntityWriter.
-            getMediaType().getSubtype());
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-          requestEntityWriter.writeRequestEntity(outputStream);
-        }
-        catch (IOException ex) {
-          throw new ClientHandlerException(ex);
-        }
-        Payload payload = new InputStreamPayload(new ByteArrayInputStream(outputStream.toByteArray()), mimeType);
-        request = request.payload(payload);
-      }
     }
     return request;
   }
