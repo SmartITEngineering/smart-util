@@ -135,21 +135,6 @@ public class CacheableClientHandler
       request = request.challenge(challenge);
     }
     /*
-     * Copy headers set by user explicitly
-     */
-    Headers requestHeaders = new Headers();
-    MultivaluedMap<String, Object> map = cr.getHeaders();
-    for (String key : map.keySet()) {
-      List<Object> values = map.get(key);
-      ArrayList<Header> headers = new ArrayList<Header>(values.size());
-      for (Object value : values) {
-        Header header = new Header(key, ClientRequest.getHeaderValue(value));
-        headers.add(header);
-      }
-      requestHeaders.add(key, headers);
-    }
-    request = request.headers(requestHeaders);
-    /*
      * Copy payload set into the request if any
      */
     if (cr.getEntity() != null) {
@@ -171,6 +156,21 @@ public class CacheableClientHandler
         throw new ClientHandlerException(ex);
       }
     }
+    /*
+     * Copy headers set by user explicitly
+     */
+    Headers requestHeaders = new Headers();
+    MultivaluedMap<String, Object> map = cr.getHeaders();
+    for (String key : map.keySet()) {
+      List<Object> values = map.get(key);
+      ArrayList<Header> headers = new ArrayList<Header>(values.size());
+      for (Object value : values) {
+        Header header = new Header(key, ClientRequest.getHeaderValue(value));
+        headers.add(header);
+      }
+      requestHeaders = requestHeaders.add(key, headers);
+    }
+    request = request.headers(requestHeaders);
     return request;
   }
 }
