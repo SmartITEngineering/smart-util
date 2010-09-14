@@ -20,8 +20,10 @@ package com.smartitengineering.util.rest.client.jersey.cache;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import java.io.File;
 import java.net.URI;
+import java.util.Date;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.jetty.server.Handler;
@@ -58,6 +60,11 @@ public class CacheTest {
     Handler webAppHandler = new WebAppContext(webapp, "/");
     jettyServer.setHandler(webAppHandler);
     jettyServer.start();
+    setupResource();
+  }
+
+  private static void setupResource() {
+    CLIENT.addFilter(new LoggingFilter());
     rootUri = UriBuilder.fromUri("/").host("localhost").port(HttpCache4jResolverBasedCacheableClientTest.PORT).scheme(
         "http").build();
     WebResource resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(RSRC_PATH).build());
@@ -77,22 +84,54 @@ public class CacheTest {
   @Test
   public void testResourceExistence() {
     WebResource resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(RSRC_PATH).build());
-    System.out.println("GET " + resource.getURI());
     ClientResponse response = resource.get(ClientResponse.class);
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(LM_RSRC_PATH).build());
-    System.out.println("GET " + resource.getURI());
     response = resource.get(ClientResponse.class);
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(ETAG_RSRC_PATH).build());
-    System.out.println("GET " + resource.getURI());
     response = resource.get(ClientResponse.class);
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     Assert.assertNotNull(response.getEntityTag());
+  }
+
+  @Test
+  public void testLastModified() {
+    WebResource resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(LM_RSRC_PATH).build());
+    ClientResponse response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Date date = response.getLastModified();
+    try {
+      Thread.sleep(2000);
+    }
+    catch (Exception ex) {
+    }
+    response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Assert.assertEquals(date, response.getLastModified());
+  }
+
+  @Test
+  public void testETag() {
+    WebResource resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(ETAG_RSRC_PATH).build());
+    ClientResponse response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Date date = response.getLastModified();
+    response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Assert.assertEquals(date, response.getLastModified());
   }
 }
