@@ -75,8 +75,7 @@ public class HttpCach4jResolverBasedCacheableClientTest {
     config.getClasses().add(Resources.HeaderWriter.class);
     HttpClient lClient = new HttpClient(new MultiThreadedHttpConnectionManager());
     HTTPClientResponseResolver responseResolver = new HTTPClientResponseResolver(lClient);
-    CacheableClientHandler handler = new CacheableClientHandler(lClient, config, new MemoryCacheStorage(),
-                                                                responseResolver);
+    CacheableClientHandler handler = new CacheableClientHandler(new MemoryCacheStorage(), responseResolver);
     Client c = CacheableClient.create(config, handler, null);
     return c;
   }
@@ -86,8 +85,7 @@ public class HttpCach4jResolverBasedCacheableClientTest {
     config.getClasses().add(Resources.HeaderWriter.class);
     HttpClient lClient = new HttpClient(new MultiThreadedHttpConnectionManager());
     HTTPClientResponseResolver responseResolver = new HTTPClientResponseResolver(lClient);
-    CacheableClientHandler handler = new CacheableClientHandler(lClient, config, new MemoryCacheStorage(),
-                                                                responseResolver);
+    CacheableClientHandler handler = new CacheableClientHandler(new MemoryCacheStorage(), responseResolver);
     Client c = CacheableClient.create(config, handler, null);
     return c;
   }

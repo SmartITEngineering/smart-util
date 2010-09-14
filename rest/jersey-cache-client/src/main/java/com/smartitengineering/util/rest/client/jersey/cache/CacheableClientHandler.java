@@ -31,9 +31,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.httpclient.HttpClient;
 import org.codehaus.httpcache4j.Challenge;
@@ -59,9 +61,8 @@ public class CacheableClientHandler
     extends TerminatingClientHandler {
 
   private final HTTPCache cache;
-  private final HttpClient httpClient;
   private final boolean internalResolver;
-  private final ThreadLocal<ClientRequest> requestHolder;
+  private static final ThreadLocal<ClientRequest> REQUEST_HOLDER = new ThreadLocal<ClientRequest>();
   private final ApacheHttpMethodProcessor methodProcessor;
 
   public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig) {
@@ -70,22 +71,31 @@ public class CacheableClientHandler
 
   public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig,
                                 CacheStorage storage) {
-    this(httpClient, clientConfig, storage, null);
+    this(storage, getDefaultResponseResolver(httpClient, clientConfig, REQUEST_HOLDER));
   }
 
-  public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig,
-                                CacheStorage storage, ResponseResolver responseResolver) {
-    this.httpClient = httpClient;
-    requestHolder = new ThreadLocal<ClientRequest>();
-    if (responseResolver == null) {
-      methodProcessor = DefaultApacheHttpMethodProcessor.getProcessorInstance(httpClient, clientConfig, requestHolder);
-      responseResolver = new CustomApacheHttpClientResponseResolver(methodProcessor);
-    }
-    else {
-      methodProcessor = null;
-    }
-    cache = new HTTPCache(storage, responseResolver);
-    internalResolver = responseResolver instanceof CustomApacheHttpClientResponseResolver;
+  public CacheableClientHandler(CacheStorage storage, ResponseResolver responseResolver) {
+    this(storage, getAsEntry(responseResolver, null));
+  }
+
+  public CacheableClientHandler(CacheStorage storage, Entry<ResponseResolver, ApacheHttpMethodProcessor> entry) {
+    this.methodProcessor = entry.getValue();
+    this.cache = new HTTPCache(storage, entry.getKey());
+    this.internalResolver = entry.getKey() instanceof CustomApacheHttpClientResponseResolver;
+  }
+
+  public static Entry<ResponseResolver, ApacheHttpMethodProcessor> getDefaultResponseResolver(HttpClient client,
+                                                                                                  ClientConfig config,
+                                                                                                  ThreadLocal<ClientRequest> requestHolder) {
+    ApacheHttpMethodProcessor methodProcessor = DefaultApacheHttpMethodProcessor.getProcessorInstance(client, config,
+                                                                                                      requestHolder);
+    ResponseResolver responseResolver = new CustomApacheHttpClientResponseResolver(methodProcessor);
+    return getAsEntry(responseResolver, methodProcessor);
+  }
+
+  protected static Entry<ResponseResolver, ApacheHttpMethodProcessor> getAsEntry(ResponseResolver responseResolver,
+                                                                                       ApacheHttpMethodProcessor methodProcessor) {
+    return new SimpleEntry<ResponseResolver, ApacheHttpMethodProcessor>(responseResolver, methodProcessor);
   }
 
   @Override
@@ -94,11 +104,11 @@ public class CacheableClientHandler
     final HTTPMethod method = HTTPMethod.valueOf(cr.getMethod());
     HTTPRequest request = processRequest(cr, method);
     if (internalResolver) {
-      requestHolder.set(cr);
+      REQUEST_HOLDER.set(cr);
     }
     HTTPResponse cachedResponse = cache.doCachedRequest(request);
     if (internalResolver) {
-      requestHolder.remove();
+      REQUEST_HOLDER.remove();
     }
     Headers headers = cachedResponse.getHeaders();
     InBoundHeaders inBoundHeaders = getInBoundHeaders(headers);
@@ -106,10 +116,6 @@ public class CacheableClientHandler
     ClientResponse response = new ClientResponse(cachedResponse.getStatus().getCode(), inBoundHeaders, entity,
                                                  getMessageBodyWorkers());
     return response;
-  }
-
-  public HttpClient getHttpClient() {
-    return httpClient;
   }
 
   public HTTPCache getCache() {
