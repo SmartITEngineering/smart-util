@@ -40,7 +40,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class HttpCach4jResolverBasedCacheableClientTest {
+public class HttpCache4jResolverBasedCacheableClientTest {
 
   public static final int PORT = 20090;
   private static Server jettyServer;
