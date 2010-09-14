@@ -25,13 +25,14 @@ import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.DeleteMethod;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.TraceMethod;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.httpcache4j.HTTPException;
 import org.codehaus.httpcache4j.HTTPMethod;
 import org.codehaus.httpcache4j.HTTPRequest;
@@ -99,7 +100,7 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
       return new ConnectMethod(config);
     }
     else if (HTTPMethod.DELETE.equals(method)) {
-      return new DeleteMethod(requestURI.toString());
+      return new CustomHttpMethod(HTTPMethod.DELETE.name(), requestURI.toString());
     }
     else if (HTTPMethod.GET.equals(method)) {
       return new GetMethod(requestURI.toString());
@@ -120,7 +121,25 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
       return new TraceMethod(requestURI.toString());
     }
     else {
-      throw new IllegalArgumentException("Cannot handle method: " + method);
+      return new CustomHttpMethod(method.name(), requestURI.toString());
+    }
+  }
+
+  private static class CustomHttpMethod extends EntityEnclosingMethod {
+
+    private final String name;
+
+    public CustomHttpMethod(String name, String uri) {
+      super(uri);
+      if (StringUtils.isBlank(name)) {
+        throw new IllegalArgumentException("Name can not be blank!");
+      }
+      this.name = name;
+    }
+
+    @Override
+    public String getName() {
+      return name;
     }
   }
 
