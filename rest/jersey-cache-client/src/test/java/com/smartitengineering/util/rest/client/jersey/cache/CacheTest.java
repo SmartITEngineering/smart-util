@@ -108,8 +108,28 @@ public class CacheTest {
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     Date date = response.getLastModified();
+    try {
+      Thread.sleep(2000);
+    }
+    catch (Exception ex) {
+    }
     response = resource.get(ClientResponse.class);
-    Assert.assertEquals(ClientResponse.Status.NOT_MODIFIED.getStatusCode(), response.getStatus());
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Assert.assertEquals(date, response.getLastModified());
+  }
+
+  @Test
+  public void testETag() {
+    WebResource resource = CLIENT.resource(UriBuilder.fromUri(rootUri).path(ETAG_RSRC_PATH).build());
+    ClientResponse response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertEquals(CONTENT, response.getEntity(String.class));
+    Assert.assertNotNull(response.getLastModified());
+    Date date = response.getLastModified();
+    response = resource.get(ClientResponse.class);
+    Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     Assert.assertEquals(date, response.getLastModified());
