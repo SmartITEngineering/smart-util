@@ -36,4 +36,6 @@ public interface Resource<T> {
   public T get();
 
   public T getLastReadStateOfEntity();
+
+  public ClientFactory getClientFactory();
 }
