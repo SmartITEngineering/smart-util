@@ -22,6 +22,10 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -48,13 +52,24 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
     }
     httpClient = new HttpClient(client, connectionConfig.getHost(), connectionConfig.getPort());
   }
-  private static ApplicationWideClientFactoryImpl clientFactoryImpl;
+  private static final Map<Entry<ConnectionConfig, ConfigProcessor>, ClientFactory> APPLICATION_CONTEXT;
+
+  static {
+    APPLICATION_CONTEXT = new ConcurrentHashMap<Entry<ConnectionConfig, ConfigProcessor>, ClientFactory>();
+  }
 
   public static ClientFactory getClientFactory(ConnectionConfig connectionConfig, ConfigProcessor processor) {
-    if (clientFactoryImpl == null) {
-      clientFactoryImpl = new ApplicationWideClientFactoryImpl(connectionConfig, processor);
+    Entry<ConnectionConfig, ConfigProcessor> entry = new SimpleEntry<ConnectionConfig, ConfigProcessor>(connectionConfig,
+                                                                                                        processor);
+    if (!APPLICATION_CONTEXT.containsKey(entry)) {
+      ApplicationWideClientFactoryImpl clientFactoryImpl = new ApplicationWideClientFactoryImpl(connectionConfig,
+                                                                                                processor);
+      APPLICATION_CONTEXT.put(entry, clientFactoryImpl);
+      return clientFactoryImpl;
     }
-    return clientFactoryImpl;
+    else {
+      return APPLICATION_CONTEXT.get(entry);
+    }
   }
 
   @Override
