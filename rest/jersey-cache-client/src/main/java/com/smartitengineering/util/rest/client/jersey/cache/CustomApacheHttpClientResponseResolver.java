@@ -21,6 +21,7 @@ import com.sun.jersey.client.apache.ApacheHttpMethodProcessor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -60,6 +61,7 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
   private HttpMethod convertRequest(HTTPRequest request) {
     URI requestURI = request.getRequestURI();
     HttpMethod method = getMethod(request.getMethod(), requestURI);
+    copyHeaders(request, method);
     return method;
   }
 
@@ -122,6 +124,16 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     }
     else {
       return new CustomHttpMethod(method.name(), requestURI.toString());
+    }
+  }
+
+  protected void copyHeaders(HTTPRequest request, HttpMethod method) {
+    Headers headers = request.getAllHeaders();
+    for (String headerNames : headers.keySet()) {
+      List<org.codehaus.httpcache4j.Header> headersForName = headers.getHeaders(headerNames);
+      for (org.codehaus.httpcache4j.Header header : headersForName) {
+        method.addRequestHeader(header.getName(), header.getValue());
+      }
     }
   }
 
