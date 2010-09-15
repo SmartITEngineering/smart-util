@@ -59,4 +59,38 @@ public class ConnectionConfig {
     public void setPort(int port) {
         this.port = port;
     }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ConnectionConfig other = (ConnectionConfig) obj;
+    if ((this.basicUri == null) ? (other.basicUri != null) : !this.basicUri.equals(other.basicUri)) {
+      return false;
+    }
+    if (this.port != other.port) {
+      return false;
+    }
+    if ((this.host == null) ? (other.host != null) : !this.host.equals(other.host)) {
+      return false;
+    }
+    if ((this.contextPath == null) ? (other.contextPath != null) : !this.contextPath.equals(other.contextPath)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 97 * hash + (this.basicUri != null ? this.basicUri.hashCode() : 0);
+    hash = 97 * hash + this.port;
+    hash = 97 * hash + (this.host != null ? this.host.hashCode() : 0);
+    hash = 97 * hash + (this.contextPath != null ? this.contextPath.hashCode() : 0);
+    return hash;
+  }
 }

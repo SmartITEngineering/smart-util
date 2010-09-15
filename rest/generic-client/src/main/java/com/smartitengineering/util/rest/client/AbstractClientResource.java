@@ -123,7 +123,12 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       throw new IllegalArgumentException("Entity class can not be null!");
     }
     if (clientFactory == null) {
-      clientFactory = ApplicationWideClientFactoryImpl.getClientFactory(CONNECTION_CONFIG, this);
+      if(referrer == null) {
+        clientFactory = ApplicationWideClientFactoryImpl.getClientFactory(CONNECTION_CONFIG, this);
+      }
+      else {
+        clientFactory = referrer.getClientFactory();
+      }
     }
     this.clientFactory = clientFactory;
     this.referrer = referrer;
@@ -320,6 +325,11 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public P previous() {
     return getPageableResource(previousUri());
+  }
+
+  @Override
+  public ClientFactory getClientFactory() {
+    return clientFactory;
   }
 
   protected abstract ResourceLink getNextUri();
