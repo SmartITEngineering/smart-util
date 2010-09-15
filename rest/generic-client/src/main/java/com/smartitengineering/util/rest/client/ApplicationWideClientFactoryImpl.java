@@ -21,6 +21,7 @@ import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 
 /**
  *
@@ -28,12 +29,13 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
  */
 public class ApplicationWideClientFactoryImpl implements ClientFactory {
 
+  public static final String TRACE = "com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl.trace";
   private Client client;
   private ClientConfig clientConfig;
   private HttpClient httpClient;
 
   private ApplicationWideClientFactoryImpl(ConnectionConfig connectionConfig, ConfigProcessor processor) {
-    if(connectionConfig == null) {
+    if (connectionConfig == null) {
       throw new IllegalArgumentException("Connection config can not be null!");
     }
     clientConfig = new DefaultClientConfig();
@@ -41,6 +43,9 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
       processor.process(clientConfig);
     }
     client = CacheableClient.create(clientConfig);
+    if (Boolean.parseBoolean(System.getProperty(TRACE))) {
+      client.addFilter(new LoggingFilter());
+    }
     httpClient = new HttpClient(client, connectionConfig.getHost(), connectionConfig.getPort());
   }
   private static ApplicationWideClientFactoryImpl clientFactoryImpl;
