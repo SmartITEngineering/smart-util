@@ -39,15 +39,15 @@ public class BufferedInputStreamTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     StringBuilder builder = new StringBuilder();
+    Random random = new Random();
     for (int i = 0; i < 2000; ++i) {
-      builder.append("test string");
+      builder.append("test string ").append(random.nextDouble());
     }
     testData = builder.toString().getBytes();
     bufferSize = testData.length / 3;
   }
 
   public void testBufferRead() {
-    System.out.println(":::::: Test Read BufferedInputStream ::::::");
     BufferedInputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(testData), bufferSize);
     byte[] readData = new byte[testData.length];
     try {
