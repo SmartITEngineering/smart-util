@@ -53,10 +53,12 @@ public class GuiceUtil {
     return guiceUtil;
   }
   private final String contextName;
+  private final boolean ignoreMissingDependency;
   private final List<Module> modules;
 
   private GuiceUtil(Properties properties) {
     contextName = properties.getProperty(CONTEXT_NAME_PROP);
+    ignoreMissingDependency = Boolean.parseBoolean(properties.getProperty("ignoreMissingDependency"));
     if (StringUtils.isBlank(contextName)) {
       throw new IllegalStateException("Bean factory context name can not be blank");
     }
@@ -144,6 +146,7 @@ public class GuiceUtil {
   }
 
   public void register() {
-    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(Guice.createInjector(modules)));
+    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(Guice.createInjector(modules),
+                                                                                     ignoreMissingDependency));
   }
 }

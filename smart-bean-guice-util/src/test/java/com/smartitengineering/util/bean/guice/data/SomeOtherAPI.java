@@ -30,8 +30,14 @@ public class SomeOtherAPI {
 
   @InjectableField(beanName = "myFirstBean")
   private IFirstBean firstBean;
+  @InjectableField(beanName = "myErrorBean")
+  private IFirstBean errorBean;
   @InjectableField
   private ISecondBean secondBean;
+
+  public IFirstBean getErrorBean() {
+    return errorBean;
+  }
 
   public IFirstBean getFirstBean() {
     return firstBean;
@@ -43,7 +49,7 @@ public class SomeOtherAPI {
 
   private SomeOtherAPI() {
   }
-  private static SomeOtherAPI api;
+  public static SomeOtherAPI api;
 
   public static SomeOtherAPI getInstance() {
     if (api == null) {

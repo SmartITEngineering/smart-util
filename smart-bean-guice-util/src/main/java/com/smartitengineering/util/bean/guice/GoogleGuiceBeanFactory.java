@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.bean.guice;
 
+import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -31,12 +32,18 @@ public class GoogleGuiceBeanFactory
     implements BeanFactory {
 
   private final Injector injector;
+  private final boolean ignoreMissingDepedency;
 
   public GoogleGuiceBeanFactory(Injector injector) {
+    this(injector, false);
+  }
+
+  public GoogleGuiceBeanFactory(Injector injector, boolean ignoreMissingDependency) {
     if (injector == null) {
       throw new IllegalArgumentException();
     }
     this.injector = injector;
+    this.ignoreMissingDepedency = ignoreMissingDependency;
   }
 
   public Injector getInjector() {
@@ -54,11 +61,21 @@ public class GoogleGuiceBeanFactory
   public Object getBean(String beanName,
                         Class beanClass)
       throws IllegalArgumentException {
-    if (StringUtils.isNotBlank(beanName)) {
-      return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+    try {
+      if (StringUtils.isNotBlank(beanName)) {
+        return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+      }
+      else {
+        return injector.getInstance(beanClass);
+      }
     }
-    else {
-      return injector.getInstance(beanClass);
+    catch (ConfigurationException exception) {
+      if (ignoreMissingDepedency) {
+        return null;
+      }
+      else {
+        throw exception;
+      }
     }
   }
 
