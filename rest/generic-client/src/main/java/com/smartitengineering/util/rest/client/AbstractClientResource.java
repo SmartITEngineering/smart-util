@@ -26,6 +26,10 @@ import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -60,7 +64,9 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private ClientUtil clientUtil;
   private ClientFactory clientFactory;
   private int getInvocationCount;
-  private boolean followRedirection;
+  private boolean followRedirectionEnabled;
+  private boolean invokeGet;
+  private final Map<String, Resource> nestedResources;
 
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -105,7 +111,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
    * @param representationType The MIME Type to expect for this resource, a.k.a., Accept HTTP header
    * @param entityClass The Entity class to ask Jersey to de-serialize the GET entity to.
    * @param clientUtil The client util instance to parse linked resources for this representation entity.
-   * @param invokeGet If true GET will be issued during construction synchronously. By default its true
+   * @param invokeGet If true GET will be issued during construction synchronously. It also means that on GET nested 
+   *                  resources will also be GET so synchronize them. By default its true.
    * @throws IllegalArgumentException If thisResourceUri or representationType or entityClass is null
    * @throws UniformInterfaceException If status is anything but < 300 or 304.
    */
@@ -123,7 +130,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       throw new IllegalArgumentException("Entity class can not be null!");
     }
     if (clientFactory == null) {
-      if(referrer == null) {
+      if (referrer == null) {
         clientFactory = ApplicationWideClientFactoryImpl.getClientFactory(CONNECTION_CONFIG, this);
       }
       else {
@@ -138,10 +145,43 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     this.relatedResourceUris = new ConcurrentMultivalueMap<String, ResourceLink>();
     this.clientUtil = clientUtil;
     this.absoluteThisResourceUri = generateAbsoluteUri();
-    this.followRedirection = followRedirection;
+    this.followRedirectionEnabled = followRedirection;
+    this.nestedResources = new HashMap<String, Resource>();
     if (invokeGet) {
       get();
     }
+  }
+
+  protected boolean isFollowRedirectionEnabled() {
+    return followRedirectionEnabled;
+  }
+
+  protected void setFollowRedirectionEnabled(boolean followRedirectionEnabled) {
+    this.followRedirectionEnabled = followRedirectionEnabled;
+  }
+
+  protected boolean isInvokeGet() {
+    return invokeGet;
+  }
+
+  protected void setInvokeGet(boolean invokeGet) {
+    this.invokeGet = invokeGet;
+  }
+
+  protected void addNestedResource(String key, Resource resource) {
+    nestedResources.put(key, resource);
+  }
+
+  protected void removeNestedResource(String key) {
+    nestedResources.remove(key);
+  }
+
+  protected <K> Resource<K> getNestedResource(String key) {
+    return nestedResources.get(key);
+  }
+
+  protected Map<String, Resource> getNestedResources() {
+    return Collections.unmodifiableMap(nestedResources);
   }
 
   protected final URI generateAbsoluteUri() {
@@ -192,7 +232,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
     final int status = response.getStatus();
-    if (followRedirection && status == ClientResponse.Status.MOVED_PERMANENTLY.getStatusCode()) {
+    if (followRedirectionEnabled && status == ClientResponse.Status.MOVED_PERMANENTLY.getStatusCode()) {
       final URI location = response.getLocation();
       if (location != null) {
         this.thisResourceUri = location;
@@ -200,8 +240,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
         return get();
       }
     }
-    if (followRedirection && (status == ClientResponse.Status.FOUND.getStatusCode() ||
-                              status == ClientResponse.Status.SEE_OTHER.getStatusCode())) {
+    if (followRedirectionEnabled && (status == ClientResponse.Status.FOUND.getStatusCode() ||
+                                     status == ClientResponse.Status.SEE_OTHER.getStatusCode())) {
       final URI location = response.getLocation();
       if (location != null) {
         URI absolutionLocation = getHttpClient().getAbsoluteUri(location, getReferrerUri());
@@ -219,9 +259,19 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
           ex.printStackTrace();
         }
       }
+      if (invokeGet) {
+        invokeGETOnNestedResources();
+      }
       return lastReadStateOfEntity;
     }
     throw new UniformInterfaceException(response);
+  }
+
+  protected void invokeGETOnNestedResources() {
+    final Collection<Resource> values = nestedResources.values();
+    for (Resource resource : values) {
+      resource.get();
+    }
   }
 
   @Override
