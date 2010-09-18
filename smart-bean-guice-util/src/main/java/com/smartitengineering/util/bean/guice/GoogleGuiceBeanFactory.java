@@ -31,23 +31,23 @@ import org.apache.commons.lang.StringUtils;
 public class GoogleGuiceBeanFactory
     implements BeanFactory {
 
-  private final Injector injector;
+  private final Injector[] injectors;
   private final boolean ignoreMissingDepedency;
 
-  public GoogleGuiceBeanFactory(Injector injector) {
-    this(injector, false);
+  public GoogleGuiceBeanFactory(Injector... injectors) {
+    this(false, injectors);
   }
 
-  public GoogleGuiceBeanFactory(Injector injector, boolean ignoreMissingDependency) {
-    if (injector == null) {
+  public GoogleGuiceBeanFactory(boolean ignoreMissingDependency, Injector... injectors) {
+    if (injectors == null) {
       throw new IllegalArgumentException();
     }
-    this.injector = injector;
+    this.injectors = injectors;
     this.ignoreMissingDepedency = ignoreMissingDependency;
   }
 
-  public Injector getInjector() {
-    return injector;
+  public Injector[] getInjector() {
+    return injectors;
   }
 
   @Override
@@ -61,21 +61,26 @@ public class GoogleGuiceBeanFactory
   public Object getBean(String beanName,
                         Class beanClass)
       throws IllegalArgumentException {
-    try {
-      if (StringUtils.isNotBlank(beanName)) {
-        return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+    final boolean beanNameNotBlank = StringUtils.isNotBlank(beanName);
+    ConfigurationException ex = null;
+    for (Injector injector : injectors) {
+      try {
+        if (beanNameNotBlank) {
+          return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+        }
+        else {
+          return injector.getInstance(beanClass);
+        }
       }
-      else {
-        return injector.getInstance(beanClass);
+      catch (ConfigurationException exception) {
+        ex = exception;
       }
     }
-    catch (ConfigurationException exception) {
-      if (ignoreMissingDepedency) {
-        return null;
-      }
-      else {
-        throw exception;
-      }
+    if (ignoreMissingDepedency) {
+      return null;
+    }
+    else {
+      throw ex;
     }
   }
 

@@ -146,7 +146,7 @@ public class GuiceUtil {
   }
 
   public void register() {
-    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(Guice.createInjector(modules),
-                                                                                     ignoreMissingDependency));
+    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(ignoreMissingDependency, Guice.
+        createInjector(modules)));
   }
 }
