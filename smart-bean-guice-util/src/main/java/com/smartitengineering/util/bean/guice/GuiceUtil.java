@@ -18,6 +18,7 @@
 package com.smartitengineering.util.bean.guice;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.PropertiesLocator;
@@ -26,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 
@@ -54,7 +56,7 @@ public class GuiceUtil {
   }
   private final String contextName;
   private final boolean ignoreMissingDependency;
-  private final List<Module> modules;
+  private final List<Module>[] modules;
 
   private GuiceUtil(Properties properties) {
     contextName = properties.getProperty(CONTEXT_NAME_PROP);
@@ -62,47 +64,39 @@ public class GuiceUtil {
     if (StringUtils.isBlank(contextName)) {
       throw new IllegalStateException("Bean factory context name can not be blank");
     }
-    String modulesStr = properties.getProperty(MODULES_LIST_PROP);
-    if (StringUtils.isBlank(modulesStr)) {
-      throw new IllegalStateException("Modules must be specified in a comma separated list!");
+    final String[] moduleStrs;
+    List<String> moduleConfigs = new ArrayList<String>();
+    for (Entry<Object, Object> entry : properties.entrySet()) {
+      if (entry.getKey().toString().startsWith(MODULES_LIST_PROP)) {
+        moduleConfigs.add(entry.getValue().toString());
+      }
     }
-    String[] moduleClassNames = modulesStr.split(",");
-    modules = new ArrayList<Module>(moduleClassNames.length);
-    for (String moduleClassName : moduleClassNames) {
-      final Class clazz;
-      try {
-        clazz = Class.forName(StringUtils.trim(moduleClassName));
+    moduleStrs = new String[moduleConfigs.size()];
+    moduleConfigs.toArray(moduleStrs);
+    modules = new List[moduleStrs.length];
+    int index = 0;
+    for (String modulesStr : moduleStrs) {
+      if (StringUtils.isBlank(modulesStr)) {
+        throw new IllegalStateException("Modules must be specified in a comma separated list!");
       }
-      catch (ClassNotFoundException ex) {
-        throw new IllegalStateException(ex);
-      }
-      if (!Module.class.isAssignableFrom(clazz)) {
-        throw new IllegalArgumentException("Specified class not instance of Module");
-      }
-      Class<? extends Module> moduleClass = clazz;
-      boolean foundConstructor = false;
-      try {
-        Constructor<? extends Module> defaultContructor = moduleClass.getConstructor();
-        modules.add(defaultContructor.newInstance());
-        foundConstructor = true;
-      }
-      catch (InstantiationException ex) {
-        throw new IllegalStateException(ex);
-      }
-      catch (IllegalAccessException ex) {
-        throw new IllegalStateException(ex);
-      }
-      catch (InvocationTargetException ex) {
-        throw new IllegalStateException(ex);
-      }
-      catch (NoSuchMethodException ex) {
-      }
-      catch (SecurityException ex) {
-      }
-      if (!foundConstructor) {
+      String[] moduleClassNames = modulesStr.split(",");
+      List<Module> moduleSet = new ArrayList<Module>(moduleClassNames.length);
+      for (String moduleClassName : moduleClassNames) {
+        final Class clazz;
         try {
-          Constructor<? extends Module> defaultContructor = moduleClass.getConstructor(Properties.class);
-          modules.add(defaultContructor.newInstance(properties));
+          clazz = Class.forName(StringUtils.trim(moduleClassName));
+        }
+        catch (ClassNotFoundException ex) {
+          throw new IllegalStateException(ex);
+        }
+        if (!Module.class.isAssignableFrom(clazz)) {
+          throw new IllegalArgumentException("Specified class not instance of Module");
+        }
+        Class<? extends Module> moduleClass = clazz;
+        boolean foundConstructor = false;
+        try {
+          Constructor<? extends Module> defaultContructor = moduleClass.getConstructor();
+          moduleSet.add(defaultContructor.newInstance());
           foundConstructor = true;
         }
         catch (InstantiationException ex) {
@@ -118,10 +112,31 @@ public class GuiceUtil {
         }
         catch (SecurityException ex) {
         }
+        if (!foundConstructor) {
+          try {
+            Constructor<? extends Module> defaultContructor = moduleClass.getConstructor(Properties.class);
+            moduleSet.add(defaultContructor.newInstance(properties));
+            foundConstructor = true;
+          }
+          catch (InstantiationException ex) {
+            throw new IllegalStateException(ex);
+          }
+          catch (IllegalAccessException ex) {
+            throw new IllegalStateException(ex);
+          }
+          catch (InvocationTargetException ex) {
+            throw new IllegalStateException(ex);
+          }
+          catch (NoSuchMethodException ex) {
+          }
+          catch (SecurityException ex) {
+          }
+        }
+        if (!foundConstructor) {
+          throw new IllegalStateException("No supported contructors found - no args and with a properties obj!");
+        }
       }
-      if (!foundConstructor) {
-        throw new IllegalStateException("No supported contructors found - no args and with a properties obj!");
-      }
+      modules[index++] = moduleSet;
     }
   }
 
@@ -146,7 +161,10 @@ public class GuiceUtil {
   }
 
   public void register() {
-    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(ignoreMissingDependency, Guice.
-        createInjector(modules)));
+    Injector[] injectors = new Injector[modules.length];
+    for (int i = 0; i < injectors.length; ++i) {
+      injectors[i] = Guice.createInjector(modules[i]);
+    }
+    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(ignoreMissingDependency, injectors));
   }
 }

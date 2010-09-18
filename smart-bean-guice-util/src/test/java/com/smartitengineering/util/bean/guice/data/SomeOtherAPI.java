@@ -34,6 +34,12 @@ public class SomeOtherAPI {
   private IFirstBean errorBean;
   @InjectableField
   private ISecondBean secondBean;
+  @InjectableField(beanName = "mySimpleBean")
+  private IFirstBean simpleBean;
+
+  public IFirstBean getSimpleBean() {
+    return simpleBean;
+  }
 
   public IFirstBean getErrorBean() {
     return errorBean;

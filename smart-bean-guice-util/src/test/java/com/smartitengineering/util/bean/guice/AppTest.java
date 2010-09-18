@@ -46,6 +46,7 @@ public class AppTest extends TestCase {
     assertNotNull(SomeOtherAPI.getInstance().getFirstBean().getFourthBean());
     assertNotNull(SomeOtherAPI.getInstance().getSecondBean().getThirdBean());
     assertNotNull(SomeOtherAPI.getInstance().getSecondBean().getFourthBean());
+    assertNotNull(SomeOtherAPI.getInstance().getSimpleBean());
     assertNull(SomeOtherAPI.getInstance().getErrorBean());
     SomeOtherAPI.api = null;
     GuiceUtil.getInstance("module-config-error.properties").register();
