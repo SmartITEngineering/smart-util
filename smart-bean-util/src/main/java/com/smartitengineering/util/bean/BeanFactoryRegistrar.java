@@ -20,8 +20,8 @@ package com.smartitengineering.util.bean;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -33,7 +33,7 @@ import org.apache.commons.lang.StringUtils;
 public class BeanFactoryRegistrar {
 
   private static final Map<String, BeanFactory> beanFactories =
-                                                new WeakHashMap<String, BeanFactory>();
+                                                new HashMap<String, BeanFactory>();
 
   public static void registerBeanFactory(final String beanFactoryContextName,
                                          final BeanFactory beanFactory) {
