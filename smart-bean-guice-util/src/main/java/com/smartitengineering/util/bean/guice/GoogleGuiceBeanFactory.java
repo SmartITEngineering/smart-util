@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.bean.guice;
 
+import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -30,17 +31,23 @@ import org.apache.commons.lang.StringUtils;
 public class GoogleGuiceBeanFactory
     implements BeanFactory {
 
-  private final Injector injector;
+  private final Injector[] injectors;
+  private final boolean ignoreMissingDepedency;
 
-  public GoogleGuiceBeanFactory(Injector injector) {
-    if (injector == null) {
-      throw new IllegalArgumentException();
-    }
-    this.injector = injector;
+  public GoogleGuiceBeanFactory(Injector... injectors) {
+    this(false, injectors);
   }
 
-  public Injector getInjector() {
-    return injector;
+  public GoogleGuiceBeanFactory(boolean ignoreMissingDependency, Injector... injectors) {
+    if (injectors == null) {
+      throw new IllegalArgumentException();
+    }
+    this.injectors = injectors;
+    this.ignoreMissingDepedency = ignoreMissingDependency;
+  }
+
+  public Injector[] getInjector() {
+    return injectors;
   }
 
   @Override
@@ -54,11 +61,26 @@ public class GoogleGuiceBeanFactory
   public Object getBean(String beanName,
                         Class beanClass)
       throws IllegalArgumentException {
-    if (StringUtils.isNotBlank(beanName)) {
-      return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+    final boolean beanNameNotBlank = StringUtils.isNotBlank(beanName);
+    ConfigurationException ex = null;
+    for (Injector injector : injectors) {
+      try {
+        if (beanNameNotBlank) {
+          return injector.getInstance(Key.get(beanClass, Names.named(beanName)));
+        }
+        else {
+          return injector.getInstance(beanClass);
+        }
+      }
+      catch (ConfigurationException exception) {
+        ex = exception;
+      }
+    }
+    if (ignoreMissingDepedency) {
+      return null;
     }
     else {
-      return injector.getInstance(beanClass);
+      throw ex;
     }
   }
 

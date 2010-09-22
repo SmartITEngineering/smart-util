@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.util.bean.adapter;
 
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import java.util.Map.Entry;
 public class GenericAdapterImpl<F, T>
     implements GenericAdapter<F, T> {
 
+  @Inject
   private AbstractAdapterHelper<F, T> helper;
 
   public AbstractAdapterHelper<F, T> getHelper() {

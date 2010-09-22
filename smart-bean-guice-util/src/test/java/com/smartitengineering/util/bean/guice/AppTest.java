@@ -17,6 +17,7 @@
  */
 package com.smartitengineering.util.bean.guice;
 
+import com.google.inject.ConfigurationException;
 import com.smartitengineering.util.bean.guice.data.SomeDefaultAPI;
 import com.smartitengineering.util.bean.guice.data.SomeOtherAPI;
 import junit.framework.TestCase;
@@ -45,5 +46,16 @@ public class AppTest extends TestCase {
     assertNotNull(SomeOtherAPI.getInstance().getFirstBean().getFourthBean());
     assertNotNull(SomeOtherAPI.getInstance().getSecondBean().getThirdBean());
     assertNotNull(SomeOtherAPI.getInstance().getSecondBean().getFourthBean());
+    assertNotNull(SomeOtherAPI.getInstance().getSimpleBean());
+    assertNull(SomeOtherAPI.getInstance().getErrorBean());
+    SomeOtherAPI.api = null;
+    GuiceUtil.getInstance("module-config-error.properties").register();
+    try {
+      SomeOtherAPI.getInstance().getFirstBean();
+      fail("Ignore not working!");
+    }
+    catch (ConfigurationException exception) {
+      //Expected;
+    }
   }
 }
