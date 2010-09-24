@@ -40,6 +40,7 @@ public class GuiceUtil {
   public static final String MODULE_CONFIG_PROP_FILE = "com/smartitengineering/util/bean/guice/guice-modules.properties";
   public static final String MODULES_LIST_PROP = "modules";
   public static final String CONTEXT_NAME_PROP = "contextName";
+  public static final String IGNORE_MISSING_DEP_PROP = "ignoreMissingDependency";
 
   public static GuiceUtil getInstance() {
     return getInstance(MODULE_CONFIG_PROP_FILE);
@@ -60,7 +61,7 @@ public class GuiceUtil {
 
   private GuiceUtil(Properties properties) {
     contextName = properties.getProperty(CONTEXT_NAME_PROP);
-    ignoreMissingDependency = Boolean.parseBoolean(properties.getProperty("ignoreMissingDependency"));
+    ignoreMissingDependency = Boolean.parseBoolean(properties.getProperty(IGNORE_MISSING_DEP_PROP));
     if (StringUtils.isBlank(contextName)) {
       throw new IllegalStateException("Bean factory context name can not be blank");
     }
