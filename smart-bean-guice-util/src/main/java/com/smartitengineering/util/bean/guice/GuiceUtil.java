@@ -40,6 +40,7 @@ public class GuiceUtil {
   public static final String MODULE_CONFIG_PROP_FILE = "com/smartitengineering/util/bean/guice/guice-modules.properties";
   public static final String MODULES_LIST_PROP = "modules";
   public static final String CONTEXT_NAME_PROP = "contextName";
+  public static final String IGNORE_MISSING_DEP_PROP = "ignoreMissingDependency";
 
   public static GuiceUtil getInstance() {
     return getInstance(MODULE_CONFIG_PROP_FILE);
@@ -54,16 +55,17 @@ public class GuiceUtil {
     GuiceUtil guiceUtil = new GuiceUtil(propFile);
     return guiceUtil;
   }
-  private final String contextName;
+  private final String contextNames[];
   private final boolean ignoreMissingDependency;
   private final List<Module>[] modules;
 
   private GuiceUtil(Properties properties) {
-    contextName = properties.getProperty(CONTEXT_NAME_PROP);
-    ignoreMissingDependency = Boolean.parseBoolean(properties.getProperty("ignoreMissingDependency"));
-    if (StringUtils.isBlank(contextName)) {
+    String contextNameProp = properties.getProperty(CONTEXT_NAME_PROP);
+    if (StringUtils.isBlank(contextNameProp)) {
       throw new IllegalStateException("Bean factory context name can not be blank");
     }
+    contextNames = contextNameProp.split(",");
+    ignoreMissingDependency = Boolean.parseBoolean(properties.getProperty(IGNORE_MISSING_DEP_PROP));
     final String[] moduleStrs;
     List<String> moduleConfigs = new ArrayList<String>();
     for (Entry<Object, Object> entry : properties.entrySet()) {
@@ -165,6 +167,9 @@ public class GuiceUtil {
     for (int i = 0; i < injectors.length; ++i) {
       injectors[i] = Guice.createInjector(modules[i]);
     }
-    BeanFactoryRegistrar.registerBeanFactory(contextName, new GoogleGuiceBeanFactory(ignoreMissingDependency, injectors));
+    final GoogleGuiceBeanFactory factory = new GoogleGuiceBeanFactory(ignoreMissingDependency, injectors);
+    for (String contextName : contextNames) {
+      BeanFactoryRegistrar.registerBeanFactory(contextName, factory);
+    }
   }
 }
