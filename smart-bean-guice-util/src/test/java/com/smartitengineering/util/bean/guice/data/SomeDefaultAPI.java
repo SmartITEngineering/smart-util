@@ -42,7 +42,7 @@ public class SomeDefaultAPI {
   }
   private SomeDefaultAPI() {
   }
-  private static SomeDefaultAPI api;
+  public static SomeDefaultAPI api;
 
   public static SomeDefaultAPI getInstance() {
     if (api == null) {

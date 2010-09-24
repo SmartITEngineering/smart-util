@@ -34,6 +34,23 @@ public class AppTest extends TestCase {
   public void testApp() {
     GuiceUtil.getInstance("module-config.properties").register();
     GuiceUtil.getInstance().register();
+    verifyInjection();
+    SomeOtherAPI.api = null;
+    GuiceUtil.getInstance("module-config-error.properties").register();
+    try {
+      SomeOtherAPI.getInstance().getFirstBean();
+      fail("Ignore not working!");
+    }
+    catch (ConfigurationException exception) {
+      //Expected;
+    }
+    SomeOtherAPI.api = null;
+    SomeDefaultAPI.api = null;
+    GuiceUtil.getInstance("module-config-multicontext.properties").register();
+    verifyInjection();
+  }
+
+  protected void verifyInjection() {
     assertNotNull(SomeDefaultAPI.getInstance().getFirstBean());
     assertNotNull(SomeDefaultAPI.getInstance().getSecondBean());
     assertNotNull(SomeDefaultAPI.getInstance().getFirstBean().getThirdBean());
@@ -48,14 +65,5 @@ public class AppTest extends TestCase {
     assertNotNull(SomeOtherAPI.getInstance().getSecondBean().getFourthBean());
     assertNotNull(SomeOtherAPI.getInstance().getSimpleBean());
     assertNull(SomeOtherAPI.getInstance().getErrorBean());
-    SomeOtherAPI.api = null;
-    GuiceUtil.getInstance("module-config-error.properties").register();
-    try {
-      SomeOtherAPI.getInstance().getFirstBean();
-      fail("Ignore not working!");
-    }
-    catch (ConfigurationException exception) {
-      //Expected;
-    }
   }
 }
