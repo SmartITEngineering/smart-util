@@ -24,6 +24,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
+import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,6 +71,11 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private boolean followRedirectionEnabled;
   private boolean invokeGet;
   private final Map<String, Resource> nestedResources;
+
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink) throws
+      IllegalArgumentException, UniformInterfaceException {
+    this(referrer, resouceLink, null);
+  }
 
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -130,7 +136,23 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       throw new IllegalArgumentException("Accept header value can not be null!");
     }
     if (entityClass == null) {
-      throw new IllegalArgumentException("Entity class can not be null!");
+      try {
+        Class<T> pesistenceRegistryClass =
+                 (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        if (logger.isDebugEnabled()) {
+          logger.debug("Entity class predicted to: " + pesistenceRegistryClass.toString());
+        }
+        entityClass = pesistenceRegistryClass;
+      }
+      catch (Exception ex) {
+        logger.warn("Could not predict entity class ", ex);
+      }
+      if (entityClass == null) {
+        throw new IllegalArgumentException("Entity class can not be null!");
+      }
+    }
+    if (clientUtil == null && entityClass != null) {
+      clientUtil = ClientUtilFactory.getInstance().getClientUtil(entityClass);
     }
     if (clientFactory == null) {
       if (referrer == null) {
