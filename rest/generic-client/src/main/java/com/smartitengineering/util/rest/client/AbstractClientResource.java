@@ -33,6 +33,8 @@ import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract resource representation on client side for a client to a RESTful Web Service. It is designed to have one
@@ -54,6 +56,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
         CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
   }
+  protected Logger logger = LoggerFactory.getLogger(getClass());
   private Resource referrer;
   private URI thisResourceUri;
   private URI absoluteThisResourceUri;
@@ -256,7 +259,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
           getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
         }
         catch (Exception ex) {
-          ex.printStackTrace();
+          logger.warn(ex.getMessage(), ex);
         }
       }
       if (invokeGet) {
