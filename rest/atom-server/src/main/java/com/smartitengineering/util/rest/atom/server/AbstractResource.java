@@ -52,23 +52,30 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
   }
 
   protected Feed getFeed() {
-    return getFeed(getUriInfo().getRequestUri().toString(), getUriInfo().getAbsolutePath().toString(), new Date());
+    return getFeed(getUriInfo().getRequestUri().toASCIIString(), getUriInfo().getAbsolutePath().toString(), new Date());
   }
 
   protected Feed getFeed(String title) {
-    return getFeed(getUriInfo().getRequestUri().toString(), title, new Date());
+    return getFeed(getUriInfo().getRequestUri().toASCIIString(), title, new Date());
   }
 
   protected Feed getFeed(String title,
                          Date updated) {
-    return getFeed(getUriInfo().getRequestUri().toString(), title, updated);
+    return getFeed(getUriInfo().getRequestUri().toASCIIString(), title, updated);
   }
 
   protected Feed getFeed(String id,
                          String title,
                          Date updated) {
     Feed feed = getBaseFeed();
-    feed.setId(id);
+    String encodedId;
+    try {
+      encodedId = URLEncoder.encode(id, "UTF-8");
+    }
+    catch (UnsupportedEncodingException ex) {
+      encodedId = id;
+    }
+    feed.setId(encodedId);
     feed.setTitle(title);
     feed.setUpdated(updated);
     return feed;
@@ -82,10 +89,7 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
   }
 
   protected Link getSelfLink() {
-    Link selfLink = abderaFactory.newLink();
-    selfLink.setHref(getUriInfo().getRequestUri().toString());
-    selfLink.setRel(Link.REL_SELF);
-    selfLink.setMimeType(MediaType.APPLICATION_ATOM_XML);
+    Link selfLink = getLink(getUriInfo().getRequestUri().toASCIIString(), Link.REL_SELF, MediaType.APPLICATION_ATOM_XML);
     return selfLink;
   }
 
@@ -108,11 +112,7 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
   }
 
   protected Link getLink(URI uri, String rel, String mimeType) {
-    Link link = getAbderaFactory().newLink();
-    link.setRel(rel);
-    link.setHref(uri.toASCIIString());
-    link.setMimeType(mimeType);
-    return link;
+    return getLink(uri.toASCIIString(), rel, mimeType);
   }
 
   protected Link getLink(String uri, String rel, String mimeType) {
