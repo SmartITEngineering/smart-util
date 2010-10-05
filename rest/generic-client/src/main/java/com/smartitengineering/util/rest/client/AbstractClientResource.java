@@ -25,6 +25,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,9 +54,13 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
 
   static {
     CONNECTION_CONFIG = ConfigFactory.getInstance().getConnectionConfig();
-
-    BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
-        CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
+    if (CONNECTION_CONFIG != null) {
+      BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
+          CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
+    }
+    else {
+      BASE_URI = null;
+    }
   }
   protected Logger logger = LoggerFactory.getLogger(getClass());
   private Resource referrer;
@@ -136,17 +141,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       throw new IllegalArgumentException("Accept header value can not be null!");
     }
     if (entityClass == null) {
-      try {
-        Class<T> pesistenceRegistryClass =
-                 (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        if (logger.isDebugEnabled()) {
-          logger.debug("Entity class predicted to: " + pesistenceRegistryClass.toString());
-        }
-        entityClass = pesistenceRegistryClass;
-      }
-      catch (Exception ex) {
-        logger.warn("Could not predict entity class ", ex);
-      }
+      entityClass = initializeEntityClassFromGenerics();
       if (entityClass == null) {
         throw new IllegalArgumentException("Entity class can not be null!");
       }
@@ -175,6 +170,26 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     if (invokeGet) {
       get();
     }
+  }
+
+  protected final Class<? extends T> initializeEntityClassFromGenerics() {
+    Class<? extends T> extractedEntityClass = null;
+    try {
+      Type paramType =
+           ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+      if (paramType instanceof ParameterizedType) {
+        paramType = ((ParameterizedType) paramType).getRawType();
+      }
+      Class<T> pesistenceRegistryClass = paramType instanceof Class ? (Class<T>) paramType : null;
+      if (logger.isDebugEnabled()) {
+        logger.debug("Entity class predicted to: " + pesistenceRegistryClass.toString());
+      }
+      extractedEntityClass = pesistenceRegistryClass;
+    }
+    catch (Exception ex) {
+      logger.warn("Could not predict entity class ", ex);
+    }
+    return extractedEntityClass;
   }
 
   protected boolean isFollowRedirectionEnabled() {
@@ -248,12 +263,11 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   }
 
   @Override
-  public T get() {
+  public final T get() {
     return get(getUri());
   }
 
   protected T get(URI uri) {
-    getInvocationCount++;
     ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
     final int status = response.getStatus();
@@ -274,19 +288,25 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       }
     }
     if (status < 300 ||
-        (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode() && response.hasEntity())) {
-      lastReadStateOfEntity = response.getEntity(getEntityClass());
-      if (getClientUtil() != null) {
-        try {
-          getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+        (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode())) {
+      if (response.hasEntity()) {
+        lastReadStateOfEntity = response.getEntity(getEntityClass());
+        if (getClientUtil() != null) {
+          try {
+            getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+          }
+          catch (Exception ex) {
+            logger.warn(ex.getMessage(), ex);
+          }
         }
-        catch (Exception ex) {
-          logger.warn(ex.getMessage(), ex);
+        if (invokeGet) {
+          invokeGETOnNestedResources();
         }
       }
-      if (invokeGet) {
-        invokeGETOnNestedResources();
+      else {
+        lastReadStateOfEntity = null;
       }
+      getInvocationCount++;
       return lastReadStateOfEntity;
     }
     throw new UniformInterfaceException(response);
