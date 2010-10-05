@@ -17,9 +17,13 @@
  */
 package com.smartitengineering.util.rest.atom.server;
 
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.api.core.HttpContext;
+import com.sun.jersey.api.core.ResourceContext;
 import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Entry;
@@ -29,6 +33,17 @@ import org.apache.abdera.model.Link;
 public abstract class AbstractResource extends com.smartitengineering.util.rest.server.AbstractResource {
 
   private final Factory abderaFactory = Abdera.getNewFactory();
+
+  protected AbstractResource() {
+  }
+
+  protected AbstractResource(UriInfo info, HttpContext context, ResourceContext resourceContext) {
+    super(info, context, resourceContext);
+  }
+
+  protected AbstractResource(ServerResourceInjectables injectables) {
+    super(injectables);
+  }
 
   protected Factory getAbderaFactory() {
     return abderaFactory;
@@ -87,6 +102,14 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
     Link link = getAbderaFactory().newLink();
     link.setRel(rel);
     link.setHref(uri.toString());
+    link.setMimeType(mimeType);
+    return link;
+  }
+
+  protected Link getLink(String uri, String rel, String mimeType) {
+    Link link = getAbderaFactory().newLink();
+    link.setRel(rel);
+    link.setHref(uri);
     link.setMimeType(mimeType);
     return link;
   }
