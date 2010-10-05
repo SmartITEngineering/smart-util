@@ -20,7 +20,9 @@ package com.smartitengineering.util.rest.atom.server;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.core.ResourceContext;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Date;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -89,7 +91,14 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
 
   protected Entry getEntry(final String id, final String name, final Date updated, Link... links) {
     Entry entry = getAbderaFactory().newEntry();
-    entry.setId(id);
+    String entryId;
+    try {
+      entryId = URLEncoder.encode(id, "UTF-8");
+    }
+    catch (UnsupportedEncodingException ex) {
+      entryId = id;
+    }
+    entry.setId(entryId);
     entry.setTitle(name);
     entry.setUpdated(updated);
     for (Link link : links) {
@@ -101,7 +110,7 @@ public abstract class AbstractResource extends com.smartitengineering.util.rest.
   protected Link getLink(URI uri, String rel, String mimeType) {
     Link link = getAbderaFactory().newLink();
     link.setRel(rel);
-    link.setHref(uri.toString());
+    link.setHref(uri.toASCIIString());
     link.setMimeType(mimeType);
     return link;
   }
