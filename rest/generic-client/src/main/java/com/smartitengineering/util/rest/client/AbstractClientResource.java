@@ -30,8 +30,11 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -76,6 +79,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private boolean followRedirectionEnabled;
   private boolean invokeGet;
   private final Map<String, Resource> nestedResources;
+  private final Map<String, Map<String, Object>> cachedHeaders;
 
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -167,6 +171,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     this.absoluteThisResourceUri = generateAbsoluteUri();
     this.followRedirectionEnabled = followRedirection;
     this.nestedResources = new HashMap<String, Resource>();
+    this.cachedHeaders = new HashMap<String, Map<String, Object>>();
     if (invokeGet) {
       get();
     }
@@ -307,6 +312,16 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
         lastReadStateOfEntity = null;
       }
       getInvocationCount++;
+      Map<String, Object> headers = new HashMap<String, Object>();
+      EntityTag tag = response.getEntityTag();
+      if (tag != null) {
+        headers.put(HttpHeaders.ETAG, tag);
+      }
+      Date date = response.getLastModified();
+      if (date != null) {
+        headers.put(HttpHeaders.LAST_MODIFIED, date);
+      }
+      cachedHeaders.put(uri.toString(), headers);
       return lastReadStateOfEntity;
     }
     throw new UniformInterfaceException(response);
@@ -333,7 +348,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public ClientResponse delete(Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    final ClientResponse response = webResource.delete(ClientResponse.class);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    final ClientResponse response = builder.delete(ClientResponse.class);
     checkStatus(response, status);
     return response;
   }
@@ -341,7 +357,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public <P> ClientResponse put(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    Builder builder = webResource.type(contentType);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    builder.type(contentType);
     final ClientResponse response = builder.put(ClientResponse.class, param);
     checkStatus(response, status);
     return response;
@@ -350,7 +367,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public <P> ClientResponse post(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    Builder builder = webResource.type(contentType);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    builder.type(contentType);
     final ClientResponse response = builder.post(ClientResponse.class, param);
     checkStatus(response, status);
     return response;
@@ -448,5 +466,21 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       return;
     }
     throw new UniformInterfaceException(response);
+  }
+
+  protected Builder addNecessaryHeaders(URI uri, WebResource resource) {
+    Map<String, Object> headers = cachedHeaders.get(uri.toString());
+    Builder builder = resource.getRequestBuilder();
+    if (headers != null) {
+      final Object etag = headers.get(HttpHeaders.ETAG);
+      if (etag != null) {
+        builder.header(HttpHeaders.IF_MATCH, etag);
+      }
+      final Object lastModified = headers.get(HttpHeaders.LAST_MODIFIED);
+      if (lastModified != null) {
+        builder.header(HttpHeaders.IF_UNMODIFIED_SINCE, lastModified);
+      }
+    }
+    return builder;
   }
 }
