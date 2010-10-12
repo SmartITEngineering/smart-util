@@ -17,7 +17,8 @@
  */
 package com.smartitengineering.util.rest.client.jersey.cache;
 
-import com.sun.jersey.client.apache.ApacheHttpMethodProcessor;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.client.apache.ApacheHttpMethodExecutor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -52,10 +53,13 @@ import org.codehaus.httpcache4j.resolver.ResponseResolver;
 public class CustomApacheHttpClientResponseResolver implements ResponseResolver {
 
   private ResponseCreator responseCreator = new ResponseCreator();
-  private ApacheHttpMethodProcessor methodProcessor;
+  private ApacheHttpMethodExecutor methodProcessor;
+  private final ThreadLocal<ClientRequest> request;
 
-  public CustomApacheHttpClientResponseResolver(ApacheHttpMethodProcessor methodProcessor) {
+  public CustomApacheHttpClientResponseResolver(ApacheHttpMethodExecutor methodProcessor,
+                                                ThreadLocal<ClientRequest> reqLocal) {
     this.methodProcessor = methodProcessor;
+    this.request = reqLocal;
   }
 
   private HttpMethod convertRequest(HTTPRequest request) {
@@ -158,7 +162,7 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
   @Override
   public HTTPResponse resolve(HTTPRequest httpr) throws IOException {
     HttpMethod method = convertRequest(httpr);
-    methodProcessor.executeMethod(method);
+    methodProcessor.executeMethod(method, request.get());
     return convertResponse(method);
 
   }

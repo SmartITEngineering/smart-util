@@ -22,8 +22,9 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.TerminatingClientHandler;
 import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.client.apache.ApacheHttpMethodProcessor;
-import com.sun.jersey.client.apache.DefaultApacheHttpMethodProcessor;
+import com.sun.jersey.client.apache.ApacheHttpMethodExecutor;
+import com.sun.jersey.client.apache.DefaultApacheHttpMethodExecutor;
+import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.core.util.ReaderWriter;
 import java.io.BufferedInputStream;
@@ -63,7 +64,7 @@ public class CacheableClientHandler
   private final HTTPCache cache;
   private final boolean internalResolver;
   private static final ThreadLocal<ClientRequest> REQUEST_HOLDER = new ThreadLocal<ClientRequest>();
-  private final ApacheHttpMethodProcessor methodProcessor;
+  private final ApacheHttpMethodExecutor methodProcessor;
 
   public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig) {
     this(httpClient, clientConfig, new MemoryCacheStorage());
@@ -72,30 +73,36 @@ public class CacheableClientHandler
   public CacheableClientHandler(HttpClient httpClient, ClientConfig clientConfig,
                                 CacheStorage storage) {
     this(storage, getDefaultResponseResolver(httpClient, clientConfig, REQUEST_HOLDER));
+    httpClient.getParams().setAuthenticationPreemptive(clientConfig.getPropertyAsFeature(
+        ApacheHttpClientConfig.PROPERTY_PREEMPTIVE_AUTHENTICATION));
+    final Integer connectTimeout = (Integer) clientConfig.getProperty(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT);
+    if (connectTimeout != null) {
+      httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
+    }
+
   }
 
   public CacheableClientHandler(CacheStorage storage, ResponseResolver responseResolver) {
     this(storage, getAsEntry(responseResolver, null));
   }
 
-  public CacheableClientHandler(CacheStorage storage, Entry<ResponseResolver, ApacheHttpMethodProcessor> entry) {
+  public CacheableClientHandler(CacheStorage storage, Entry<ResponseResolver, ApacheHttpMethodExecutor> entry) {
     this.methodProcessor = entry.getValue();
     this.cache = new HTTPCache(storage, entry.getKey());
     this.internalResolver = entry.getKey() instanceof CustomApacheHttpClientResponseResolver;
   }
 
-  public static Entry<ResponseResolver, ApacheHttpMethodProcessor> getDefaultResponseResolver(HttpClient client,
-                                                                                                  ClientConfig config,
-                                                                                                  ThreadLocal<ClientRequest> requestHolder) {
-    ApacheHttpMethodProcessor methodProcessor = DefaultApacheHttpMethodProcessor.getProcessorInstance(client, config,
-                                                                                                      requestHolder);
-    ResponseResolver responseResolver = new CustomApacheHttpClientResponseResolver(methodProcessor);
+  public static Entry<ResponseResolver, ApacheHttpMethodExecutor> getDefaultResponseResolver(HttpClient client,
+                                                                                             ClientConfig config,
+                                                                                             ThreadLocal<ClientRequest> requestHolder) {
+    ApacheHttpMethodExecutor methodProcessor = new DefaultApacheHttpMethodExecutor(client);
+    ResponseResolver responseResolver = new CustomApacheHttpClientResponseResolver(methodProcessor, REQUEST_HOLDER);
     return getAsEntry(responseResolver, methodProcessor);
   }
 
-  protected static Entry<ResponseResolver, ApacheHttpMethodProcessor> getAsEntry(ResponseResolver responseResolver,
-                                                                                       ApacheHttpMethodProcessor methodProcessor) {
-    return new SimpleEntry<ResponseResolver, ApacheHttpMethodProcessor>(responseResolver, methodProcessor);
+  protected static Entry<ResponseResolver, ApacheHttpMethodExecutor> getAsEntry(ResponseResolver responseResolver,
+                                                                                ApacheHttpMethodExecutor methodProcessor) {
+    return new SimpleEntry<ResponseResolver, ApacheHttpMethodExecutor>(responseResolver, methodProcessor);
   }
 
   @Override
@@ -204,7 +211,7 @@ public class CacheableClientHandler
     return request;
   }
 
-  public ApacheHttpMethodProcessor getMethodProcessor() {
+  public ApacheHttpMethodExecutor getMethodProcessor() {
     return methodProcessor;
   }
 }

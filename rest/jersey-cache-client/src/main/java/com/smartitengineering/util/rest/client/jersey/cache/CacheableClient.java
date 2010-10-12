@@ -35,7 +35,7 @@ public class CacheableClient
     super(handler, config, provider);
     this.clientHandler = handler;
     if (this.clientHandler.getMethodProcessor() != null) {
-      getComponentProviderFactory().injectOnProviderInstance(this.clientHandler.getMethodProcessor());
+      inject(this.clientHandler.getMethodProcessor());
     }
   }
 
