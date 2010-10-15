@@ -40,7 +40,7 @@ import org.junit.Test;
  */
 public class CacheTest {
 
-  public static final String HTTPCACHE4J_HEADER = "X-HTTPCache4J";
+  public static final String HTTPCACHE4J_HEADER = "X-Cache";
   private static final String CONTENT = "Hello World!";
   private static final String RSRC_PATH = "helloworld.txt";
   private static final String LM_RSRC_PATH = "lm/" + RSRC_PATH;
@@ -48,7 +48,6 @@ public class CacheTest {
   private static final Client CLIENT = CacheableClient.create();
   private static URI rootUri;
   private static Server jettyServer;
-  private static boolean checkForHeader;
 
   @BeforeClass
   public static void setupServer()
@@ -74,8 +73,6 @@ public class CacheTest {
     if (response.getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
       throw new RuntimeException("Could not setup resource!");
     }
-    checkForHeader = System.getProperty("cachetest.checkforheader") != null;
-    System.out.println(":::::::::: CHECK FOR HEADER: " + checkForHeader);
   }
 
   @AfterClass
@@ -111,9 +108,7 @@ public class CacheTest {
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
-    if (checkForHeader) {
-      Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    }
+    Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
     Date date = response.getLastModified();
     try {
       Thread.sleep(2000);
@@ -125,9 +120,8 @@ public class CacheTest {
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     Assert.assertEquals(date, response.getLastModified());
-    if (checkForHeader) {
-      Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    }
+    Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
+    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("MISS"));
   }
 
   @Test
@@ -137,17 +131,14 @@ public class CacheTest {
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
-    if (checkForHeader) {
-      Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    }
+    Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
     Date date = response.getLastModified();
     response = resource.get(ClientResponse.class);
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
     Assert.assertNotNull(response.getLastModified());
     Assert.assertEquals(date, response.getLastModified());
-    if (checkForHeader) {
-      Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    }
+    Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
+    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("MISS"));
   }
 }
