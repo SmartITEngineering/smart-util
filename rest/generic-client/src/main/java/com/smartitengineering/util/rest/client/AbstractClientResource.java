@@ -275,6 +275,10 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   protected T get(URI uri) {
     ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Request Accept header: " + getResourceRepresentationType());
+      logger.debug("Response header: " + response.getType());
+    }
     final int status = response.getStatus();
     if (followRedirectionEnabled && status == ClientResponse.Status.MOVED_PERMANENTLY.getStatusCode()) {
       final URI location = response.getLocation();
@@ -294,7 +298,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     }
     if (status < 300 ||
         (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode())) {
-      if (response.hasEntity()) {
+      if (response.hasEntity() && response.getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
         lastReadStateOfEntity = response.getEntity(getEntityClass());
         if (getClientUtil() != null) {
           try {
