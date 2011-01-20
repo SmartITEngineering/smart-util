@@ -93,4 +93,10 @@ public class ConnectionConfig {
     hash = 97 * hash + (this.contextPath != null ? this.contextPath.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "ConnectionConfig{" + "basicUri=" + basicUri + ", port=" + port + ", host=" + host + ", contextPath=" + contextPath +
+        '}';
+  }
 }

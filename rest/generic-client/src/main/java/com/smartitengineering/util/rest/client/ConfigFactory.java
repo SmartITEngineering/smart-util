@@ -37,16 +37,22 @@ public final class ConfigFactory {
   private static ConfigFactory configFactory;
 
   public static ConfigFactory getInstance() {
+    System.out.println("*************** GETTING CONNECTION CONFIG INSTANCE ***************");
     if (configFactory == null) {
+      System.out.println("*************** INITIALIZING CONNECTION CONFIG ***************");
       configFactory = new ConfigFactory();
+      BeanFactoryRegistrar.aggregate(configFactory);
+      configFactory.init();
     }
     return configFactory;
   }
 
   private ConfigFactory() {
-    BeanFactoryRegistrar.aggregate(this);
+  }
+
+  private void init() {
     if (connectionConfig == null) {
-      System.out.println("Dependency not injected!");
+      System.out.println("*************** Dependency not injected! **************");
       String propFileName = "user-client-config.properties";
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
       if (inputStream != null) {
@@ -64,9 +70,17 @@ public final class ConfigFactory {
         }
       }
     }
+    else {
+      System.out.println("CONNECTION CONFIG " + connectionConfig);
+    }
   }
 
   public ConnectionConfig getConnectionConfig() {
     return connectionConfig;
+  }
+
+  @Override
+  public String toString() {
+    return "ConfigFactory{" + "connectionConfig=" + connectionConfig + '}';
   }
 }
