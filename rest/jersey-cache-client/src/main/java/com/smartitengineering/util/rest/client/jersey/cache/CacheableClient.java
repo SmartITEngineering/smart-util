@@ -67,7 +67,12 @@ public class CacheableClient
   }
 
   public static CacheableClient create(ClientConfig cc) {
-    return create(cc, null);
+    return create(cc, (IoCComponentProviderFactory) null);
+  }
+
+  public static CacheableClient create(ClientConfig cc,
+                                       CacheableClientHandler clientHandler) {
+    return create(cc, clientHandler, null);
   }
 
   public static CacheableClient create(ClientConfig cc,
