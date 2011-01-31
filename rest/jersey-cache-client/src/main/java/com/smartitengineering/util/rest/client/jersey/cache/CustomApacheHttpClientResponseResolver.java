@@ -141,6 +141,12 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     }
   }
 
+  @Override
+  public void shutdown() {
+    //Nothing to implement
+    //TODO Here the connection managers should be shutdown
+  }
+
   private static class CustomHttpMethod extends EntityEnclosingMethod {
 
     private final String name;
