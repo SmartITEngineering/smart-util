@@ -121,7 +121,7 @@ public class CacheTest {
     Assert.assertNotNull(response.getLastModified());
     Assert.assertEquals(date, response.getLastModified());
     Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("MISS"));
+    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("HIT"));
   }
 
   @Test
@@ -139,6 +139,6 @@ public class CacheTest {
     Assert.assertNotNull(response.getLastModified());
     Assert.assertEquals(date, response.getLastModified());
     Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
-    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("MISS"));
+    Assert.assertTrue(response.getHeaders().getFirst(HTTPCACHE4J_HEADER).startsWith("HIT"));
   }
 }
