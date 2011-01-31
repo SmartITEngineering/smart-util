@@ -133,6 +133,11 @@ public class CacheTest {
     Assert.assertNotNull(response.getLastModified());
     Assert.assertNotNull(response.getHeaders().getFirst(HTTPCACHE4J_HEADER));
     Date date = response.getLastModified();
+    try {
+      Thread.sleep(2000);
+    }
+    catch (Exception ex) {
+    }
     response = resource.get(ClientResponse.class);
     Assert.assertEquals(ClientResponse.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(CONTENT, response.getEntity(String.class));
