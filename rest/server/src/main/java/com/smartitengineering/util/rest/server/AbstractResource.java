@@ -32,6 +32,29 @@ public abstract class AbstractResource {
   @Context
   private ResourceContext resourceContext;
 
+  protected AbstractResource() {
+  }
+
+  protected AbstractResource(UriInfo info, HttpContext context, ResourceContext resourceContext) {
+    this.uriInfo = info;
+    this.context = context;
+    this.resourceContext = resourceContext;
+  }
+
+  protected AbstractResource(ServerResourceInjectables injectables) {
+    this.uriInfo = injectables.getUriInfo();
+    this.context = injectables.getContext();
+    this.resourceContext = injectables.getResourceContext();
+  }
+
+  protected ServerResourceInjectables getInjectables() {
+    ServerResourceInjectables injectables = new ServerResourceInjectables();
+    injectables.setContext(context);
+    injectables.setResourceContext(resourceContext);
+    injectables.setUriInfo(uriInfo);
+    return injectables;
+  }
+
   protected HttpContext getContext() {
     return context;
   }

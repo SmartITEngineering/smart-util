@@ -24,15 +24,22 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract resource representation on client side for a client to a RESTful Web Service. It is designed to have one
@@ -50,10 +57,15 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
 
   static {
     CONNECTION_CONFIG = ConfigFactory.getInstance().getConnectionConfig();
-
-    BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
-        CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
+    if (CONNECTION_CONFIG != null) {
+      BASE_URI = UriBuilder.fromUri(CONNECTION_CONFIG.getContextPath()).path(CONNECTION_CONFIG.getBasicUri()).host(
+          CONNECTION_CONFIG.getHost()).port(CONNECTION_CONFIG.getPort()).scheme("http").build();
+    }
+    else {
+      BASE_URI = null;
+    }
   }
+  protected Logger logger = LoggerFactory.getLogger(getClass());
   private Resource referrer;
   private URI thisResourceUri;
   private URI absoluteThisResourceUri;
@@ -67,6 +79,12 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   private boolean followRedirectionEnabled;
   private boolean invokeGet;
   private final Map<String, Resource> nestedResources;
+  private final Map<String, Map<String, Object>> cachedHeaders;
+
+  protected AbstractClientResource(Resource referrer, ResourceLink resouceLink) throws
+      IllegalArgumentException, UniformInterfaceException {
+    this(referrer, resouceLink, null);
+  }
 
   protected AbstractClientResource(Resource referrer, ResourceLink resouceLink, Class<? extends T> entityClass) throws
       IllegalArgumentException, UniformInterfaceException {
@@ -127,7 +145,13 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       throw new IllegalArgumentException("Accept header value can not be null!");
     }
     if (entityClass == null) {
-      throw new IllegalArgumentException("Entity class can not be null!");
+      entityClass = initializeEntityClassFromGenerics();
+      if (entityClass == null) {
+        throw new IllegalArgumentException("Entity class can not be null!");
+      }
+    }
+    if (clientUtil == null && entityClass != null) {
+      clientUtil = ClientUtilFactory.getInstance().getClientUtil(entityClass);
     }
     if (clientFactory == null) {
       if (referrer == null) {
@@ -147,9 +171,30 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     this.absoluteThisResourceUri = generateAbsoluteUri();
     this.followRedirectionEnabled = followRedirection;
     this.nestedResources = new HashMap<String, Resource>();
+    this.cachedHeaders = new HashMap<String, Map<String, Object>>();
     if (invokeGet) {
       get();
     }
+  }
+
+  protected final Class<? extends T> initializeEntityClassFromGenerics() {
+    Class<? extends T> extractedEntityClass = null;
+    try {
+      Type paramType =
+           ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+      if (paramType instanceof ParameterizedType) {
+        paramType = ((ParameterizedType) paramType).getRawType();
+      }
+      Class<T> pesistenceRegistryClass = paramType instanceof Class ? (Class<T>) paramType : null;
+      if (logger.isDebugEnabled()) {
+        logger.debug("Entity class predicted to: " + pesistenceRegistryClass.toString());
+      }
+      extractedEntityClass = pesistenceRegistryClass;
+    }
+    catch (Exception ex) {
+      logger.warn("Could not predict entity class ", ex);
+    }
+    return extractedEntityClass;
   }
 
   protected boolean isFollowRedirectionEnabled() {
@@ -223,14 +268,17 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   }
 
   @Override
-  public T get() {
+  public final T get() {
     return get(getUri());
   }
 
   protected T get(URI uri) {
-    getInvocationCount++;
     ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Request Accept header: " + getResourceRepresentationType());
+      logger.debug("Response header: " + response.getType());
+    }
     final int status = response.getStatus();
     if (followRedirectionEnabled && status == ClientResponse.Status.MOVED_PERMANENTLY.getStatusCode()) {
       final URI location = response.getLocation();
@@ -249,19 +297,35 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       }
     }
     if (status < 300 ||
-        (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode() && response.hasEntity())) {
-      lastReadStateOfEntity = response.getEntity(getEntityClass());
-      if (getClientUtil() != null) {
-        try {
-          getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+        (status == ClientResponse.Status.NOT_MODIFIED.getStatusCode())) {
+      if (response.hasEntity() && response.getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
+        lastReadStateOfEntity = response.getEntity(getEntityClass());
+        if (getClientUtil() != null) {
+          try {
+            getClientUtil().parseLinks(lastReadStateOfEntity, getRelatedResourceUris());
+          }
+          catch (Exception ex) {
+            logger.warn(ex.getMessage(), ex);
+          }
         }
-        catch (Exception ex) {
-          ex.printStackTrace();
+        if (invokeGet) {
+          invokeGETOnNestedResources();
         }
       }
-      if (invokeGet) {
-        invokeGETOnNestedResources();
+      else {
+        lastReadStateOfEntity = null;
       }
+      getInvocationCount++;
+      Map<String, Object> headers = new HashMap<String, Object>();
+      EntityTag tag = response.getEntityTag();
+      if (tag != null) {
+        headers.put(HttpHeaders.ETAG, tag);
+      }
+      Date date = response.getLastModified();
+      if (date != null) {
+        headers.put(HttpHeaders.LAST_MODIFIED, date);
+      }
+      cachedHeaders.put(uri.toString(), headers);
       return lastReadStateOfEntity;
     }
     throw new UniformInterfaceException(response);
@@ -288,7 +352,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public ClientResponse delete(Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    final ClientResponse response = webResource.delete(ClientResponse.class);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    final ClientResponse response = builder.delete(ClientResponse.class);
     checkStatus(response, status);
     return response;
   }
@@ -296,7 +361,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public <P> ClientResponse put(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    Builder builder = webResource.type(contentType);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    builder.type(contentType);
     final ClientResponse response = builder.put(ClientResponse.class, param);
     checkStatus(response, status);
     return response;
@@ -305,7 +371,8 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   @Override
   public <P> ClientResponse post(String contentType, P param, Status... status) {
     WebResource webResource = getHttpClient().getWebResource(getUri());
-    Builder builder = webResource.type(contentType);
+    Builder builder = addNecessaryHeaders(getUri(), webResource);
+    builder.type(contentType);
     final ClientResponse response = builder.post(ClientResponse.class, param);
     checkStatus(response, status);
     return response;
@@ -403,5 +470,21 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       return;
     }
     throw new UniformInterfaceException(response);
+  }
+
+  protected Builder addNecessaryHeaders(URI uri, WebResource resource) {
+    Map<String, Object> headers = cachedHeaders.get(uri.toString());
+    Builder builder = resource.getRequestBuilder();
+    if (headers != null) {
+      final Object etag = headers.get(HttpHeaders.ETAG);
+      if (etag != null) {
+        builder.header(HttpHeaders.IF_MATCH, etag);
+      }
+      final Object lastModified = headers.get(HttpHeaders.LAST_MODIFIED);
+      if (lastModified != null) {
+        builder.header(HttpHeaders.IF_UNMODIFIED_SINCE, lastModified);
+      }
+    }
+    return builder;
   }
 }

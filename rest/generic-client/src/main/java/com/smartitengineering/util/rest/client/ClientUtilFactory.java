@@ -49,6 +49,9 @@ public class ClientUtilFactory {
   }
 
   public ClientUtil getClientUtil(Class clazz) {
+    if (clazz == null) {
+      return null;
+    }
     return clientUtils.get(clazz);
   }
 }

@@ -18,7 +18,9 @@
 package com.smartitengineering.util.rest.client;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterface;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import java.net.URI;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
@@ -48,11 +50,14 @@ public abstract class ClientUtil {
   public static <T> T readEntity(final URI uri, HttpClient client, String acceptType, Class<? extends T> clazz) {
     if (uri != null && client != null && clazz != null) {
       try {
+        UniformInterface uniformInterface;
         WebResource resource = client.getWebResource(uri);
+        uniformInterface = resource;
         if (StringUtils.isNotBlank(acceptType)) {
-          resource.accept(acceptType);
+          Builder builder = resource.accept(acceptType);
+          uniformInterface = builder;
         }
-        T newEntity = resource.get(clazz);
+        T newEntity = uniformInterface.get(clazz);
         return newEntity;
       }
       catch (Exception ex) {
