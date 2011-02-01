@@ -17,33 +17,37 @@
  */
 package com.smartitengineering.util.rest.client.jersey.cache;
 
+import org.apache.commons.lang.StringUtils;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.client.apache.ApacheHttpMethodExecutor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.TraceMethod;
-import org.apache.commons.lang.StringUtils;
 import org.codehaus.httpcache4j.HTTPException;
 import org.codehaus.httpcache4j.HTTPMethod;
 import org.codehaus.httpcache4j.HTTPRequest;
 import org.codehaus.httpcache4j.HTTPResponse;
+import org.codehaus.httpcache4j.HTTPVersion;
 import org.codehaus.httpcache4j.Headers;
 import org.codehaus.httpcache4j.Status;
+import org.codehaus.httpcache4j.StatusLine;
 import org.codehaus.httpcache4j.payload.DelegatingInputStream;
 import org.codehaus.httpcache4j.resolver.ResponseCreator;
 import org.codehaus.httpcache4j.resolver.ResponseResolver;
+import static org.codehaus.httpcache4j.HTTPMethod.*;
 
 /**
  *
@@ -62,11 +66,42 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     this.request = reqLocal;
   }
 
+  @Override
+  public void shutdown() {
+    //Nothing to implement
+    //TODO Here the connection managers should be shutdown
+  }
+
+  @Override
+  public HTTPResponse resolve(HTTPRequest httpr) throws IOException {
+    HttpMethod method = convertRequest(httpr);
+    methodProcessor.executeMethod(method, request.get());
+    return convertResponse(method);
+  }
+
   private HttpMethod convertRequest(HTTPRequest request) {
     URI requestURI = request.getRequestURI();
     HttpMethod method = getMethod(request.getMethod(), requestURI);
-    copyHeaders(request, method);
+    Headers requestHeaders = request.getAllHeaders();
+    addHeaders(requestHeaders, method);
+    method.setDoAuthentication(true);
+    if (method instanceof EntityEnclosingMethod && request.hasPayload()) {
+      InputStream payload = request.getPayload().getInputStream();
+      EntityEnclosingMethod carrier = (EntityEnclosingMethod) method;
+      if (payload != null) {
+        carrier.setRequestEntity(new InputStreamRequestEntity(payload));
+      }
+    }
+
     return method;
+  }
+
+  private void addHeaders(Headers headers, HttpMethod method) {
+    if (!headers.isEmpty()) {
+      for (org.codehaus.httpcache4j.Header header : headers) {
+        method.addRequestHeader(header.getName(), header.getValue());
+      }
+    }
   }
 
   private HTTPResponse convertResponse(HttpMethod method) {
@@ -78,8 +113,11 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     HTTPResponse response;
     try {
       stream = getInputStream(method);
-      //TODO change it to latest code in next version
-      response = responseCreator.createResponse(Status.valueOf(method.getStatusCode()), headers, stream);
+      StatusLine line = new StatusLine(
+          HTTPVersion.get(method.getStatusLine().getHttpVersion()),
+          Status.valueOf(method.getStatusCode()),
+          method.getStatusText());
+      response = responseCreator.createResponse(line, headers, stream);
     }
     finally {
       if (stream == null) {
@@ -99,52 +137,43 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     }
   }
 
+  /**
+   * Determines the HttpClient's request method from the HTTPMethod enum.
+   *
+   * @param method     the HTTPCache enum that determines
+   * @param requestURI the request URI.
+   * @return a new HttpMethod subclass.
+   */
   protected HttpMethod getMethod(HTTPMethod method, URI requestURI) {
-    if (HTTPMethod.CONNECT.equals(method)) {
+    if (CONNECT.equals(method)) {
       HostConfiguration config = new HostConfiguration();
       config.setHost(requestURI.getHost(), requestURI.getPort(), requestURI.getScheme());
       return new ConnectMethod(config);
     }
-    else if (HTTPMethod.DELETE.equals(method)) {
+    else if (DELETE.equals(method)) {
       return new CustomHttpMethod(HTTPMethod.DELETE.name(), requestURI.toString());
     }
-    else if (HTTPMethod.GET.equals(method)) {
+    else if (GET.equals(method)) {
       return new GetMethod(requestURI.toString());
     }
-    else if (HTTPMethod.HEAD.equals(method)) {
+    else if (HEAD.equals(method)) {
       return new HeadMethod(requestURI.toString());
     }
-    else if (HTTPMethod.OPTIONS.equals(method)) {
+    else if (OPTIONS.equals(method)) {
       return new OptionsMethod(requestURI.toString());
     }
-    else if (HTTPMethod.POST.equals(method)) {
+    else if (POST.equals(method)) {
       return new PostMethod(requestURI.toString());
     }
-    else if (HTTPMethod.PUT.equals(method)) {
+    else if (PUT.equals(method)) {
       return new PutMethod(requestURI.toString());
     }
-    else if (HTTPMethod.TRACE.equals(method)) {
+    else if (TRACE.equals(method)) {
       return new TraceMethod(requestURI.toString());
     }
     else {
       return new CustomHttpMethod(method.name(), requestURI.toString());
     }
-  }
-
-  protected void copyHeaders(HTTPRequest request, HttpMethod method) {
-    Headers headers = request.getAllHeaders();
-    for (String headerNames : headers.keySet()) {
-      List<org.codehaus.httpcache4j.Header> headersForName = headers.getHeaders(headerNames);
-      for (org.codehaus.httpcache4j.Header header : headersForName) {
-        method.addRequestHeader(header.getName(), header.getValue());
-      }
-    }
-  }
-
-  @Override
-  public void shutdown() {
-    //Nothing to implement
-    //TODO Here the connection managers should be shutdown
   }
 
   private static class CustomHttpMethod extends EntityEnclosingMethod {
@@ -163,14 +192,6 @@ public class CustomApacheHttpClientResponseResolver implements ResponseResolver 
     public String getName() {
       return name;
     }
-  }
-
-  @Override
-  public HTTPResponse resolve(HTTPRequest httpr) throws IOException {
-    HttpMethod method = convertRequest(httpr);
-    methodProcessor.executeMethod(method, request.get());
-    return convertResponse(method);
-
   }
 
   private static class HttpMethodStream extends DelegatingInputStream {
