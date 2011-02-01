@@ -18,10 +18,12 @@
 package com.smartitengineering.util.rest.client;
 
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
+import com.smartitengineering.util.rest.client.jersey.cache.CacheableClientConfigProps;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +37,7 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
 
   public static final String TRACE = "com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl.trace";
   private Client client;
-  private ClientConfig clientConfig;
+  private ApacheHttpClientConfig clientConfig;
   private HttpClient httpClient;
 
   private ApplicationWideClientFactoryImpl(ConnectionConfig connectionConfig, ConfigProcessor processor) {
@@ -46,9 +48,18 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
     if (processor != null) {
       processor.process(clientConfig);
     }
+    final Object timeoutProp = clientConfig.getProperty(CacheableClientConfigProps.TIMEOUT);
+    if (timeoutProp != null) {
+      clientConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, timeoutProp);
+    }
+    final Object username = clientConfig.getProperty(CacheableClientConfigProps.USERNAME), password = clientConfig.
+        getProperty(CacheableClientConfigProps.PASSWORD);
     client = CacheableClient.create(clientConfig);
     if (Boolean.parseBoolean(System.getProperty(TRACE))) {
       client.addFilter(new LoggingFilter());
+    }
+    if (username != null && password != null) {
+      clientConfig.getState().setCredentials(null, null, -1, username.toString(), password.toString());
     }
     httpClient = new HttpClient(client, connectionConfig.getHost(), connectionConfig.getPort());
   }
