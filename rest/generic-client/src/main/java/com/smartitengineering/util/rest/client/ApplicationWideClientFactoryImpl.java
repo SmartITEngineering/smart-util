@@ -54,12 +54,13 @@ public class ApplicationWideClientFactoryImpl implements ClientFactory {
     }
     final Object username = clientConfig.getProperty(CacheableClientConfigProps.USERNAME), password = clientConfig.
         getProperty(CacheableClientConfigProps.PASSWORD);
+    if (username != null && password != null) {
+      clientConfig.getState().setCredentials(null, null, -1, username.toString(), password.toString());
+      clientConfig.getProperties().put(ApacheHttpClientConfig.PROPERTY_PREEMPTIVE_AUTHENTICATION, Boolean.TRUE);
+    }
     client = CacheableClient.create(clientConfig);
     if (Boolean.parseBoolean(System.getProperty(TRACE))) {
       client.addFilter(new LoggingFilter());
-    }
-    if (username != null && password != null) {
-      clientConfig.getState().setCredentials(null, null, -1, username.toString(), password.toString());
     }
     httpClient = new HttpClient(client, connectionConfig.getHost(), connectionConfig.getPort());
   }
