@@ -58,6 +58,7 @@ public class GuiceUtil {
   private final String contextNames[];
   private final boolean ignoreMissingDependency;
   private final List<Module>[] modules;
+  private Injector[] injectors;
 
   private GuiceUtil(Properties properties) {
     String contextNameProp = properties.getProperty(CONTEXT_NAME_PROP);
@@ -163,7 +164,7 @@ public class GuiceUtil {
   }
 
   public void register() {
-    Injector[] injectors = new Injector[modules.length];
+    injectors = new Injector[modules.length];
     for (int i = 0; i < injectors.length; ++i) {
       injectors[i] = Guice.createInjector(modules[i]);
     }
@@ -171,5 +172,9 @@ public class GuiceUtil {
     for (String contextName : contextNames) {
       BeanFactoryRegistrar.registerBeanFactory(contextName, factory);
     }
+  }
+
+  public Injector[] getInjectors() {
+    return injectors == null ? new Injector[0] : this.injectors;
   }
 }
