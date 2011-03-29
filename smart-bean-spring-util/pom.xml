@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>smart-util</artifactId>
     <groupId>com.smartitengineering</groupId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.smartitengineering.smart-util</groupId>
@@ -53,10 +53,10 @@
             <configuration>
               <tasks>
                 <copy todir="${project.build.directory}/all-classes" verbose="true">
-                  <fileset dir="${project.build.directory}/classes"/>
+                  <fileset dir="${project.build.directory}/classes" />
                 </copy>
                 <copy todir="${project.build.directory}/all-classes" verbose="true">
-                  <fileset dir="${project.build.directory}/test-classes"/>
+                  <fileset dir="${project.build.directory}/test-classes" />
                 </copy>
               </tasks>
             </configuration>

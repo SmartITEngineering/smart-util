@@ -19,17 +19,17 @@
  *
  *
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>smart-util</artifactId>
         <groupId>com.smartitengineering</groupId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.smartitengineering.smart-util</groupId>
     <artifactId>simple-util</artifactId>
     <name>simple-util</name>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <dependencies>
         <dependency>
             <groupId>commons-lang</groupId>

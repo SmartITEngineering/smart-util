@@ -24,11 +24,11 @@
   <parent>
     <artifactId>smart-util</artifactId>
     <groupId>com.smartitengineering</groupId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <groupId>com.smartitengineering.smart-util</groupId>
   <artifactId>opensearch</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>OpenSearch</name>
   <packaging>pom</packaging>
   <modules>
