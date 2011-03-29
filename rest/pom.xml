@@ -24,12 +24,12 @@
   <parent>
     <artifactId>smart-util</artifactId>
     <groupId>com.smartitengineering</groupId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-util</groupId>
   <artifactId>rest</artifactId>
   <packaging>pom</packaging>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
   <name>RESTful WS Util</name>
   <dependencies>
     <dependency>
