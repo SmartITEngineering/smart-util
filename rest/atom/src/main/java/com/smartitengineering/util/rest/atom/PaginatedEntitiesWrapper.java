@@ -18,7 +18,6 @@
 package com.smartitengineering.util.rest.atom;
 
 import com.smartitengineering.util.rest.client.HttpClient;
-import com.smartitengineering.util.rest.client.EntityResource;
 import java.util.Collection;
 import javax.activation.MimeTypeParseException;
 import javax.ws.rs.core.MediaType;
@@ -33,7 +32,7 @@ public class PaginatedEntitiesWrapper<T> {
 
   private Feed rootFeed;
   private HttpClient client;
-  private FeedEntryReader<T> feedEntryReader;
+  private EntryReader<T> feedEntryReader;
 
   /**
    * Initialize a paginated entities wrapper based on a feed entry reader, client and the root feed to start walking.
@@ -42,7 +41,8 @@ public class PaginatedEntitiesWrapper<T> {
    * @param feedEntryReader Reader to read the collection entries
    * @throws IllegalArgumentException If any parameter is null
    */
-  public PaginatedEntitiesWrapper(Feed rootFeed, HttpClient client, FeedEntryReader<T> feedEntryReader) throws
+  public PaginatedEntitiesWrapper(Feed rootFeed, HttpClient client, EntryReader<T> feedEntryReader)
+      throws
       IllegalArgumentException {
     if (rootFeed == null || client == null || feedEntryReader == null) {
       throw new IllegalArgumentException("No parameter can be null!");
@@ -76,15 +76,15 @@ public class PaginatedEntitiesWrapper<T> {
 
   }
 
-  public Collection<EntityResource<T>> getEntitiesForCurrentPage() {
-    return feedEntryReader.readEntriesFromRooFeed(rootFeed);
+  public Collection<T> getEntitiesForCurrentPage() {
+    return feedEntryReader.getEntriesFromFeed(rootFeed);
   }
 
   public HttpClient getClient() {
     return client;
   }
 
-  public FeedEntryReader<T> getFeedEntryReader() {
+  public EntryReader<T> getFeedEntryReader() {
     return feedEntryReader;
   }
 
