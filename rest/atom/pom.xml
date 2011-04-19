@@ -24,11 +24,11 @@
   <parent>
     <artifactId>rest</artifactId>
     <groupId>com.smartitengineering.smart-util</groupId>
-    <version>0.2</version>
+    <version>0.2.1-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.rest</groupId>
   <artifactId>atom-client</artifactId>
-  <version>0.2</version>
+  <version>0.2.1-SNAPSHOT</version>
   <name>Atom Client Util</name>
   <dependencies>
     <dependency>
