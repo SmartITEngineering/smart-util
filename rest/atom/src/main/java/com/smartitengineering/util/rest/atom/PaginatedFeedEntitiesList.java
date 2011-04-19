@@ -17,7 +17,6 @@
  */
 package com.smartitengineering.util.rest.atom;
 
-import com.smartitengineering.util.rest.client.EntityResource;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -29,12 +28,12 @@ import java.util.concurrent.Executors;
  * next one could discover all the entities.
  * @author imyousuf
  */
-public class PaginatedFeedEntitiesList<T> extends AbstractList<EntityResource<T>> {
+public class PaginatedFeedEntitiesList<T> extends AbstractList<T> {
 
   private final PaginatedEntitiesWrapper<T> rootWrapper;
   private PaginatedEntitiesWrapper<T> currentWrapper;
   private final int max;
-  private final ArrayList<EntityResource<T>> backedupList;
+  private final ArrayList<T> backedupList;
   private final Object object;
   private boolean working = false;
   private final ExecutorService service;
@@ -61,10 +60,10 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<EntityResource<T>
     currentWrapper = rootWrapper;
     if (AtomClientUtil.isOpenSearchTotalResultPresent(rootWrapper.getRootFeed())) {
       int size = AtomClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
-      backedupList = new ArrayList<EntityResource<T>>(Math.min(max, size));
+      backedupList = new ArrayList<T>(Math.min(max, size));
     }
     else {
-      backedupList = new ArrayList<EntityResource<T>>();
+      backedupList = new ArrayList<T>();
     }
     this.max = max;
     this.object = new Object();
@@ -74,7 +73,7 @@ public class PaginatedFeedEntitiesList<T> extends AbstractList<EntityResource<T>
   }
 
   @Override
-  public EntityResource<T> get(int index) {
+  public T get(int index) {
     tryAndWait();
     if (index < size()) {
       return backedupList.get(index);

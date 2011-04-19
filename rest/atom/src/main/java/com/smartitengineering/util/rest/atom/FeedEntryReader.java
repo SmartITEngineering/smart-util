@@ -22,6 +22,7 @@ import com.smartitengineering.util.rest.client.EntityResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ import org.apache.abdera.model.Link;
  * configuration provided during initialization.
  *
  */
-public class FeedEntryReader<T> {
+public class FeedEntryReader<T> implements EntryReader<EntityResource<T>> {
 
   private final HttpClient client;
   private final List<Map.Entry<String, String>> linkSpecs;
@@ -89,7 +90,7 @@ public class FeedEntryReader<T> {
    * @param rootFeed The feed to fetch the entries for
    * @return Return the object instances for the entries of the feed.
    */
-  public List<EntityResource<T>> readEntriesFromRooFeed(Feed rootFeed) {
+  public List<EntityResource<T>> readEntriesFromFeed(Feed rootFeed) {
     if (rootFeed == null || rootFeed.getEntries() == null || rootFeed.getEntries().isEmpty()) {
       return Collections.emptyList();
     }
@@ -104,7 +105,8 @@ public class FeedEntryReader<T> {
     return result;
   }
 
-  protected void readEntriesFromTheirContent(List<org.apache.abdera.model.Entry> entries, List<EntityResource<T>> entities) {
+  protected void readEntriesFromTheirContent(List<org.apache.abdera.model.Entry> entries,
+                                             List<EntityResource<T>> entities) {
     for (org.apache.abdera.model.Entry entry : entries) {
       try {
         final URI src = entry.getContentSrc().toURI();
@@ -183,5 +185,10 @@ public class FeedEntryReader<T> {
     else {
       return linkSpecs.get(depth);
     }
+  }
+
+  @Override
+  public Collection<EntityResource<T>> getEntriesFromFeed(Feed feed) {
+    return readEntriesFromFeed(feed);
   }
 }

@@ -17,7 +17,6 @@
  */
 package com.smartitengineering.util.rest.atom;
 
-import com.smartitengineering.util.rest.client.EntityResource;
 import java.util.AbstractList;
 import java.util.ArrayList;
 
@@ -27,12 +26,12 @@ import java.util.ArrayList;
  * could discover all the entities.
  * @author imyousuf
  */
-public class DynamicPaginatedEntitiesList<T> extends AbstractList<EntityResource<T>> {
+public class DynamicPaginatedEntitiesList<T> extends AbstractList<T> {
 
   private final PaginatedEntitiesWrapper<T> rootWrapper;
   private PaginatedEntitiesWrapper<T> currentWrapper;
   private final int size;
-  private final ArrayList<EntityResource<T>> backedupList;
+  private final ArrayList<T> backedupList;
 
   /**
    * Construct the dynamic list formed using the root feed wrapper.
@@ -49,11 +48,11 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<EntityResource
     }
     currentWrapper = rootWrapper;
     size = AtomClientUtil.getOpenSearchTotalResult(rootWrapper.getRootFeed());
-    backedupList = new ArrayList<EntityResource<T>>(size);
+    backedupList = new ArrayList<T>(size);
   }
 
   @Override
-  public EntityResource<T> get(int index) {
+  public T get(int index) {
     if (index >= size) {
       throw new IndexOutOfBoundsException("Size is " + size + " but request index is " + index);
     }
@@ -72,7 +71,7 @@ public class DynamicPaginatedEntitiesList<T> extends AbstractList<EntityResource
     }
   }
 
-  protected ArrayList<EntityResource<T>> getBackedupList() {
+  protected ArrayList<T> getBackedupList() {
     return backedupList;
   }
 
