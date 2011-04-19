@@ -90,7 +90,7 @@ public class FeedEntryReader<T> implements EntryReader<EntityResource<T>> {
    * @param rootFeed The feed to fetch the entries for
    * @return Return the object instances for the entries of the feed.
    */
-  public List<EntityResource<T>> readEntriesFromRooFeed(Feed rootFeed) {
+  public List<EntityResource<T>> readEntriesFromFeed(Feed rootFeed) {
     if (rootFeed == null || rootFeed.getEntries() == null || rootFeed.getEntries().isEmpty()) {
       return Collections.emptyList();
     }
@@ -189,6 +189,6 @@ public class FeedEntryReader<T> implements EntryReader<EntityResource<T>> {
 
   @Override
   public Collection<EntityResource<T>> getEntriesFromFeed(Feed feed) {
-    return readEntriesFromRooFeed(feed);
+    return readEntriesFromFeed(feed);
   }
 }
