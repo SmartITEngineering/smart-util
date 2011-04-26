@@ -24,11 +24,11 @@
   <parent>
     <artifactId>opensearch</artifactId>
     <groupId>com.smartitengineering.smart-util</groupId>
-    <version>0.2.1</version>
+    <version>0.2.2-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.opensearch</groupId>
   <artifactId>jaxrs</artifactId>
-  <version>0.2.1</version>
+  <version>0.2.2-SNAPSHOT</version>
   <name>OpenSearch JAX-RS Provider</name>
   <dependencies>
     <dependency>
