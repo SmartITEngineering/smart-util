@@ -87,7 +87,7 @@ public class GuiceUtil {
       for (String moduleClassName : moduleClassNames) {
         final Class clazz;
         try {
-          clazz = Class.forName(StringUtils.trim(moduleClassName));
+          clazz = Class.forName(StringUtils.trim(moduleClassName), true, Thread.currentThread().getContextClassLoader());
         }
         catch (ClassNotFoundException ex) {
           throw new IllegalStateException(ex);
