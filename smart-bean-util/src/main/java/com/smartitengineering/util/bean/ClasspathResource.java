@@ -47,12 +47,16 @@ public class ClasspathResource
     }
 
     public InputStream getInputStream() {
-        return getClass().getClassLoader().getResourceAsStream(getFilename());
+        return getClassLoader().getResourceAsStream(getFilename());
     }
 
     public boolean exists() {
-        return getClass().getClassLoader().getResource(getFilename()) != null;
+        return getClassLoader().getResource(getFilename()) != null;
     }
+
+  protected ClassLoader getClassLoader() {
+    return Thread.currentThread().getContextClassLoader();
+  }
 
     public boolean isReadable() {
         return exists();
