@@ -24,11 +24,11 @@
   <parent>
     <artifactId>rest</artifactId>
     <groupId>com.smartitengineering.smart-util</groupId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.2</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.rest</groupId>
   <artifactId>server</artifactId>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.2.2</version>
   <name>RESTful Server Util</name>
   <dependencies>
     <dependency>

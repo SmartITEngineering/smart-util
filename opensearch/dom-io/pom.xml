@@ -24,11 +24,11 @@
   <parent>
     <artifactId>opensearch</artifactId>
     <groupId>com.smartitengineering.smart-util</groupId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.2</version>
   </parent>
   <groupId>com.smartitengineering.smart-util.opensearch</groupId>
   <artifactId>dom-io</artifactId>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.2.2</version>
   <name>Open Search IO DOM Impl</name>
   <dependencies>
     <dependency>
