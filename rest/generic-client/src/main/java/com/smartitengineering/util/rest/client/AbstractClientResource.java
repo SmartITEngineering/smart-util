@@ -275,6 +275,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
   protected T get(URI uri) {
     ClientResponse response = ClientUtil.readEntity(uri, getHttpClient(), getResourceRepresentationType(),
                                                     ClientResponse.class);
+    response.bufferEntity();
     if (logger.isDebugEnabled()) {
       logger.debug("Request Accept header: " + getResourceRepresentationType());
       logger.debug("Response header: " + response.getType());
@@ -328,7 +329,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
       cachedHeaders.put(uri.toString(), headers);
       return lastReadStateOfEntity;
     }
-    throw new UniformInterfaceException(response);
+    throw new UniformInterfaceException(response, true);
   }
 
   protected void invokeGETOnNestedResources() {
@@ -354,6 +355,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     WebResource webResource = getHttpClient().getWebResource(getUri());
     Builder builder = addNecessaryHeaders(getUri(), webResource);
     final ClientResponse response = builder.delete(ClientResponse.class);
+    response.bufferEntity();
     checkStatus(response, status);
     return response;
   }
@@ -364,6 +366,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     Builder builder = addNecessaryHeaders(getUri(), webResource);
     builder.type(contentType);
     final ClientResponse response = builder.put(ClientResponse.class, param);
+    response.bufferEntity();
     checkStatus(response, status);
     return response;
   }
@@ -374,6 +377,7 @@ public abstract class AbstractClientResource<T, P extends Resource> implements R
     Builder builder = addNecessaryHeaders(getUri(), webResource);
     builder.type(contentType);
     final ClientResponse response = builder.post(ClientResponse.class, param);
+    response.bufferEntity();
     checkStatus(response, status);
     return response;
   }
